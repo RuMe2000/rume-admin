@@ -35,8 +35,8 @@ function Login() {
             }
 
             //success
-            console.log("Admin logged in successfully.");
-            toast.success("Admin logged in successfully.", {
+            console.log("Logged in successfully.");
+            toast.success("Welcome, Admin!", {
                 position: 'top-center',
                 autoClose: 1000,
                 hideProgressBar: true,
@@ -73,13 +73,13 @@ function Login() {
             {/* left side for logo */}
             <div className="relative w-full h-screen overflow-hidden flex items-center justify-center">
                 {/* Foreground Text */}
-                <h1 className="text-[13rem] pt-8 font-bold text-mainBlue z-10">RuMe.</h1>
+                <h1 className="text-[13rem] pt-15 font-bold text-mainBlue z-10">RuMe.</h1>
             </div>
 
             {/* right side for form */}
-            <div className='w-2/4 bg-transparent flex items-center justify-center z-10'>
+            <div className='w-1/2 bg-transparent flex items-center justify-center z-10 pr-10'>
                 <form onSubmit={handleSubmit} className='w-full max-w-md px-8 py-10 bg-blue-500/10 border border-white/20 rounded-2xl shadow-lg'>
-                    <h1 className='text-4xl font-bold text-center mb-6 text-white'>Login</h1>
+                    <h1 className='text-4xl font-bold text-center mb-8 text-white'>Login</h1>
 
                     <div className='mb-4'>
                         <label htmlFor='email' className='block text-white text-lg font-medium mb-3'>Email</label>

@@ -17,18 +17,18 @@ const Sidebar = () => {
     };
 
     // common tailwind classes for all links
-    const baseLinkClasses = 'flex items-center gap-2 py-3 pl-2 mb-2 rounded-lg transition duration-300';
-    const activeLinkClasses = 'rounded-lg bg-gradient-to-r from-mainBlue to-transparent text-white font-medium border-l border-white';
+    const baseLinkClasses = 'flex items-center h-13 pl-5 gap-2 transition duration-300';
+    const activeLinkClasses = 'bg-gradient-to-r from-mainBlue to-transparent text-white font-medium border-l border-white';
     const inactiveLinkClasses = 'text-gray-300 hover:bg-gradient-to-r hover:from-hoverBlue to-transparent hover:border-white hover:text-white';
 
     return (
-        <nav className='w-66 bg-bgBlue rounded-r-2xl border-r border-y border-darkGray text-white px-3 py-4 my-3 flex flex-col justify-between'>
+        <nav className='w-64 bg-bgBlue rounded-r-2xl border-r border-y border-darkGray text-white pt-2 pb-4 my-3 flex flex-col justify-between'>
             <div>
                 <div className='flex items-center justify-center gap-1 pb-2'>
                     <img src={logo} className='h-15'></img>
                     <h1 className='text-center text-white text-3xl font-bold'>RuMe.</h1>
                 </div>
-                <ul className='space-y-2 mt-4 divide-y divide-darkGray'>
+                <ul className='divide-y divide-darkGray'>
                     <li>
                         <NavLink
                             to="/dashboard"
@@ -123,7 +123,7 @@ const Sidebar = () => {
 
             <button
                 onClick={handleSignOut}
-                className='w-full p-2 bg-errorRed text-white font-bold rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition'>
+                className='p-2 mx-3 bg-errorRed text-white font-bold rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition'>
                 <span>Sign Out</span>
             </button>
         </nav>
