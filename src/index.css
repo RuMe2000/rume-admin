@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+    --font-display: ;
+
+    --color-mainBlue: oklch(0.4500 0.2176 272.38);
+    --color-hoverBlue: oklch(0.45 0.2059 273.04 / 0.30);
+    --color-darkBlue: oklch(0.2177 0.0845 259.03);
+    --color-charcoal: oklch(0.20 0.02 270);
+    --color-bgBlue: oklch(0.18 0.05 250);
+    --color-darkGray: oklch(37.3% 0.034 259.733);
+    --color-errorRed: oklch(0.6355 0.2502 29.13);
+    --color-successGreen: oklch(0.8317 0.2036 155.15);
+}
+
