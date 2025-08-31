@@ -94,3 +94,34 @@ export const deleteUser = async (id, collectionName = "users") => {
         throw error;
     }
 }
+
+//get all property count
+export const getAllPropertyCount = async () => {
+    const propertiesRef = collection(db, "properties");
+    const q = query(propertiesRef);
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.size;
+}
+
+
+//get all properties
+export const getAllProperties = async () => {
+    try {
+        const propertiesRef = collection(db, "properties");
+        const q = query(propertiesRef);
+        const querySnapshot = await getDocs(q);
+
+        const allProperties = [];
+        querySnapshot.forEach((doc) => {
+            allProperties.push({ id: doc.id, ...doc.data() });
+        });
+
+        return allProperties;
+    } catch (error) {
+        console.error('Error fetching properties:', error);
+        return [];
+    }
+}
+
+//get

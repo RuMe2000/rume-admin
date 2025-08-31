@@ -49,9 +49,9 @@ async function seed() {
             await usersRef.doc(user.uid).set(user);
             console.log(`✅ Seeded user: ${user.name}`);
         }
-        console.log("🎉 Seeding complete!");
+        console.log("Seeding complete!");
     } catch (error) {
-        console.error("❌ Error seeding users:", error);
+        console.error("Error seeding users:", error);
     }
 }
 

@@ -5,13 +5,13 @@ import { getAnalytics } from 'firebase/analytics';
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCmQ2wTSMBTv6l6mYH9vWNaYYfDbSWX2kc",
-    authDomain: "rume-admintest.firebaseapp.com",
-    projectId: "rume-admintest",
-    storageBucket: "rume-admintest.firebasestorage.app",
-    messagingSenderId: "989128591470",
-    appId: "1:989128591470:web:e9a610dd6904ca5a717e7f",
-    measurementId: "G-5M3CGGP5T3"
+    apiKey: "AIzaSyBMmRD9INkH1cgqbiXgeDQHbut5dP2zDDM",
+    authDomain: "rume-612e1.firebaseapp.com",
+    projectId: "rume-612e1",
+    storageBucket: "rume-612e1.firebasestorage.app",
+    messagingSenderId: "257294933262",
+    appId: "1:257294933262:web:0dadd91f75e84b4a658b5f",
+    measurementId: "G-T3GWN0RKZY"
 };
 
 const app = initializeApp(firebaseConfig);

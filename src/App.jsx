@@ -15,6 +15,7 @@ import PropertyManagement from "./pages/properties/PropertyManagement";
 import Transactions from "./pages/transactions/Transactions";
 import FeedbackModeration from "./pages/moderation/FeedbackModeration";
 import Analytics from "./pages/analytics/Analytics";
+import AllProperties from "./pages/properties/AllProperties";
 
 
 function App() {
@@ -42,7 +43,10 @@ function App() {
                                     <Route path="/users/seekers" element={<Seekers />} />
                                     <Route path="/users/admins" element={<Admins />} />
 
+                                    {/* property management routes */}
                                     <Route path="/properties" element={<PropertyManagement />} />
+                                    <Route path="/properties/all" element={<AllProperties />} />
+
                                     <Route path="/transactions" element={<Transactions />} />
                                     <Route path="/feedback" element={<FeedbackModeration />} />
                                     <Route path="/analytics" element={<Analytics />} />
