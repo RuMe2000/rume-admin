@@ -7,6 +7,9 @@ const AllProperties = () => {
 
     const [allProperties, setAllProperties] = useState([]);
 
+    const [hoveredId, setHoveredId] = useState(null);
+    const [hoveredOwnerId, setHoveredOwnerId] = useState(null);
+
     useEffect(() => {
         const fetchAllProperties = async () => {
             const data = await getAllProperties();
@@ -29,8 +32,8 @@ const AllProperties = () => {
                 <table className='min-w-full text-white rounded-md'>
                     <thead>
                         <tr>
-                            <th className='px-4 py-2 border-b-3 border-darkGray text-center'>Property ID</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Owner ID</th>
+                            <th className='w-35 px-4 py-2 border-b-3 border-darkGray text-center'>Property ID</th>
+                            <th className="w-35 px-4 py-2 border-b-3 border-darkGray text-center">Owner ID</th>
                             <th className="px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
                             <th className="px-4 py-2 border-b-3 border-darkGray text-center">Address</th>
                             <th className="px-4 py-2 border-b-3 border-darkGray text-center">Location</th>
@@ -41,8 +44,28 @@ const AllProperties = () => {
                     <tbody>
                         {allProperties.map((property) => (
                             <tr key={property.id} className='text-center border-b border-darkGray'>
-                                <td className='px-4 py-2'>{property.id.length > 5 ? `${property.id.substring(0, 5)}...` : property.id}</td>
-                                <td className='px-4 py-2'>{property.ownerId || 'N/A'}</td>
+                                <td className='px-4 py-2 relative'
+                                    onMouseEnter={() => setHoveredId(property.id)}
+                                    onMouseLeave={() => setHoveredId(null)}
+                                >
+                                    {`${property.id.substring(0, 7)}...`}
+                                    {hoveredId === property.id && (
+                                        <div className='absolute bg-gray-700 text-white text-xs font-bold p-2 rounded-md whitespace-nowrap z-50'>
+                                            {property.id}
+                                        </div>
+                                    )}
+                                </td>
+                                <td className='px-4 py-2 relative'
+                                    onMouseEnter={() => setHoveredOwnerId(property.ownerId)}
+                                    onMouseLeave={() => setHoveredOwnerId(null)}
+                                >
+                                    {`${property.ownerId.substring(0, 7)}...`}
+                                    {hoveredOwnerId === property.ownerId && (
+                                        <div className='absolute bg-gray-700 text-white text-xs font-bold p-2 rounded-md whitespace-nowrap z-50'>
+                                            {property.ownerId}
+                                        </div>
+                                    )}
+                                </td>
                                 <td className='px-4 py-2'>{property.name || 'N/A'}</td>
                                 <td className='px-4 py-2'>{property.address || 'N/A'}</td>
                                 <td className='px-4 py-2'>{property.location ? `${property.location._lat}, ${property.location._long}` : 'N/A'}</td>
