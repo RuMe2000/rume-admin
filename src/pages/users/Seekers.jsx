@@ -38,10 +38,14 @@ const Seekers = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {seekers.map((seeker, index) => (
+                        {seekers.map((seeker) => (
                             <tr key={seeker.id} className='text-center border-b border-darkGray'>
                                 <td className='px-4 py-2'>{seeker.id}</td>
-                                <td className='px-4 py-2'>{seeker.name || 'N/A'}</td>
+                                <td className='px-4 py-2'>
+                                    {seeker?.firstName || seeker?.lastName
+                                        ? `${seeker.firstName ?? ''} ${seeker.lastName ?? ''}`.trim()
+                                        : 'N/A'}
+                                </td>
                                 <td className='px-4 py-2'>{seeker.email || 'N/A'}</td>
                                 <td className='px-4 py-2'>{seeker.role || 'N/A'}</td>
                                 <td className='px-4 py-2'>{seeker.createdAt ? new Date(seeker.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</td>

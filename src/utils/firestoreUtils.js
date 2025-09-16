@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, getDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 //get user count by role
@@ -60,7 +60,7 @@ export const getAllOwners = async () => {
         console.error('Error fetching owners:', error);
         return [];
     }
-}
+};
 
 //get all admins
 export const getAllAdmins = async () => {
@@ -79,7 +79,7 @@ export const getAllAdmins = async () => {
         console.error('Error fetching admins:', error);
         return [];
     }
-}
+};
 
 //delete user
 export const deleteUser = async (id, collectionName = "users") => {
@@ -89,11 +89,11 @@ export const deleteUser = async (id, collectionName = "users") => {
     try {
         await deleteDoc(doc(db, collectionName, id));
         console.log(`User with ID ${id} deleted successfully`);
-    } catch (error){
+    } catch (error) {
         console.error("Error deleting user:", error);
         throw error;
     }
-}
+};
 
 //get all property count
 export const getAllPropertyCount = async () => {
@@ -102,26 +102,136 @@ export const getAllPropertyCount = async () => {
     const querySnapshot = await getDocs(q);
 
     return querySnapshot.size;
+};
+
+//get property count by status
+export const getPropertyCountByStatus = async (status) => {
+    const propertiesRef = collection(db, "properties");
+    const q = query(propertiesRef, where("status", "==", status));
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.size;
 }
 
-
-//get all properties
 export const getAllProperties = async () => {
     try {
+        //get all properties
         const propertiesRef = collection(db, "properties");
         const q = query(propertiesRef);
         const querySnapshot = await getDocs(q);
 
-        const allProperties = [];
-        querySnapshot.forEach((doc) => {
-            allProperties.push({ id: doc.id, ...doc.data() });
+        const allProperties = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        //get all unique owner IDs
+        const ownerIds = Array.from(new Set(allProperties.map(p => p.ownerId).filter(Boolean)));
+
+        //fetch owners once
+        const ownerSnaps = await Promise.all(ownerIds.map(id => getDoc(doc(db, 'users', id))));
+        const ownerMap = {};
+        ownerSnaps.forEach((snap, idx) => {
+            const id = ownerIds[idx];
+            if (snap.exists()) {
+                const data = snap.data();
+                const first = data.firstName ?? '';
+                const last = data.lastName ?? '';
+                ownerMap[id] = (first || last) ? `${first} ${last}`.trim() : 'Unknown Owner';
+            } else {
+                ownerMap[id] = 'Unknown Owner';
+            }
         });
 
-        return allProperties;
+        //attach ownerName into each property
+        const withOwners = allProperties.map(p => ({
+            ...p,
+            ownerName: ownerMap[p.ownerId] ?? 'Unknown Owner'
+        }));
+
+        return withOwners;
     } catch (error) {
         console.error('Error fetching properties:', error);
         return [];
     }
-}
+};
 
-//get
+//get all pending properties
+export const getPendingProperties = async () => {
+    try {
+        //get all properties
+        const propertiesRef = collection(db, "properties");
+        const q = query(propertiesRef, where("status", "==", "pending"));
+        const querySnapshot = await getDocs(q);
+
+        const allProperties = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        //get all unique owner IDs
+        const ownerIds = Array.from(new Set(allProperties.map(p => p.ownerId).filter(Boolean)));
+
+        //fetch owners once
+        const ownerSnaps = await Promise.all(ownerIds.map(id => getDoc(doc(db, 'users', id))));
+        const ownerMap = {};
+        ownerSnaps.forEach((snap, idx) => {
+            const id = ownerIds[idx];
+            if (snap.exists()) {
+                const data = snap.data();
+                const first = data.firstName ?? '';
+                const last = data.lastName ?? '';
+                ownerMap[id] = (first || last) ? `${first} ${last}`.trim() : 'Unknown Owner';
+            } else {
+                ownerMap[id] = 'Unknown Owner';
+            }
+        });
+
+        //attach ownerName into each property
+        const withOwners = allProperties.map(p => ({
+            ...p,
+            ownerName: ownerMap[p.ownerId] ?? 'Unknown Owner'
+        }));
+
+        return withOwners;
+    } catch (error) {
+        console.error('Error fetching properties:', error);
+        return [];
+    }
+};
+
+//get all verified properties
+export const getVerifiedProperties = async () => {
+    try {
+        //get all properties
+        const propertiesRef = collection(db, "properties");
+        const q = query(propertiesRef, where("status", "==", "verified"));
+        const querySnapshot = await getDocs(q);
+
+        const allProperties = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        //get all unique owner IDs
+        const ownerIds = Array.from(new Set(allProperties.map(p => p.ownerId).filter(Boolean)));
+
+        //fetch owners once
+        const ownerSnaps = await Promise.all(ownerIds.map(id => getDoc(doc(db, 'users', id))));
+        const ownerMap = {};
+        ownerSnaps.forEach((snap, idx) => {
+            const id = ownerIds[idx];
+            if (snap.exists()) {
+                const data = snap.data();
+                const first = data.firstName ?? '';
+                const last = data.lastName ?? '';
+                ownerMap[id] = (first || last) ? `${first} ${last}`.trim() : 'Unknown Owner';
+            } else {
+                ownerMap[id] = 'Unknown Owner';
+            }
+        });
+
+        //attach ownerName into each property
+        const withOwners = allProperties.map(p => ({
+            ...p,
+            ownerName: ownerMap[p.ownerId] ?? 'Unknown Owner'
+        }));
+
+        return withOwners;
+    } catch (error) {
+        console.error('Error fetching properties:', error);
+        return [];
+    }
+};
+

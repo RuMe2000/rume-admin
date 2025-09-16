@@ -41,7 +41,11 @@ const Owners = () => {
                         {owners.map((owner, index) => (
                             <tr key={owner.id} className='text-center border-b border-darkGray'>
                                 <td className='px-4 py-2'>{owner.id}</td>
-                                <td className='px-4 py-2'>{owner.name || 'N/A'}</td>
+                                <td className='px-4 py-2'>
+                                    {owner?.firstName || owner?.lastName
+                                        ? `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim()
+                                        : 'N/A'}
+                                </td>
                                 <td className='px-4 py-2'>{owner.email || 'N/A'}</td>
                                 <td className='px-4 py-2'>{owner.role || 'N/A'}</td>
                                 <td className='px-4 py-2'>{owner.createdAt ? new Date(owner.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</td>

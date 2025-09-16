@@ -16,6 +16,9 @@ import Transactions from "./pages/transactions/Transactions";
 import FeedbackModeration from "./pages/moderation/FeedbackModeration";
 import Analytics from "./pages/analytics/Analytics";
 import AllProperties from "./pages/properties/AllProperties";
+import PropertyEdit from "./pages/properties/PropertyEdit";
+import PendingProperties from "./pages/properties/PendingProperties";
+import VerifiedProperties from "./pages/properties/VerifiedProperties";
 
 
 function App() {
@@ -23,13 +26,13 @@ function App() {
         <BrowserRouter>
             <ToastContainer />
             <Routes>
-                <Route path="/login" element={<Login />} />
+                {/* <Route path="/login" element={<Login />} /> */}
 
                 {/* protected routes */}
                 <Route
                     path="/*"
                     element={
-                        <ProtectedRoute>
+                        // <ProtectedRoute>
                         <div className="flex min-h-screen bg-bgBlue">
                             <Sidebar />
 
@@ -46,6 +49,9 @@ function App() {
                                     {/* property management routes */}
                                     <Route path="/properties" element={<PropertyManagement />} />
                                     <Route path="/properties/all" element={<AllProperties />} />
+                                    <Route path="/properties/pending" element={<PendingProperties />} />
+                                    <Route path="/properties/verified" element={<VerifiedProperties />} />
+                                    <Route path="/properties/edit/:propertyId" element={<PropertyEdit />} />
 
                                     <Route path="/transactions" element={<Transactions />} />
                                     <Route path="/feedback" element={<FeedbackModeration />} />
@@ -56,7 +62,7 @@ function App() {
                                 </Routes>
                             </div>
                         </div>
-                        </ProtectedRoute>
+                        // </ProtectedRoute>
                     }
                 />
             </Routes>

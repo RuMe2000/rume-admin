@@ -50,7 +50,11 @@ const Admins = () => {
                         {admins.map((admin) => (
                             <tr key={admin.id} className='text-center border-b border-darkGray'>
                                 <td className='w-50 px-4 py-2'>{admin.id}</td>
-                                <td className='px-4 py-2'>{admin.name || 'N/A'}</td>
+                                <td className='px-4 py-2'>
+                                    {admin?.firstName || admin?.lastName
+                                        ? `${admin.firstName ?? ''} ${admin.lastName ?? ''}`.trim()
+                                        : 'N/A'}
+                                </td>
                                 <td className='px-4 py-2'>{admin.email || 'N/A'}</td>
                                 <td className='px-4 py-2'>{admin.role || 'N/A'}</td>
                                 <td className='px-4 py-2'>{admin.createdAt ? new Date(admin.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</td>
@@ -58,7 +62,7 @@ const Admins = () => {
                                     <button
                                         // onClick={() => handleDelete(admin.id)}
                                         className='bg-errorRed px-3 py-1 rounded-lg hover:bg-red-700 duration-300 transition'>
-                                            Delete
+                                        Delete
                                     </button>
                                 </td>
 
