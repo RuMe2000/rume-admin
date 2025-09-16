@@ -40,7 +40,14 @@ const Seekers = () => {
                     <tbody>
                         {seekers.map((seeker) => (
                             <tr key={seeker.id} className='text-center border-b border-darkGray'>
-                                <td className='px-4 py-2'>{seeker.id}</td>
+                                <td className='px-4 py-2 relative group cursor-pointer transition-all duration-200'>
+                                    <span className='group-hover:hidden'>
+                                        {seeker.id.substring(0, 12)}...
+                                    </span>
+                                    <span className='hidden group-hover:inline-block transition-all duration-200'>
+                                        {seeker.id}
+                                    </span>
+                                </td>
                                 <td className='px-4 py-2'>
                                     {seeker?.firstName || seeker?.lastName
                                         ? `${seeker.firstName ?? ''} ${seeker.lastName ?? ''}`.trim()

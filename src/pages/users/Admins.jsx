@@ -49,7 +49,14 @@ const Admins = () => {
                     <tbody>
                         {admins.map((admin) => (
                             <tr key={admin.id} className='text-center border-b border-darkGray'>
-                                <td className='w-50 px-4 py-2'>{admin.id}</td>
+                                <td className='px-4 py-2 relative group cursor-pointer transition-all duration-200'>
+                                    <span className='group-hover:hidden'>
+                                        {admin.id.substring(0, 12)}...
+                                    </span>
+                                    <span className='hidden group-hover:inline-block transition-all duration-200'>
+                                        {admin.id}
+                                    </span>
+                                </td>
                                 <td className='px-4 py-2'>
                                     {admin?.firstName || admin?.lastName
                                         ? `${admin.firstName ?? ''} ${admin.lastName ?? ''}`.trim()

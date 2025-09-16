@@ -38,9 +38,16 @@ const Owners = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {owners.map((owner, index) => (
+                        {owners.map((owner) => (
                             <tr key={owner.id} className='text-center border-b border-darkGray'>
-                                <td className='px-4 py-2'>{owner.id}</td>
+                                <td className='px-4 py-2 relative group cursor-pointer transition-all duration-200'>
+                                    <span className='group-hover:hidden'>
+                                        {owner.id.substring(0, 12)}...
+                                    </span>
+                                    <span className='hidden group-hover:inline-block transition-all duration-200'>
+                                        {owner.id}
+                                    </span>
+                                </td>
                                 <td className='px-4 py-2'>
                                     {owner?.firstName || owner?.lastName
                                         ? `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim()

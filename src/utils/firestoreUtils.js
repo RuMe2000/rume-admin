@@ -235,3 +235,43 @@ export const getVerifiedProperties = async () => {
     }
 };
 
+//get all transactions
+export const getTransactions = async () => {
+    try {
+        //get all transactions
+        const transactionsRef = collection(db, "transactions");
+        const q = query(transactionsRef);
+        const querySnapshot = await getDocs(q);
+
+        const transactions = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        //get all seeker ids
+        const seekerIds = Array.from(new Set(transactions.map(p => p.userId).filter(Boolean)));
+
+        //fetch seekers
+        const seekerSnaps = await Promise.all(seekerIds.map(id => getDoc(doc(db, 'users', id))));
+        const seekerMap = {};
+        seekerSnaps.forEach((snap, idx) => {
+            const id = seekerIds[idx];
+            if (snap.exists()) {
+                const data = snap.data();
+                const first = data.firstName ?? '';
+                const last = data.lastName ?? '';
+                seekerMap[id] = (first || last) ? `${first} ${last}`.trim() : 'Unknown Seeker';
+            } else {
+                seekerMap[id] = 'Unknown Seeker';
+            }
+        });
+
+        //attach seeker name to transaction
+        const withSeekers = transactions.map(p => ({
+            ...p,
+            seekerName: seekerMap[p.userId] ?? 'Unknown Seeker'
+        }));
+
+        return withSeekers;
+    } catch (error) {
+        console.error('Error fetching seekers:', error);
+        return [];
+    }
+};
