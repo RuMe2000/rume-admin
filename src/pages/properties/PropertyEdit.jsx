@@ -1,18 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, GeoPoint } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PropertyEdit() {
     const { propertyId } = useParams();
-
     const [property, setProperty] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const navigate = useNavigate();
     const location = useLocation();
-
     const from = location.state?.from;
+
+    const GOOGLE_MAPS_API_KEY =
+        (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOOGLE_MAPS_API_KEY) ||
+        process.env.REACT_APP_GOOGLE_MAPS_API_KEY ||
+        '';
+
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: GOOGLE_MAPS_API_KEY
+    });
 
     useEffect(() => {
         const fetchProperty = async () => {
@@ -25,7 +34,7 @@ export default function PropertyEdit() {
                     const propertyData = snapshot.data();
 
                     //get owner name
-                    let ownerName = 'yuyuyuy';
+                    let ownerName = 'Unknown Owner';
                     if (propertyData.ownerId) {
                         const ownerRef = doc(db, "users", propertyData.ownerId);
                         const ownerSnap = await getDoc(ownerRef);
@@ -34,7 +43,7 @@ export default function PropertyEdit() {
                             ownerName =
                                 (firstName || lastName)
                                     ? `${firstName} ${lastName}`.trim()
-                                    : "kakaka";
+                                    : "Unknown Owner";
                         }
                     }
 
@@ -55,22 +64,42 @@ export default function PropertyEdit() {
         setProperty(prev => ({ ...prev, [field]: value }));
     };
 
+    const [showSuccess, setShowSuccess] = useState(false);
+
     const handleSave = async () => {
         const propertyRef = doc(db, "properties", propertyId);
+
+        //convert to geopoint
+        const updatedLocation = new GeoPoint(
+            Number(property.location.latitude.toFixed(7)),
+            Number(property.location.longitude.toFixed(7))
+        );
+
         await updateDoc(propertyRef, {
             ...property,
+            location: updatedLocation,
             updatedAt: new Date(),
         });
-        navigate('/properties');
+
+        setShowSuccess(true); //show popup
+        //hide popup after 2 seconds
+        setTimeout(() => {
+            setShowSuccess(false);
+            navigate('/properties');
+        }, 2000);
     };
 
-    if (loading) {
+    if (loading || !isLoaded) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <p className="text-xl text-white italic">Loading property details...</p>
             </div>
         );
     }
+
+    const lat = property?.location?.latitude ?? 0;
+    const lng = property?.location?.longitude ?? 0;
+    const center = { lat, lng };
 
     return (
         <div>
@@ -109,14 +138,29 @@ export default function PropertyEdit() {
                     className='px-2 py-2 bg-darkGray/30 rounded-md border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
                 />
 
-                {/* replace with actual map later */}
-                <label className='font-bold mt-4 text-lg'>Geolocation:</label>
-                <input
-                    value={`${Math.abs(property.location.latitude)}°${property.location.latitude >= 0 ? 'N' : 'S'}, ${Math.abs(property.location.longitude)}°${property.location.longitude >= 0 ? 'E' : 'W'}` ?? ''}
-                    onChange={(e) => handleChange("location", e.target.value)}
-                    style={{ width: `${(property.address ?? '').length || 1}ch` }}
-                    className='px-2 py-2 bg-darkGray/30 rounded-md border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
-                />
+                <label className='font-bold mt-4 text-lg'>Location:</label>
+                <div className='flex flex-col'>
+                    <div className='rounded-md overflow-hidden' style={{ height: 450, width: 800 }}>
+                        <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={center} zoom={15}>
+                            <Marker
+                                position={center}
+                                draggable
+                                onDragEnd={(e) => {
+                                    const newLat = e.latLng.lat();
+                                    const newLng = e.latLng.lng();
+                                    setProperty(prev => ({
+                                        ...prev,
+                                        location: { latitude: newLat, longitude: newLng },
+                                    }));
+                                }}
+                            />
+                        </GoogleMap>
+                    </div>
+                    <p className="text-sm text-gray-400 italic">
+                        Latitude: {Math.abs(property.location.latitude).toFixed(7)}° {property.location.latitude >= 0 ? 'N' : 'S'},
+                        Longitude: {Math.abs(property.location.longitude).toFixed(7)}° {property.location.longitude >= 0 ? 'E' : 'W'}
+                    </p>
+                </div>
             </div>
 
             <div className="fixed bottom-6 right-7 hover:scale-105 duration-200 transition">
@@ -126,6 +170,29 @@ export default function PropertyEdit() {
                     Save
                 </button>
             </div>
+
+            <AnimatePresence>
+                {showSuccess && (
+                    <motion.div
+                        className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <motion.div
+                            className="bg-mainBlue text-white px-8 py-5 rounded-lg shadow-lg"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <p className="text-lg font-semibold">Property updated successfully!</p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
         </div>
     );
 }

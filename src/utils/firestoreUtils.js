@@ -1,6 +1,15 @@
 import { collection, query, where, getDocs, deleteDoc, getDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 
+//get all user count
+export const getAllUserCount = async () => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef);
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.size;
+}
+
 //get user count by role
 export const getUserCountByRole = async (role) => {
     const usersRef = collection(db, "users");
@@ -103,6 +112,15 @@ export const getAllPropertyCount = async () => {
 
     return querySnapshot.size;
 };
+
+//get pending property count
+export const getPendingPropertyCount = async (status) => {
+    const propertiesRef = collection(db, "properties");
+    const q = query(propertiesRef, where("status", "==", "pending"));
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.size;
+}
 
 //get property count by status
 export const getPropertyCountByStatus = async (status) => {
@@ -234,6 +252,28 @@ export const getVerifiedProperties = async () => {
         return [];
     }
 };
+
+//get this week transaction count
+export const getRecentTransactionCount = async () => {
+    //get current date/time
+    const now = new Date();
+    //get start of the week
+    const startOfWeek = new Date(now);
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    //firestore query
+    const transactionsRef = collection(db, "transactions");
+    const q = query(
+        transactionsRef,
+        where("createdAt", ">=", startOfWeek)
+    );
+
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.size;
+}
 
 //get all transactions
 export const getTransactions = async () => {
