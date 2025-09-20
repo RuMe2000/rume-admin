@@ -332,7 +332,7 @@ export const suspendUser = async (userId, daysToSuspend) => {
         });
 
         console.log(`User ${userId} has been suspended for ${days} days.`);
-    } catch (error){
+    } catch (error) {
         console.error('Error suspending user:', error);
         throw new Error(`Failed to suspend user: ${error.message}`);
     }
@@ -345,4 +345,34 @@ export const unsuspendUser = async (userId) => {
         status: 'Active',
         suspendedUntil: null
     });
+};
+
+//delete property
+export const deleteProperty = async (propertyId) => {
+    try {
+        await deleteDoc(doc(db, "properties", propertyId));
+        console.log(`Successfully deleted property listing: ${propertyId}`);
+    } catch (error) {
+        console.error('Error deleting property listing:', error);
+        throw new Error(`Failed to delete property listing: ${error.message}`);
+    }
+}
+
+
+//get user info
+export const getUserById = async (userId) => {
+    if (!userId) throw new Error("No userId provided");
+    try {
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            return { id: userSnap.id, ...userSnap.data() };
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        throw error;
+    }
 };

@@ -19,7 +19,7 @@ import AllProperties from "./pages/properties/AllProperties";
 import PropertyEdit from "./pages/properties/PropertyEdit";
 import PendingProperties from "./pages/properties/PendingProperties";
 import VerifiedProperties from "./pages/properties/VerifiedProperties";
-
+import UserCard from './pages/users/UserCard';
 
 function App() {
     return (
@@ -27,7 +27,7 @@ function App() {
             <ToastContainer />
 
             <Routes>
-                <Route path="/login" element={<Login />} />
+                {/* <Route path="/login" element={<Login />} /> */}
 
                 {/* protected routes */}
                 <Route
@@ -35,7 +35,7 @@ function App() {
                     element={
                         <div className="flex min-h-screen bg-bgBlue">
                             <Sidebar />
-                            <ProtectedRoute>
+                            {/* <ProtectedRoute> */}
                             <div className="flex-1 p-5 bg-radial from-hoverBlue via-darkBlue to-bgBlue text-white">
                                 <Routes>
                                     <Route path="/dashboard" element={<Dashboard />} />
@@ -45,6 +45,7 @@ function App() {
                                     <Route path="/users/owners" element={<Owners />} />
                                     <Route path="/users/seekers" element={<Seekers />} />
                                     <Route path="/users/admins" element={<Admins />} />
+                                    {/* <Route path="/users/usercard/:userId" element={<UserCard />} /> */}
 
                                     {/* property management routes */}
                                     <Route path="/properties" element={<PropertyManagement />} />
@@ -62,7 +63,7 @@ function App() {
                                 </Routes>
                             </div>
 
-                            </ProtectedRoute>
+                            {/* </ProtectedRoute> */}
                         </div>
                     }
                 />

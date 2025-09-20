@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { getAllOwners, deleteUser, suspendUser, unsuspendUser } from '../../utils/firestoreUtils';
+import { getAllOwners } from '../../utils/firestoreUtils';
+import UserCard from './UserCard';
 
 const Owners = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [owners, setOwners] = useState([]);
+    const [selectedUserId, setSelectedUserId] = useState(null);
 
     const fetchOwners = async () => {
         setIsLoading(true);
@@ -17,59 +19,6 @@ const Owners = () => {
     useEffect(() => {
         fetchOwners();
     }, []);
-
-    // Function to handle permanent account deletion
-    const handleDeleteUser = async (userToDelete) => {
-        const confirmed = window.confirm(
-            `Are you sure you want to permanently delete the account of ${userToDelete.email}? This action cannot be undone.`
-        );
-
-        if (confirmed) {
-            try {
-                // Call the function from the utility file
-                await deleteUser(userToDelete.id);
-                // Update UI state immediately by filtering out the deleted user
-                setOwners(prevOwners => prevOwners.filter(owner => owner.id !== userToDelete.id));
-
-                alert(`User ${userToDelete.email} has been permanently deleted.`);
-            } catch (error) {
-                console.error("Error deleting user:", error);
-                alert(`Failed to delete user: ${error.message}. Please check console for details.`);
-            }
-        }
-    };
-
-    // Function to handle account suspension
-    const handleSuspendUser = async (userToSuspend) => {
-        const daysToSuspend = prompt(`How many days do you want to suspend ${userToSuspend.email}?`);
-
-        try {
-            // Call the function from the utility file
-            await suspendUser(userToSuspend.id, daysToSuspend);
-            // Re-fetch data to update the UI with the new status
-            await fetchOwners();
-
-            alert(`User ${userToSuspend.email} has been suspended for ${daysToSuspend} days.`);
-        } catch (error) {
-            console.error("Error suspending user:", error);
-            alert(`Failed to suspend user: ${error.message}. Please check console for details.`);
-        }
-    };
-
-    // Function to handle account unsuspension
-    const handleUnsuspendUser = async (userToUnsuspend) => {
-        try {
-            // Call the function from the utility file
-            await unsuspendUser(userToUnsuspend.id);
-            // Re-fetch data to update the UI with the new status
-            await fetchOwners();
-
-            alert(`User ${userToUnsuspend.email} has been unsuspended.`);
-        } catch (error) {
-            console.error("Error unsuspending user:", error);
-            alert(`Failed to unsuspend user: ${error.message}. Please check console for details.`);
-        }
-    };
 
     return (
         <div>
@@ -95,7 +44,7 @@ const Owners = () => {
                             <th className="px-4 py-2 border-b-3 border-darkGray text-center">Role</th>
                             <th className="px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
                             <th className="px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Actions</th>
+                            <th className="px-4 py-2 border-b-3 border-darkGray text-center"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -131,25 +80,13 @@ const Owners = () => {
                                         {owner.createdAt ? new Date(owner.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
                                     </td>
                                     <td className='px-4 py-2 flex items-center justify-center gap-2'>
-                                        {owner.status === 'Suspended' ? (
-                                            <button onClick={() => handleUnsuspendUser(owner)}
-                                                className="bg-blue-500 text-white text-sm px-3 py-1 rounded-md hover:bg-blue-700 duration-300 transition"
-                                            >
-                                                Unsuspend
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleSuspendUser(owner)}
-                                                className='bg-orange-500 text-white text-sm px-3 py-1 rounded-md hover:bg-orange-700 duration-300 transition'
-                                            >
-                                                Suspend
-                                            </button>
-                                        )}
                                         <button
-                                            onClick={() => handleDeleteUser(owner)}
-                                            className='bg-red-500 text-white text-sm px-3 py-1 rounded-md hover:bg-red-600 duration-300 transition'
+                                            onClick={() => setSelectedUserId(owner.id)}
+                                            className='bg-mainBlue px-3 py-1 rounded-lg hover:bg-hoverBlue hover:cursor-pointer duration-300 transition'
                                         >
-                                            Delete
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF">
+                                                <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
+                                            </svg>
                                         </button>
                                     </td>
                                 </tr>
@@ -161,6 +98,14 @@ const Owners = () => {
                         )}
                     </tbody>
                 </table>
+
+                {selectedUserId && (
+                    <UserCard
+                        userId={selectedUserId}
+                        onClose={() => setSelectedUserId(null)}
+                    />
+                )}
+
             </div>
         </div>
     );

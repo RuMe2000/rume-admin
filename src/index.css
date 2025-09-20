@@ -5,6 +5,7 @@
 
     --color-mainBlue: oklch(0.4500 0.2176 272.38);
     --color-hoverBlue: oklch(0.45 0.2059 273.04 / 0.30);
+    --color-hoverBlueFull: oklch(0.45 0.2059 273.04);
     --color-darkBlue: oklch(0.2177 0.0845 259.03);
     --color-charcoal: oklch(0.20 0.02 270);
     --color-bgBlue: oklch(0.18 0.05 250);

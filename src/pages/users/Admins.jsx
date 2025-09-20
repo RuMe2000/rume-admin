@@ -43,7 +43,7 @@ const Admins = () => {
                             <th className="px-4 py-2 border-b-3 border-darkGray text-center">Email</th>
                             <th className="px-4 py-2 border-b-3 border-darkGray text-center">Role</th>
                             <th className="px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Actions</th>
+                            <th className="px-4 py-2 border-b-3 border-darkGray text-center"></th>
                         </tr>
                     </thead>
                     <tbody>

@@ -111,17 +111,18 @@ export default function PropertyEdit() {
                     <h1 className='text-3xl font-semibold'>{property.name}</h1>
                 </div>
                 <div className={`
-                    mr-2 flex flex-row items-center rounded-md px-5 py-1
-                    ${property.status === 'verified' ? 'bg-successGreen' : ''}
-                    ${property.status === 'pending' ? 'bg-orange-400' : ''} `}>
-                    <h1 className='text-xl font-semibold mr-2'>STATUS:</h1>
-                    <h1 className='text-xl color-white italic '>{property.status}</h1>
+                    mr-2 flex flex-row items-center rounded-full px-5 py-1
+                    ${property?.status === 'verified' ? 'bg-successGreen' : 'bg-errorRed'}
+                    ${property?.status === 'pending' ? 'bg-orange-400' : 'bg-errorRed'} `}>
+                    <h1 className='text-xl color-white italic '>{property?.status ? property.status.charAt(0).toUpperCase() + property.status.slice(1) : 'Unknown'}</h1>
                 </div>
             </div>
 
             <div className='flex flex-col mt-6 ml-4 items-start overflox-x-auto'>
-                <p className=''>ID: {propertyId ?? ''}</p>
-                <p className='mb-3'>Owner: {property.ownerName ?? ''}</p>
+                <label className='font-bold text-lg'>ID:</label>
+                <p className='mb-3'>{propertyId ?? ''}</p>
+                <label className='font-bold text-lg'>Owner:</label>
+                <p className='mb-3'>{property.ownerName ?? ''}</p>
                 <label className='font-bold mb-1 text-lg'>Property Name:</label>
                 <input
                     value={property.name ?? ''}
