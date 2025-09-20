@@ -25,17 +25,17 @@ function App() {
     return (
         <BrowserRouter>
             <ToastContainer />
+
             <Routes>
-                {/* <Route path="/login" element={<Login />} /> */}
+                <Route path="/login" element={<Login />} />
 
                 {/* protected routes */}
                 <Route
                     path="/*"
                     element={
-                        // <ProtectedRoute>
                         <div className="flex min-h-screen bg-bgBlue">
                             <Sidebar />
-
+                            <ProtectedRoute>
                             <div className="flex-1 p-5 bg-radial from-hoverBlue via-darkBlue to-bgBlue text-white">
                                 <Routes>
                                     <Route path="/dashboard" element={<Dashboard />} />
@@ -61,12 +61,15 @@ function App() {
                                     <Route path="/" element={<Dashboard />} />
                                 </Routes>
                             </div>
+
+                            </ProtectedRoute>
                         </div>
-                        // </ProtectedRoute>
                     }
                 />
-            </Routes>
-        </BrowserRouter>
+
+            </Routes >
+
+        </BrowserRouter >
     );
 }
 

@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, deleteDoc, getDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 //get all user count
@@ -87,20 +87,6 @@ export const getAllAdmins = async () => {
     } catch (error) {
         console.error('Error fetching admins:', error);
         return [];
-    }
-};
-
-//delete user
-export const deleteUser = async (id, collectionName = "users") => {
-    const confirmDelete = window.confirm("Delete this user?");
-    if (!confirmDelete) return;
-
-    try {
-        await deleteDoc(doc(db, collectionName, id));
-        console.log(`User with ID ${id} deleted successfully`);
-    } catch (error) {
-        console.error("Error deleting user:", error);
-        throw error;
     }
 };
 
@@ -314,4 +300,49 @@ export const getTransactions = async () => {
         console.error('Error fetching seekers:', error);
         return [];
     }
+};
+
+//delete user from firestore
+export const deleteUser = async (userId) => {
+    try {
+        await deleteDoc(doc(db, "users", userId));
+        console.log(`Successfully deleted user document: ${userId}`);
+    } catch (error) {
+        console.error('Error deleting user document:', error);
+        throw new Error(`Failed to delete user document: ${error.message}`);
+    }
+};
+
+//suspend user
+export const suspendUser = async (userId, daysToSuspend) => {
+    const days = parseInt(daysToSuspend);
+
+    if (isNaN(days) || days <= 0) {
+        throw new Error('Invalid number of days entered');
+    }
+
+    try {
+        const suspendedUntil = new Date();
+        suspendedUntil.setDate(suspendedUntil.getDate() + days);
+
+        const userDocRef = doc(db, 'users', userId);
+        await updateDoc(userDocRef, {
+            status: 'Suspended',
+            suspendedUntil: suspendedUntil.toISOString()
+        });
+
+        console.log(`User ${userId} has been suspended for ${days} days.`);
+    } catch (error){
+        console.error('Error suspending user:', error);
+        throw new Error(`Failed to suspend user: ${error.message}`);
+    }
+};
+
+//unsuspend user
+export const unsuspendUser = async (userId) => {
+    const userDocRef = doc(db, 'users', userId);
+    await updateDoc(userDocRef, {
+        status: 'Active',
+        suspendedUntil: null
+    });
 };

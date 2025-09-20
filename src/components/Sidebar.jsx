@@ -4,6 +4,7 @@ import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { toast } from 'react-toastify';
 import logo from '../assets/rume_logo.png';
 
 const Sidebar = () => {
@@ -11,25 +12,29 @@ const Sidebar = () => {
     const [adminName, setAdminName] = useState('');
 
     useEffect(() => {
-        const fetchAdminName = async () => {
-            const user = auth.currentUser;
+        // Listen for changes to the Firebase Authentication state
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) {
                 try {
                     const userDocRef = doc(db, 'users', user.uid);
                     const userDoc = await getDoc(userDocRef);
 
                     if (userDoc.exists()) {
-                        setAdminName(userDoc.data().name);
+                        setAdminName(`${userDoc.data().firstName} ${userDoc.data().lastName}`);
                     } else {
-                        console.warn("No user document found");
+                        console.warn("No user document found in Firestore for the current user.");
                     }
                 } catch (error) {
                     console.error("Error fetching user data:", error);
                 }
+            } else {
+                // If the user logs out, clear the admin name
+                setAdminName('');
             }
-        };
+        });
 
-        fetchAdminName();
+        // Clean up the listener when the component unmounts
+        return () => unsubscribe();
     }, []);
 
     const handleSignOut = async () => {
@@ -56,20 +61,20 @@ const Sidebar = () => {
 
                 {/* admin info */}
                 <div className='flex flex-col items-center justify-between pb-5 px-1'>
-                <div className='flex flex-row items-center justify-start gap-1'>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#FFFFFF">
-                        <path d="M480-440q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0-80q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0 440q-139-35-229.5-159.5T160-516v-244l320-120 320 120v244q0 152-90.5 276.5T480-80Zm0-400Zm0-315-240 90v189q0 54 15 105t41 96q42-21 88-33t96-12q50 0 96 12t88 33q26-45 41-96t15-105v-189l-240-90Zm0 515q-36 0-70 8t-65 22q29 30 63 52t72 34q38-12 72-34t63-52q-31-14-65-22t-70-8Z" />
-                    </svg>
-                    <span className='text-sm'>{adminName || "Loading..."}</span>
+                    <div className='flex flex-row items-center justify-start gap-1'>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#FFFFFF">
+                            <path d="M480-440q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0-80q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0 440q-139-35-229.5-159.5T160-516v-244l320-120 320 120v244q0 152-90.5 276.5T480-80Zm0-400Zm0-315-240 90v189q0 54 15 105t41 96q42-21 88-33t96-12q50 0 96 12t88 33q26-45 41-96t15-105v-189l-240-90Zm0 515q-36 0-70 8t-65 22q29 30 63 52t72 34q38-12 72-34t63-52q-31-14-65-22t-70-8Z" />
+                        </svg>
+                        <span className='text-sm'>{adminName || "Loading..."}</span>
+                    </div>
+                    <div>
+                        <button
+                            onClick={handleSignOut}
+                            className='mx-3 text-errorRed rounded-lg text-sm hover:text-red-700 focus:outline-none hover:cursor-pointer hover:scale-105 transition'>
+                            <span>Sign Out</span>
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <button
-                        onClick={handleSignOut}
-                        className='mx-3 text-errorRed rounded-lg text-sm hover:text-red-700 focus:outline-none hover:cursor-pointer hover:scale-105 transition'>
-                        <span>Sign Out</span>
-                    </button>
-                </div>
-            </div>
 
                 <ul className='divide-y divide-darkGray'>
                     <li>
@@ -164,7 +169,7 @@ const Sidebar = () => {
                 </ul>
             </div>
 
-            
+
         </nav>
 
     )

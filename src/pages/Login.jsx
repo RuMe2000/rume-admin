@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import logo from '../assets/rume_logo.png';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const navigate = useNavigate();
 
@@ -34,20 +36,12 @@ function Login() {
                 throw new Error("Access denied!");
             }
 
-            //success
-            console.log("Logged in successfully.");
-            toast.success("Welcome, Admin!", {
-                position: 'top-center',
-                autoClose: 1000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: false,
-                progress: undefined,
-            });
-
+            setShowSuccess(true); //show popup
+            //hide popup after 2 seconds
             setTimeout(() => {
+                setShowSuccess(false);
                 navigate('/dashboard');
-            }, 1000);
+            }, 2000);
 
         } catch (error) {
             console.log(error.message);
@@ -65,11 +59,11 @@ function Login() {
     return (
         <div className='flex min-h-screen bg-bgBlue'>
             {/* Oversized Logo */}
-                <img
-                    src={logo}
-                    alt="Logo"
-                    className="absolute top-1/2 left-1/3 transform -translate-x-1/2 -translate-y-1/2 scale-[1.4] z-0 opacity-60 pointer-events-none"
-                />
+            <img
+                src={logo}
+                alt="Logo"
+                className="absolute top-1/2 left-1/3 transform -translate-x-1/2 -translate-y-1/2 scale-[1.4] z-0 opacity-60 pointer-events-none"
+            />
             {/* left side for logo */}
             <div className="relative w-full h-screen overflow-hidden flex items-center justify-center">
                 {/* Foreground Text */}
@@ -105,11 +99,33 @@ function Login() {
                         />
                     </div>
 
-                    <button type='submit' className='w-full p-3 mt-5 bg-mainBlue text-xl text-white font-bold rounded-xl hover:bg-hoverBlue focus:outline-none focus:ring-2 focus:ring-blue-500 transition'>
+                    <button type='submit' className='w-full p-3 mt-5 bg-mainBlue text-xl text-white font-bold rounded-xl hover:bg-hoverBlue cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300'>
                         Login
                     </button>
                 </form>
             </div>
+
+            <AnimatePresence>
+                {showSuccess && (
+                    <motion.div
+                        className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <motion.div
+                            className="bg-mainBlue text-white px-13 py-5 rounded-lg shadow-lg"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <p className="text-lg font-semibold">Welcome, Admin!</p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

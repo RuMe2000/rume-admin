@@ -75,7 +75,7 @@ const Transactions = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {transactions.map((transaction) => (
+                        {filteredTransactions.map((transaction) => (
                             <tr key={transaction.id} className="text-center border-b border-darkGray">
                                 <td className="px-4 py-2">{transaction.id}</td>
                                 <td className="px-4 py-2">{transaction.seekerName}</td>
