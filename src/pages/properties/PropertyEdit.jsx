@@ -4,6 +4,7 @@ import { doc, getDoc, updateDoc, GeoPoint } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { verifyProperty, unverifyProperty } from '../../utils/firestoreUtils';
 
 export default function PropertyEdit() {
     const { propertyId } = useParams();
@@ -23,42 +24,70 @@ export default function PropertyEdit() {
         googleMapsApiKey: GOOGLE_MAPS_API_KEY
     });
 
-    useEffect(() => {
-        const fetchProperty = async () => {
-            try {
-                //get property doc
-                const propertyRef = doc(db, "properties", propertyId);
-                const snapshot = await getDoc(propertyRef);
+    const fetchProperty = async () => {
+        try {
+            //get property doc
+            const propertyRef = doc(db, "properties", propertyId);
+            const snapshot = await getDoc(propertyRef);
 
-                if (snapshot.exists()) {
-                    const propertyData = snapshot.data();
+            if (snapshot.exists()) {
+                const propertyData = snapshot.data();
 
-                    //get owner name
-                    let ownerName = 'Unknown Owner';
-                    if (propertyData.ownerId) {
-                        const ownerRef = doc(db, "users", propertyData.ownerId);
-                        const ownerSnap = await getDoc(ownerRef);
-                        if (ownerSnap.exists()) {
-                            const { firstName = "", lastName = "" } = ownerSnap.data();
-                            ownerName =
-                                (firstName || lastName)
-                                    ? `${firstName} ${lastName}`.trim()
-                                    : "Unknown Owner";
-                        }
+                //get owner name
+                let ownerName = 'Unknown Owner';
+                if (propertyData.ownerId) {
+                    const ownerRef = doc(db, "users", propertyData.ownerId);
+                    const ownerSnap = await getDoc(ownerRef);
+                    if (ownerSnap.exists()) {
+                        const { firstName = "", lastName = "" } = ownerSnap.data();
+                        ownerName =
+                            (firstName || lastName)
+                                ? `${firstName} ${lastName}`.trim()
+                                : "Unknown Owner";
                     }
-
-                    //merge owner name into property
-                    setProperty({ ...propertyData, ownerName });
                 }
-            } catch (error) {
-                console.error("Error fetching property:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
 
+                //merge owner name into property
+                setProperty({ ...propertyData, ownerName });
+            }
+        } catch (error) {
+            console.error("Error fetching property:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchProperty();
     }, [propertyId]);
+
+    const handleVerify = async (propertyId) => {
+        try {
+            await verifyProperty(propertyId); // update Firestore
+            // update local state immediately
+            setProperty(prev => ({
+                ...prev,
+                status: 'verified'
+            }));
+        } catch (error) {
+            console.error('Error verifying property:', error);
+            alert(error.message);
+        }
+    };
+
+    const handleUnverify = async (propertyId) => {
+        try {
+            await unverifyProperty(propertyId); // update Firestore
+            setProperty(prev => ({
+                ...prev,
+                status: 'pending'
+            }));
+        } catch (error) {
+            console.error('Error unverifying property:', error);
+            alert(error.message);
+        }
+    };
+
 
     const handleChange = (field, value) => {
         setProperty(prev => ({ ...prev, [field]: value }));
@@ -110,11 +139,19 @@ export default function PropertyEdit() {
                     </button>
                     <h1 className='text-3xl font-semibold'>{property.name}</h1>
                 </div>
-                <div className={`
-                    mr-2 flex flex-row items-center rounded-full px-5 py-1
-                    ${property?.status === 'verified' ? 'bg-successGreen' : 'bg-errorRed'}
-                    ${property?.status === 'pending' ? 'bg-orange-400' : 'bg-errorRed'} `}>
-                    <h1 className='text-xl color-white italic '>{property?.status ? property.status.charAt(0).toUpperCase() + property.status.slice(1) : 'Unknown'}</h1>
+                <div
+                    className={`
+                        mr-2 flex flex-row items-center rounded-full px-5 py-1
+                        ${property.status === 'verified' ? 'bg-successGreen' : ''}
+                        ${property.status === 'pending' ? 'bg-orange-400' : ''}
+                        ${property.status !== 'verified' && property.status !== 'pending' ? 'bg-errorRed' : ''}
+                    `}
+                >
+                    <h1 className="text-xl text-white italic">
+                        {property.status
+                            ? property.status.toUpperCase()
+                            : 'Unknown'}
+                    </h1>
                 </div>
             </div>
 
@@ -128,7 +165,7 @@ export default function PropertyEdit() {
                     value={property.name ?? ''}
                     onChange={(e) => handleChange("name", e.target.value)}
                     style={{ width: `${(property.address ?? '').length || 1}ch` }}
-                    className='px-2 py-2 bg-darkGray/30 rounded-md border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
+                    className='px-2 py-2 bg-darkGray/30 rounded-full border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
                 />
 
                 <label className='font-bold mt-4 text-lg'>Address:</label>
@@ -136,7 +173,7 @@ export default function PropertyEdit() {
                     value={property.address ?? ''}
                     onChange={(e) => handleChange("address", e.target.value)}
                     style={{ width: `${(property.address ?? '').length || 1}ch` }}
-                    className='px-2 py-2 bg-darkGray/30 rounded-md border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
+                    className='px-2 py-2 bg-darkGray/30 rounded-full border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
                 />
 
                 <label className='font-bold mt-4 text-lg'>Location:</label>
@@ -164,10 +201,27 @@ export default function PropertyEdit() {
                 </div>
             </div>
 
-            <div className="fixed bottom-6 right-7 hover:scale-105 duration-200 transition">
+            <div className="flex flex-row gap-3 fixed bottom-6 right-7">
+                {property.status === 'pending' ? (
+                    <button
+                        onClick={() => handleVerify(propertyId)}
+                        className="bg-successGreen font-semibold text-xl px-8 py-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300 transition"
+                    >
+                        Verify
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => handleUnverify(propertyId)}
+                        className="bg-yellow-500 font-semibold text-xl px-8 py-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300 transition"
+                    >
+                        Unverify
+                    </button>
+                )}
+
+                {/* save button */}
                 <button
                     onClick={handleSave}
-                    className="py-2 px-10 text-xl font-bold bg-mainBlue rounded-md hover:cursor-pointer">
+                    className="py-2 px-8 text-xl font-semibold bg-mainBlue rounded-full hover:scale-105 hover:cursor-pointer duration-300 transition">
                     Save
                 </button>
             </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { deleteUser, suspendUser, unsuspendUser, getUserById } from '../../utils/firestoreUtils';
+import { deleteUser, suspendUser, unsuspendUser, getUserById, verifyOwner, unverifyOwner } from '../../utils/firestoreUtils';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 const UserCard = ({ userId, onClose }) => {
@@ -75,6 +75,26 @@ const UserCard = ({ userId, onClose }) => {
         }
     };
 
+    const handleVerifyOwner = async (userToVerify) => {
+        try {
+            await verifyOwner(userToVerify.id);
+            await fetchUserAndPic();
+            alert(`Owner ${userToVerify.id} has been verified.`);
+        } catch (error) {
+            console.error('Error verifying user:', error);
+        }
+    };
+
+    const handleUnverifyOwner = async (userToUnverify) => {
+        try {
+            await unverifyOwner(userToUnverify.id);
+            await fetchUserAndPic();
+            alert(`Owner ${userToUnverify.id} has been verified.`);
+        } catch (error) {
+            console.error('Error unverifying user:', error);
+        }
+    }
+
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
             <div className="bg-bgBlue text-white rounded-2xl shadow-lg w-[450px] h-[600px] relative p-6 flex flex-col border-2 border-darkGray">
@@ -122,13 +142,15 @@ const UserCard = ({ userId, onClose }) => {
                                 <p className="font-bold">Email:</p>
                                 <p className="mb-3">{user.email}</p>
                                 <p className="font-bold">First Name:</p>
-                                <p className="mb-3">{user.firstName}</p>
+                                <p className="mb-3">{user.firstName.charAt(0).toUpperCase() + user.firstName.slice(1)}</p>
                                 <p className="font-bold">Last Name:</p>
-                                <p className="mb-3">{user.lastName}</p>
+                                <p className="mb-3">{user.lastName.charAt(0).toUpperCase() + user.lastName.slice(1)}</p>
                                 <p className="font-bold">Role:</p>
-                                <p className="mb-3">{user.role}</p>
-                                <p className="font-bold">Status:</p>
-                                <p className="mb-3">{user.status}</p>
+                                <p className="mb-3">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                                <p className='font-bold'>Status:</p>
+                                <p className={`mb-3 rounded-full px-3
+                                    ${user.status === 'active' ? 'bg-successGreen' : ''}
+                                    ${user.status === 'suspended' ? 'bg-orange-400' : ''}`}>{user.status.charAt(0).toUpperCase() + user.status.slice(1)}</p>
                             </div>
                         </>
                     ) : (
@@ -139,24 +161,43 @@ const UserCard = ({ userId, onClose }) => {
                 {/* Buttons bottom-right */}
                 {user && (
                     <div className="flex justify-end gap-3 mt-4">
-                        {user.status === 'Suspended' ? (
+                        {user.role === 'owner' && (
+                            user.status === 'verified' ? (
+                                <button
+                                    onClick={() => handleUnverifyOwner(user)}
+                                    className="bg-yellow-500 font-semibold text-white px-4 py-2 rounded-full hover:bg-yellow-700 duration-300 transition"
+                                >
+                                    Unverify
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => handleVerifyOwner(user)}
+                                    className="bg-green-600 font-semibold text-white px-4 py-2 rounded-full hover:bg-green-700 duration-300 transition"
+                                >
+                                    Verify
+                                </button>
+                            )
+                        )}
+
+
+                        {user.status === 'suspended' ? (
                             <button
                                 onClick={() => handleUnsuspendUser(user)}
-                                className="bg-mainBlue text-white px-4 py-2 rounded-md hover:bg-hoverBlue duration-300 transition"
+                                className="bg-mainBlue text-white px-4 py-2 font-semibold rounded-full hover:bg-hoverBlue duration-300 transition"
                             >
                                 Unsuspend
                             </button>
                         ) : (
                             <button
                                 onClick={() => handleSuspendUser(user)}
-                                className="bg-mainBlue text-white px-4 py-2 rounded-md hover:bg-hoverBlue duration-300 transition"
+                                className="bg-yellow-500 text-white px-4 py-2 font-semibold rounded-full hover:bg-yellow-700 duration-300 transition"
                             >
                                 Suspend
                             </button>
                         )}
                         <button
                             onClick={() => handleDeleteUser(user)}
-                            className="bg-errorRed text-white px-4 py-2 rounded-md hover:bg-red-700 duration-300 transition"
+                            className="bg-errorRed text-white px-4 py-2 font-semibold rounded-full hover:bg-red-700 duration-300 transition"
                         >
                             Delete
                         </button>

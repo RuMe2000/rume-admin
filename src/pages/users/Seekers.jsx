@@ -69,11 +69,11 @@ const Seekers = () => {
                                             : 'N/A'}
                                     </td>
                                     <td className='px-4 py-2'>{seeker.email || 'N/A'}</td>
-                                    <td className='px-4 py-2'>{seeker.role || 'N/A'}</td>
+                                    <td className='px-4 py-2'>{seeker.role.charAt(0).toUpperCase() + seeker.role.slice(1) || 'N/A'}</td>
                                     <td className='px-4 py-2'>
                                         <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                                            ${seeker.status === 'Suspended' ? 'bg-yellow-500 text-white' : 'bg-green-500 text-white'}`}>
-                                            {seeker.status || 'Active'}
+                                            ${seeker.status === 'suspended' ? 'bg-yellow-500 text-white' : 'bg-green-500 text-white'}`}>
+                                            {seeker.status.charAt(0).toUpperCase() + seeker.status.slice(1) || 'active'}
                                         </span>
                                     </td>
                                     <td className='px-4 py-2'>
@@ -102,7 +102,11 @@ const Seekers = () => {
                 {selectedUserId && (
                     <UserCard
                         userId={selectedUserId}
-                        onClose={() => setSelectedUserId(null)}
+                        role='seeker'
+                        onClose={() => {
+                            setSelectedUserId(null);
+                            fetchSeekers();
+                        }}
                     />
                 )}
 

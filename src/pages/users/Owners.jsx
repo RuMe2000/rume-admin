@@ -69,11 +69,11 @@ const Owners = () => {
                                             : 'N/A'}
                                     </td>
                                     <td className='px-4 py-2'>{owner.email || 'N/A'}</td>
-                                    <td className='px-4 py-2'>{owner.role || 'N/A'}</td>
+                                    <td className='px-4 py-2'>{owner.role.charAt(0).toUpperCase() + owner.role.slice(1) || 'N/A'}</td>
                                     <td className='px-4 py-2'>
                                         <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                                            ${owner.status === 'Suspended' ? 'bg-yellow-500 text-white' : 'bg-green-500 text-white'}`}>
-                                            {owner.status || 'Active'}
+                                            ${owner.status === 'unverified' ? 'bg-yellow-500 text-white' : 'bg-green-500 text-white'}`}>
+                                            {owner.status.charAt(0).toUpperCase() + owner.status.slice(1) || ''}
                                         </span>
                                     </td>
                                     <td className='px-4 py-2'>
@@ -102,10 +102,13 @@ const Owners = () => {
                 {selectedUserId && (
                     <UserCard
                         userId={selectedUserId}
-                        onClose={() => setSelectedUserId(null)}
+                        role="owner"
+                        onClose={() => {
+                            setSelectedUserId(null);
+                            fetchOwners(); // refresh owners list after closing
+                        }}
                     />
                 )}
-
             </div>
         </div>
     );

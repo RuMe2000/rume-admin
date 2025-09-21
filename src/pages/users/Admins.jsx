@@ -63,7 +63,7 @@ const Admins = () => {
                                         : 'N/A'}
                                 </td>
                                 <td className='px-4 py-2'>{admin.email || 'N/A'}</td>
-                                <td className='px-4 py-2'>{admin.role || 'N/A'}</td>
+                                <td className='px-4 py-2'>{admin.role.charAt(0).toUpperCase() + admin.role.slice(1) || 'N/A'}</td>
                                 <td className='px-4 py-2'>{admin.createdAt ? new Date(admin.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</td>
                                 <td className='px-4 py-2'>
                                     <button

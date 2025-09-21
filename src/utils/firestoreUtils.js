@@ -327,7 +327,7 @@ export const suspendUser = async (userId, daysToSuspend) => {
 
         const userDocRef = doc(db, 'users', userId);
         await updateDoc(userDocRef, {
-            status: 'Suspended',
+            status: 'suspended',
             suspendedUntil: suspendedUntil.toISOString()
         });
 
@@ -342,7 +342,7 @@ export const suspendUser = async (userId, daysToSuspend) => {
 export const unsuspendUser = async (userId) => {
     const userDocRef = doc(db, 'users', userId);
     await updateDoc(userDocRef, {
-        status: 'Active',
+        status: 'active',
         suspendedUntil: null
     });
 };
@@ -375,4 +375,34 @@ export const getUserById = async (userId) => {
         console.error("Error fetching user:", error);
         throw error;
     }
+};
+
+//verify property owner
+export const verifyOwner = async (userId) => {
+    const userDocRef = doc(db, 'users', userId);
+    await updateDoc(userDocRef, {
+        status: 'verified',
+    });
+};
+
+//unverify property owner
+export const unverifyOwner = async (userId) => {
+    const userDocRef = doc(db, 'users', userId);
+    await updateDoc(userDocRef, {
+        status: 'unverified',
+    });
+};
+
+export const verifyProperty = async (propertyId) => {
+    const propertyDocRef = doc(db, 'properties', propertyId);
+    await updateDoc(propertyDocRef, {
+        status: 'verified',
+    });
+};
+
+export const unverifyProperty = async (propertyId) => {
+    const propertyDocRef = doc(db, 'properties', propertyId);
+    await updateDoc(propertyDocRef, {
+        status: 'pending',
+    });
 };

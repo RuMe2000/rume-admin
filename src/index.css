@@ -14,3 +14,12 @@
     --color-successGreen: oklch(62.7% 0.194 149.214);
 }
 
+/* in your global.css or a module */
+.rdp {
+    --rdp-accent-color: #2563eb;
+    /* blue highlight */
+    --rdp-background-color: #1e293b;
+    /* dark background */
+    font-family: 'Inter', sans-serif;
+    color: black;
+}
