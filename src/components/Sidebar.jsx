@@ -52,7 +52,7 @@ const Sidebar = () => {
     const inactiveLinkClasses = 'text-gray-300 hover:bg-gradient-to-r hover:from-hoverBlue to-transparent hover:border-white hover:text-white';
 
     return (
-        <nav className='w-64 bg-bgBlue rounded-r-2xl border-r border-y border-darkGray text-white pt-2 pb-1 my-3 flex flex-col justify-between'>
+        <nav className='h-202 w-64 bg-bgBlue rounded-r-2xl border-r border-y border-darkGray text-white py-2 my-3 flex flex-col justify-between'>
             <div>
                 <div className='flex items-center justify-center gap-1 pb-3'>
                     <img src={logo} className='h-15'></img>

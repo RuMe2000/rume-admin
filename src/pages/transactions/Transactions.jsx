@@ -1,7 +1,7 @@
 import { getTransactions } from "../../utils/firestoreUtils";
 import { useState, useEffect } from "react";
-import MyDatePicker from "../../components/MyDatePicker";
-import Datepicker from 'react-datepicker'
+// import MyDatePicker from "../../components/MyDatePicker";
+// import Datepicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css';
 
 const Transactions = () => {
@@ -9,8 +9,8 @@ const Transactions = () => {
     const [filter, setFilter] = useState("all");
     const [statusFilter, setStatusFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    // const [startDate, setStartDate] = useState("");
+    // const [endDate, setEndDate] = useState("");
     const [sortDirection, setSortDirection] = useState("desc");
 
     useEffect(() => {
@@ -43,18 +43,18 @@ const Transactions = () => {
         if (!t.createdAt?.seconds) return false;
         const createdAtDate = new Date(t.createdAt.seconds * 1000);
 
-        // time filter
+        //time filter
         if (filter === "week" && createdAtDate < startOfWeek) return false;
         if (filter === "month" && createdAtDate < startOfMonth) return false;
 
-        // status filter
+        //status filter
         if (statusFilter !== "all" && t.status !== statusFilter) return false;
 
-        // custom date range
-        if (startDate && createdAtDate < new Date(startDate)) return false;
-        if (endDate && createdAtDate > new Date(endDate)) return false;
+        // // custom date range
+        // if (startDate && createdAtDate < new Date(startDate)) return false;
+        // if (endDate && createdAtDate > new Date(endDate)) return false;
 
-        // search filter (payer or payee)
+        //search filter
         const lowerSearch = searchTerm.toLowerCase();
         if (
             lowerSearch &&
@@ -92,7 +92,7 @@ const Transactions = () => {
                         title="Search by User"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="bg-hoverBlue text-white px-2 py-1 rounded-full border border-gray-600 focus:outline-none"
+                        className="bg-hoverBlue text-white px-2 py-1 rounded-xl border border-gray-600 focus:outline-none"
                     />
 
                     {/* time range */}
@@ -100,7 +100,7 @@ const Transactions = () => {
                         value={filter}
                         title="Time Period"
                         onChange={(e) => setFilter(e.target.value)}
-                        className="bg-hoverBlue text-white px-3 py-2 rounded-full font-semibold border border-gray-600 focus:outline-none cursor-pointer"
+                        className="bg-hoverBlue text-white px-3 py-2 rounded-xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
                     >
                         <option className="bg-blue-950" value="all">
                             All Time
@@ -118,7 +118,7 @@ const Transactions = () => {
                         value={statusFilter}
                         title="Status"
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-hoverBlue text-white px-3 py-2 rounded-full font-semibold border border-gray-600 focus:outline-none cursor-pointer"
+                        className="bg-hoverBlue text-white px-3 py-2 rounded-xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
                     >
                         <option className="bg-blue-950" value="all">
                             All
@@ -147,18 +147,18 @@ const Transactions = () => {
                                 onClick={() =>
                                     setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))
                                 }
-                                className="px-4 py-2 border-b-3 border-darkGray text-center cursor-pointer select-none"
+                                className="w-35 px-4 py-2 border-b-3 border-darkGray text-center cursor-pointer select-none"
                             >
                                 Date
                                 <span className="ml-1">
                                     {sortDirection === "desc" ? "  ▼" : "  ▲"}
                                 </span>
                             </th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Payer</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Payee</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Amount</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Payer</th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Payee</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Amount</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -175,7 +175,7 @@ const Transactions = () => {
                                     <td className="px-4 py-2">{transaction.amount}</td>
                                     <td className="px-4 py-2">
                                         <span
-                                            className={`px-3 py-1 rounded-full text-sm font-semibold
+                                            className={`inline-flex items-center justify-center w-23 h-7 rounded-full text-sm font-semibold
                                                     ${transaction.status === 'failed'
                                                     ? 'bg-errorRed text-white'
                                                     : transaction.status === 'succeeded'
@@ -190,13 +190,20 @@ const Transactions = () => {
                                                 : 'Unknown'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-2">{transaction.id}</td>
+                                    <td className="px-2 py-2 relative group cursor-pointer">
+                                        <span className='group-hover:hidden'>
+                                            {transaction.id.substring(0, 12)}...
+                                        </span>
+                                        <span className='hidden group-hover:inline-block transition-all duration-200'>
+                                            {transaction.id}
+                                        </span>
+                                    </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
                                 <td colSpan="6" className="text-center py-4">
-                                    No transactions match the filters.
+                                    Loading transactions...
                                 </td>
                             </tr>
                         )}

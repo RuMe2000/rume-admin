@@ -38,12 +38,12 @@ const Admins = () => {
                 <table className="min-w-full text-white rounded-md">
                     <thead>
                         <tr>
-                            <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Email</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Role</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center"></th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
+                            <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Email</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Role</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
+                            <th className="w-15 px-4 py-2 border-b-3 border-darkGray text-center"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,8 +59,9 @@ const Admins = () => {
                                 </td>
                                 <td className='px-4 py-2'>
                                     {admin?.firstName || admin?.lastName
-                                        ? `${admin.firstName ?? ''} ${admin.lastName ?? ''}`.trim()
-                                        : 'N/A'}
+                                            ? `${admin.firstName.charAt(0).toUpperCase() + admin.firstName.slice(1)} 
+                                            ${admin.lastName.charAt(0).toUpperCase() + admin.lastName.slice(1)}`.trim()
+                                            : 'N/A'}
                                 </td>
                                 <td className='px-4 py-2'>{admin.email || 'N/A'}</td>
                                 <td className='px-4 py-2'>{admin.role.charAt(0).toUpperCase() + admin.role.slice(1) || 'N/A'}</td>

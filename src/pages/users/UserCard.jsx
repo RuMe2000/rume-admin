@@ -97,11 +97,11 @@ const UserCard = ({ userId, onClose }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
-            <div className="bg-bgBlue text-white rounded-2xl shadow-lg w-[450px] h-[600px] relative p-6 flex flex-col border-2 border-darkGray">
+            <div className="bg-bgBlue text-white rounded-2xl shadow-lg w-[500px] h-[600px] relative p-6 flex flex-col border-2 border-darkGray">
                 {/* X Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-3 right-3 text-white cursor-pointer"
+                    className="absolute top-3 right-3 text-white cursor-pointer hover:scale-110 transition duration-200"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -149,8 +149,10 @@ const UserCard = ({ userId, onClose }) => {
                                 <p className="mb-3">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
                                 <p className='font-bold'>Status:</p>
                                 <p className={`mb-3 rounded-full px-3
-                                    ${user.status === 'active' ? 'bg-successGreen' : ''}
-                                    ${user.status === 'suspended' ? 'bg-orange-400' : ''}`}>{user.status.charAt(0).toUpperCase() + user.status.slice(1)}</p>
+                                    ${user?.status === 'active' || 'verified' ? 'bg-successGreen' : 'bg-gray-400'}
+                                    ${user.status === 'suspended' || 'unverified' ? 'bg-orange-400' : 'bg-gray-400'}`}>
+                                        {user?.status.charAt(0).toUpperCase() + user.status.slice(1) || 'N/A'}
+                                </p>
                             </div>
                         </>
                     ) : (
@@ -165,16 +167,16 @@ const UserCard = ({ userId, onClose }) => {
                             user.status === 'verified' ? (
                                 <button
                                     onClick={() => handleUnverifyOwner(user)}
-                                    className="bg-yellow-500 font-semibold text-white px-4 py-2 rounded-full hover:bg-yellow-700 duration-300 transition"
+                                    className="bg-yellow-500 font-semibold text-white px-4 py-2 rounded-lg hover:bg-yellow-700 duration-300 transition"
                                 >
-                                    Unverify
+                                    UNVERIFY
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => handleVerifyOwner(user)}
-                                    className="bg-green-600 font-semibold text-white px-4 py-2 rounded-full hover:bg-green-700 duration-300 transition"
+                                    className="bg-green-600 font-semibold text-white px-4 py-2 rounded-lg hover:bg-green-700 duration-300 transition"
                                 >
-                                    Verify
+                                    VERIFY
                                 </button>
                             )
                         )}
@@ -183,23 +185,23 @@ const UserCard = ({ userId, onClose }) => {
                         {user.status === 'suspended' ? (
                             <button
                                 onClick={() => handleUnsuspendUser(user)}
-                                className="bg-mainBlue text-white px-4 py-2 font-semibold rounded-full hover:bg-hoverBlue duration-300 transition"
+                                className="bg-mainBlue text-white px-4 py-2 font-semibold rounded-lg hover:bg-hoverBlue duration-300 transition"
                             >
-                                Unsuspend
+                                UNSUSPEND
                             </button>
                         ) : (
                             <button
                                 onClick={() => handleSuspendUser(user)}
-                                className="bg-yellow-500 text-white px-4 py-2 font-semibold rounded-full hover:bg-yellow-700 duration-300 transition"
+                                className="bg-yellow-500 text-white px-4 py-2 font-semibold rounded-lg hover:bg-yellow-700 duration-300 transition"
                             >
-                                Suspend
+                                SUSPEND
                             </button>
                         )}
                         <button
                             onClick={() => handleDeleteUser(user)}
-                            className="bg-errorRed text-white px-4 py-2 font-semibold rounded-full hover:bg-red-700 duration-300 transition"
+                            className="bg-errorRed text-white px-4 py-2 font-semibold rounded-md hover:bg-red-700 duration-300 transition"
                         >
-                            Delete
+                            DELETE
                         </button>
                     </div>
                 )}

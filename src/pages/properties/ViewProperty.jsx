@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { doc, getDoc, updateDoc, GeoPoint } from 'firebase/firestore';
+import { doc, getDoc, getDocs, updateDoc, GeoPoint, collection } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { verifyProperty, unverifyProperty } from '../../utils/firestoreUtils';
+import RoomCard from '../../components/RoomCard';
+import { getDownloadURL } from 'firebase/storage';
 
-export default function PropertyEdit() {
+export default function ViewProperty() {
     const { propertyId } = useParams();
     const [property, setProperty] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -42,13 +44,25 @@ export default function PropertyEdit() {
                         const { firstName = "", lastName = "" } = ownerSnap.data();
                         ownerName =
                             (firstName || lastName)
-                                ? `${firstName} ${lastName}`.trim()
+                                ? `${firstName.charAt(0).toUpperCase() + firstName.slice(1)} ${lastName.charAt(0).toUpperCase() + lastName.slice(1)}`.trim()
                                 : "Unknown Owner";
                     }
                 }
 
+                //get rooms subcollection
+                const roomsRef = collection(db, 'properties', propertyId, 'rooms');
+                const roomsSnap = await getDocs(roomsRef);
+                const roomsList = roomsSnap.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+
                 //merge owner name into property
-                setProperty({ ...propertyData, ownerName });
+                setProperty({
+                    ...propertyData,
+                    ownerName,
+                    rooms: roomsList,
+                });
             }
         } catch (error) {
             console.error("Error fetching property:", error);
@@ -144,7 +158,7 @@ export default function PropertyEdit() {
                         mr-2 flex flex-row items-center rounded-full px-5 py-1
                         ${property.status === 'verified' ? 'bg-successGreen' : ''}
                         ${property.status === 'pending' ? 'bg-orange-400' : ''}
-                        ${property.status !== 'verified' && property.status !== 'pending' ? 'bg-errorRed' : ''}
+                        ${property.status !== 'verified' && property.status !== 'pending' ? 'bg-gray-400' : ''}
                     `}
                 >
                     <h1 className="text-xl text-white italic">
@@ -155,7 +169,22 @@ export default function PropertyEdit() {
                 </div>
             </div>
 
-            <div className='flex flex-col mt-6 ml-4 items-start overflox-x-auto'>
+            <div className='flex flex-col mt-6 ml-4 items-center justify-center'>
+                <div className='rounded-md overflow-hidden mb-3' title='Property Image'
+                    style={{ maxWidth: 800 }}
+                >
+                    {property.backgroundImageUrl ? (<img
+                        src={property.backgroundImageUrl}
+                    />
+                    ) : (
+                        <div className="w-300 h-800 mb-3 rounded-lg bg-gray-400 flex items-center justify-center">
+                            <span className="text-2xl text-white">No photo</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className='flex flex-col ml-4 items-start overflox-x-auto'>
                 <label className='font-bold text-lg'>ID:</label>
                 <p className='mb-3'>{propertyId ?? ''}</p>
                 <label className='font-bold text-lg'>Owner:</label>
@@ -165,7 +194,7 @@ export default function PropertyEdit() {
                     value={property.name ?? ''}
                     onChange={(e) => handleChange("name", e.target.value)}
                     style={{ width: `${(property.address ?? '').length || 1}ch` }}
-                    className='px-2 py-2 bg-darkGray/30 rounded-full border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
+                    className='px-2 py-2 bg-darkGray/30 rounded-lg border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
                 />
 
                 <label className='font-bold mt-4 text-lg'>Address:</label>
@@ -173,12 +202,12 @@ export default function PropertyEdit() {
                     value={property.address ?? ''}
                     onChange={(e) => handleChange("address", e.target.value)}
                     style={{ width: `${(property.address ?? '').length || 1}ch` }}
-                    className='px-2 py-2 bg-darkGray/30 rounded-full border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
+                    className='px-2 py-2 bg-darkGray/30 rounded-lg border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
                 />
 
-                <label className='font-bold mt-4 text-lg'>Location:</label>
-                <div className='flex flex-col'>
-                    <div className='rounded-md overflow-hidden' style={{ height: 450, width: 800 }}>
+                {/* <label className='font-bold mt-4 text-lg'>Location:</label> */}
+                <div className='flex flex-col mt-4'>
+                    <div className='rounded-md overflow-hidden' style={{ height: 400, width: 700 }}>
                         <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={center} zoom={15}>
                             <Marker
                                 position={center}
@@ -199,30 +228,43 @@ export default function PropertyEdit() {
                         Longitude: {Math.abs(property.location.longitude).toFixed(7)}° {property.location.longitude >= 0 ? 'E' : 'W'}
                     </p>
                 </div>
+
+                <div className="mt-4 w-full">
+                    <label className="font-bold text-lg">Rooms:</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {property?.rooms && property.rooms.length > 0 ? (
+                            property.rooms.map((room) => 
+                            <RoomCard key={room.id} room={room} />)
+                        ) : (
+                            <p className="text-gray-400 italic">No rooms listed.</p>
+                        )}
+                    </div>
+                </div>
+
             </div>
 
             <div className="flex flex-row gap-3 fixed bottom-6 right-7">
                 {property.status === 'pending' ? (
                     <button
                         onClick={() => handleVerify(propertyId)}
-                        className="bg-successGreen font-semibold text-xl px-8 py-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300 transition"
+                        className="bg-successGreen font-semibold text-lg px-8 py-2 rounded-lg hover:cursor-pointer hover:scale-105 duration-300 transition"
                     >
-                        Verify
+                        VERIFY
                     </button>
                 ) : (
                     <button
                         onClick={() => handleUnverify(propertyId)}
-                        className="bg-yellow-500 font-semibold text-xl px-8 py-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300 transition"
+                        className="bg-yellow-500 font-semibold text-lg px-6 py-2 rounded-lg hover:cursor-pointer hover:scale-105 duration-300 transition"
                     >
-                        Unverify
+                        UNVERIFY
                     </button>
                 )}
 
                 {/* save button */}
                 <button
                     onClick={handleSave}
-                    className="py-2 px-8 text-xl font-semibold bg-mainBlue rounded-full hover:scale-105 hover:cursor-pointer duration-300 transition">
-                    Save
+                    className="py-2 px-8 text-lg font-semibold bg-mainBlue rounded-lg hover:scale-105 hover:cursor-pointer duration-300 transition">
+                    SAVE
                 </button>
             </div>
 

@@ -10,11 +10,11 @@ const Seekers = () => {
     const [selectedUserId, setSelectedUserId] = useState(null);
 
     const fetchSeekers = async () => {
-            setIsLoading(true);
-            const data = await getAllSeekers();
-            setSeekers(data);
-            setIsLoading(false);
-        };
+        setIsLoading(true);
+        const data = await getAllSeekers();
+        setSeekers(data);
+        setIsLoading(false);
+    };
 
     useEffect(() => {
         fetchSeekers();
@@ -38,13 +38,13 @@ const Seekers = () => {
                 <table className="min-w-full text-white rounded-md">
                     <thead>
                         <tr>
-                            <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Email</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Role</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
-                            <th className="px-4 py-2 border-b-3 border-darkGray text-center"></th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
+                            <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Email</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Role</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
+                            <th className="w-15 px-4 py-2 border-b-3 border-darkGray text-center"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -65,15 +65,21 @@ const Seekers = () => {
                                     </td>
                                     <td className='px-4 py-2'>
                                         {seeker?.firstName || seeker?.lastName
-                                            ? `${seeker.firstName ?? ''} ${seeker.lastName ?? ''}`.trim()
+                                            ? `${seeker.firstName.charAt(0).toUpperCase() + seeker.firstName.slice(1)} 
+                                            ${seeker.lastName.charAt(0).toUpperCase() + seeker.lastName.slice(1)}`.trim()
                                             : 'N/A'}
                                     </td>
                                     <td className='px-4 py-2'>{seeker.email || 'N/A'}</td>
                                     <td className='px-4 py-2'>{seeker.role.charAt(0).toUpperCase() + seeker.role.slice(1) || 'N/A'}</td>
-                                    <td className='px-4 py-2'>
-                                        <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                                            ${seeker.status === 'suspended' ? 'bg-yellow-500 text-white' : 'bg-green-500 text-white'}`}>
-                                            {seeker.status.charAt(0).toUpperCase() + seeker.status.slice(1) || 'active'}
+                                    <td className='px-2 py-2'>
+                                        <span className={`inline-flex items-center justify-center w-20 h-7 rounded-full text-sm font-semibold
+                                            ${seeker.status === 'suspended' ? 'bg-yellow-500 text-white' : 'bg-gray-400'}
+                                            ${seeker.status === 'active' ? 'bg-green-500 text-white': 'bg-gray-400'}`}>
+                                            {
+                                                seeker?.status
+                                                    ? seeker.status.charAt(0).toUpperCase() + seeker.status.slice(1)
+                                                    : 'N/A'
+                                            }
                                         </span>
                                     </td>
                                     <td className='px-4 py-2'>
@@ -82,7 +88,7 @@ const Seekers = () => {
                                     <td className='px-4 py-2 flex items-center justify-center gap-2'>
                                         <button
                                             onClick={() => setSelectedUserId(seeker.id)}
-                                            className='bg-mainBlue px-3 py-1 rounded-lg hover:bg-hoverBlue hover:cursor-pointer duration-300 transition'
+                                            className='bg-transparent px-3 py-1 rounded-lg hover:scale-120 hover:cursor-pointer duration-300 transition'
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF">
                                                 <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />

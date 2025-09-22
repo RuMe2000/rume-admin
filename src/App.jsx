@@ -16,10 +16,9 @@ import Transactions from "./pages/transactions/Transactions";
 import FeedbackModeration from "./pages/moderation/FeedbackModeration";
 import Analytics from "./pages/analytics/Analytics";
 import AllProperties from "./pages/properties/AllProperties";
-import PropertyEdit from "./pages/properties/PropertyEdit";
+import ViewProperty from "./pages/properties/ViewProperty";
 import PendingProperties from "./pages/properties/PendingProperties";
 import VerifiedProperties from "./pages/properties/VerifiedProperties";
-import UserCard from './pages/users/UserCard';
 
 function App() {
     return (
@@ -34,9 +33,12 @@ function App() {
                     path="/*"
                     element={
                         <div className="flex min-h-screen bg-bgBlue">
-                            <Sidebar />
+                            <div className="w-64 fixed top-0 left-0">
+                                <Sidebar />
+                            </div>
+                            
                             {/* <ProtectedRoute> */}
-                            <div className="flex-1 p-5 bg-radial from-hoverBlue via-darkBlue to-bgBlue text-white">
+                            <div className="flex-1 ml-64 overflow-y-auto p-5 bg-radial from-hoverBlue via-darkBlue to-bgBlue text-white">
                                 <Routes>
                                     <Route path="/dashboard" element={<Dashboard />} />
 
@@ -52,7 +54,7 @@ function App() {
                                     <Route path="/properties/all" element={<AllProperties />} />
                                     <Route path="/properties/pending" element={<PendingProperties />} />
                                     <Route path="/properties/verified" element={<VerifiedProperties />} />
-                                    <Route path="/properties/edit/:propertyId" element={<PropertyEdit />} />
+                                    <Route path="/properties/view/:propertyId" element={<ViewProperty />} />
 
                                     <Route path="/transactions" element={<Transactions />} />
                                     <Route path="/feedback" element={<FeedbackModeration />} />

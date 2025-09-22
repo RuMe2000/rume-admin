@@ -136,8 +136,8 @@ export const getAllProperties = async () => {
             const id = ownerIds[idx];
             if (snap.exists()) {
                 const data = snap.data();
-                const first = data.firstName ?? '';
-                const last = data.lastName ?? '';
+                const first = data.firstName.charAt(0).toUpperCase() + data.firstName.slice(1) ?? '';
+                const last = data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1) ?? '';
                 ownerMap[id] = (first || last) ? `${first} ${last}`.trim() : 'Unknown Owner';
             } else {
                 ownerMap[id] = 'Unknown Owner';
@@ -177,8 +177,8 @@ export const getPendingProperties = async () => {
             const id = ownerIds[idx];
             if (snap.exists()) {
                 const data = snap.data();
-                const first = data.firstName ?? '';
-                const last = data.lastName ?? '';
+                const first = data.firstName.charAt(0).toUpperCase() + data.firstName.slice(1) ?? '';
+                const last = data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1) ?? '';
                 ownerMap[id] = (first || last) ? `${first} ${last}`.trim() : 'Unknown Owner';
             } else {
                 ownerMap[id] = 'Unknown Owner';
@@ -218,8 +218,8 @@ export const getVerifiedProperties = async () => {
             const id = ownerIds[idx];
             if (snap.exists()) {
                 const data = snap.data();
-                const first = data.firstName ?? '';
-                const last = data.lastName ?? '';
+                const first = data.firstName.charAt(0).toUpperCase() + data.firstName.slice(1) ?? '';
+                const last = data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1) ?? '';
                 ownerMap[id] = (first || last) ? `${first} ${last}`.trim() : 'Unknown Owner';
             } else {
                 ownerMap[id] = 'Unknown Owner';
