@@ -6,7 +6,6 @@ import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { verifyProperty, unverifyProperty } from '../../utils/firestoreUtils';
 import RoomCard from '../../components/RoomCard';
-import { getDownloadURL } from 'firebase/storage';
 
 export default function ViewProperty() {
     const { propertyId } = useParams();
@@ -148,7 +147,8 @@ export default function ViewProperty() {
         <div>
             <div className='flex flex-row items-center text-white justify-between'>
                 <div className='flex flex-row gap-3'>
-                    <button onClick={() => navigate(from)} className='cursor-pointer hover:scale-115 p-1 rounded-lg duration-200 transition'>
+                    <button onClick={() => navigate('/properties', { replace:true })} 
+                    className='cursor-pointer hover:scale-115 p-1 rounded-lg duration-200 transition'>
                         <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#FFFFFF"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" /></svg>
                     </button>
                     <h1 className='text-3xl font-semibold'>{property.name}</h1>
@@ -157,7 +157,7 @@ export default function ViewProperty() {
                     className={`
                         mr-2 flex flex-row items-center rounded-full px-5 py-1
                         ${property.status === 'verified' ? 'bg-successGreen' : ''}
-                        ${property.status === 'pending' ? 'bg-orange-400' : ''}
+                        ${property.status === 'pending' ? 'bg-yellow-500' : ''}
                         ${property.status !== 'verified' && property.status !== 'pending' ? 'bg-gray-400' : ''}
                     `}
                 >
@@ -170,7 +170,7 @@ export default function ViewProperty() {
             </div>
 
             <div className='flex flex-col mt-6 ml-4 items-center justify-center'>
-                <div className='rounded-md overflow-hidden mb-3' title='Property Image'
+                <div className='rounded-lg overflow-hidden mb-3' title='Property Image'
                     style={{ maxWidth: 800 }}
                 >
                     {property.backgroundImageUrl ? (<img
@@ -187,8 +187,10 @@ export default function ViewProperty() {
             <div className='flex flex-col ml-4 items-start overflox-x-auto'>
                 {/* <label className='font-bold text-lg'>ID:</label>
                 <p className='mb-3'>{propertyId ?? ''}</p> */}
-                <label className='font-bold text-lg'>Owner:</label>
-                <p className='mb-3'>{property.ownerName ?? ''}</p>
+                <div className='flex flex-row gap-2 items-center mb-3'>
+                    <label className='font-bold text-lg'>Owner:</label>
+                    <p className='text-lg'>{property.ownerName ?? ''}</p>
+                </div>
                 <label className='font-bold mb-1 text-lg'>Property Name:</label>
                 <input
                     value={property.name ?? ''}
@@ -207,7 +209,7 @@ export default function ViewProperty() {
 
                 {/* <label className='font-bold mt-4 text-lg'>Location:</label> */}
                 <div className='flex flex-col mt-4'>
-                    <div className='rounded-md overflow-hidden' style={{ height: 400, width: 700 }}>
+                    <div className='rounded-lg overflow-hidden' style={{ height: 400, width: 700 }}>
                         <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={center} zoom={15}>
                             <Marker
                                 position={center}
@@ -270,7 +272,7 @@ export default function ViewProperty() {
                 {/* save button */}
                 <button
                     onClick={handleSave}
-                    className="py-2 px-8 text-lg font-semibold bg-mainBlue rounded-lg hover:bg-hoverBlue hover:cursor-pointer duration-300 transition">
+                    className="py-2 px-8 text-lg font-semibold bg-successGreen rounded-lg hover:bg-successGreen/70 hover:cursor-pointer duration-300 transition">
                     SAVE
                 </button>
             </div>
@@ -285,7 +287,7 @@ export default function ViewProperty() {
                         transition={{ duration: 0.3 }}
                     >
                         <motion.div
-                            className="bg-mainBlue text-white px-8 py-5 rounded-lg shadow-lg"
+                            className="bg-successGreen text-white px-8 py-5 rounded-lg shadow-lg"
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.8, opacity: 0 }}

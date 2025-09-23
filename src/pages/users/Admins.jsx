@@ -61,11 +61,11 @@ const Admins = () => {
                                     {admin?.firstName || admin?.lastName
                                             ? `${admin.firstName.charAt(0).toUpperCase() + admin.firstName.slice(1)} 
                                             ${admin.lastName.charAt(0).toUpperCase() + admin.lastName.slice(1)}`.trim()
-                                            : 'N/A'}
+                                            : 'Unknown'}
                                 </td>
-                                <td className='px-4 py-2'>{admin.email || 'N/A'}</td>
-                                <td className='px-4 py-2'>{admin.role.charAt(0).toUpperCase() + admin.role.slice(1) || 'N/A'}</td>
-                                <td className='px-4 py-2'>{admin.createdAt ? new Date(admin.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</td>
+                                <td className='px-4 py-2'>{admin.email || 'Unknown'}</td>
+                                <td className='px-4 py-2'>{admin.role.charAt(0).toUpperCase() + admin.role.slice(1) || 'Unknown'}</td>
+                                <td className='px-4 py-2'>{admin.createdAt ? new Date(admin.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</td>
                                 <td className='px-4 py-2'>
                                     <button
                                         // onClick={() => handleDelete(admin.id)}

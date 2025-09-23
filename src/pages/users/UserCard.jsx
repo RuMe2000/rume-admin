@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { deleteUser, suspendUser, unsuspendUser, getUserById, verifyOwner, unverifyOwner } from '../../utils/firestoreUtils';
+import { deleteUser, suspendUser, unsuspendUser, getUserById, verifyOwner, unverifyOwner, getPropertiesByUser, getBookedRoomByUser } from '../../utils/firestoreUtils';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 const UserCard = ({ userId, onClose }) => {
@@ -7,12 +7,17 @@ const UserCard = ({ userId, onClose }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [profilePicUrl, setProfilePicUrl] = useState(null);
 
-    // fetch user info and pic
+    const [ownedProperties, setOwnedProperties] = useState([]);
+    const [bookedRoom, setBookedRoom] = useState(null);
+
     const fetchUserAndPic = async () => {
         setIsLoading(true);
+
+        //fetch user info
         const data = await getUserById(userId);
         setUser(data);
 
+        //fetch profile pic if exists
         if (data?.email) {
             try {
                 const storage = getStorage();
@@ -23,10 +28,28 @@ const UserCard = ({ userId, onClose }) => {
                 const url = await getDownloadURL(picRef);
                 setProfilePicUrl(url);
             } catch (err) {
-                console.warn('No profile picture found:', err.message);
+                console.warn("No profile picture found:", err.message);
                 setProfilePicUrl(null);
             }
         }
+
+        //fetch properties or booked room
+        if (data?.role === "owner") {
+            //get properties owned by user
+            const props = await getPropertiesByUser(userId);
+            setOwnedProperties(props);
+            setBookedRoom(null); //clear booked room
+        } else if (data?.role === "seeker") {
+            //get booked room
+            const room = await getBookedRoomByUser(userId);
+            setBookedRoom(room);
+            setOwnedProperties([]); //clear properties
+        } else {
+            //neither role
+            setOwnedProperties([]);
+            setBookedRoom(null);
+        }
+
         setIsLoading(false);
     };
 
@@ -34,6 +57,7 @@ const UserCard = ({ userId, onClose }) => {
         fetchUserAndPic();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userId]);
+
 
     const handleDeleteUser = async (userToDelete) => {
         const confirmed = window.confirm(
@@ -89,7 +113,7 @@ const UserCard = ({ userId, onClose }) => {
         try {
             await unverifyOwner(userToUnverify.id);
             await fetchUserAndPic();
-            alert(`Owner ${userToUnverify.id} has been verified.`);
+            alert(`Owner ${userToUnverify.id} has been unverified.`);
         } catch (error) {
             console.error('Error unverifying user:', error);
         }
@@ -97,7 +121,7 @@ const UserCard = ({ userId, onClose }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
-            <div className="bg-bgBlue text-white rounded-2xl shadow-lg w-[500px] h-[600px] relative p-6 flex flex-col border-2 border-darkGray">
+            <div className="bg-bgBlue text-white rounded-2xl shadow-lg w-[500px] h-[650px] relative p-6 flex flex-col border-2 border-darkGray">
                 {/* X Button */}
                 <button
                     onClick={onClose}
@@ -148,11 +172,56 @@ const UserCard = ({ userId, onClose }) => {
                                 <p className="font-bold">Role:</p>
                                 <p className="mb-3">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
                                 <p className='font-bold'>Status:</p>
-                                <p className={`mb-3 rounded-full px-3
-                                    ${user?.status === 'active' || 'verified' ? 'bg-successGreen' : 'bg-gray-400'}
-                                    ${user.status === 'suspended' || 'unverified' ? 'bg-orange-400' : 'bg-gray-400'}`}>
-                                        {user?.status.charAt(0).toUpperCase() + user.status.slice(1) || 'N/A'}
+                                <p
+                                    className={`mb-3 rounded-full px-3 ${(user?.status === 'active' || user?.status === 'verified')
+                                        ? 'bg-successGreen'
+                                        : (user?.status === 'suspended' || user?.status === 'unverified')
+                                            ? 'bg-yellow-500'
+                                            : 'bg-gray-400'
+                                        }`}
+                                >
+                                    {user?.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Unknown'}
                                 </p>
+                                {(() => {
+                                    switch (user?.role) {
+                                        case 'owner':
+                                            return (
+                                                <div>
+                                                    <p className='font-bold'>Properties Owned:</p>
+                                                    {ownedProperties.length > 0 ? (
+                                                        <ul className="list-disc ml-5">
+                                                            {ownedProperties.map((prop) => (
+                                                                <li key={prop.id}>{prop.name}</li>
+                                                            ))}
+                                                        </ul>
+                                                    ) : (
+                                                        <p className="italic text-gray-400">No properties posted yet.</p>
+                                                    )}
+                                                </div>
+                                            );
+
+                                        case 'seeker':
+                                            return (
+                                                <div>
+                                                    <p className='font-bold'>Property Booked:</p>
+                                                    {bookedRoom ? (
+                                                        <p>
+                                                            {bookedRoom.propertyName} – {bookedRoom.roomName}
+                                                        </p>
+                                                    ) : (
+                                                        <p className="italic text-gray-400">No booked room yet.</p>
+                                                    )}
+                                                </div>
+                                            );
+
+                                        case 'admin':
+                                            return <p>Admin</p>;
+
+                                        default:
+                                            return null;
+                                    }
+                                })()}
+
                             </div>
                         </>
                     ) : (
@@ -167,14 +236,14 @@ const UserCard = ({ userId, onClose }) => {
                             user.status === 'verified' ? (
                                 <button
                                     onClick={() => handleUnverifyOwner(user)}
-                                    className="bg-yellow-500 font-semibold text-white px-4 py-2 rounded-lg hover:bg-yellow-700 duration-300 transition"
+                                    className="bg-yellow-500 font-semibold text-white text-sm px-4 py-2 rounded-lg hover:bg-yellow-700 duration-300 transition"
                                 >
                                     UNVERIFY
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => handleVerifyOwner(user)}
-                                    className="bg-green-600 font-semibold text-white px-4 py-2 rounded-lg hover:bg-green-700 duration-300 transition"
+                                    className="bg-green-600 font-semibold text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 duration-300 transition"
                                 >
                                     VERIFY
                                 </button>
@@ -185,21 +254,21 @@ const UserCard = ({ userId, onClose }) => {
                         {user.status === 'suspended' ? (
                             <button
                                 onClick={() => handleUnsuspendUser(user)}
-                                className="bg-mainBlue text-white px-4 py-2 font-semibold rounded-lg hover:bg-hoverBlue duration-300 transition"
+                                className="bg-mainBlue text-white text-sm px-4 py-2 font-semibold rounded-lg hover:bg-hoverBlue duration-300 transition"
                             >
                                 UNSUSPEND
                             </button>
                         ) : (
                             <button
                                 onClick={() => handleSuspendUser(user)}
-                                className="bg-yellow-500 text-white px-4 py-2 font-semibold rounded-lg hover:bg-yellow-700 duration-300 transition"
+                                className="bg-yellow-500 text-white text-sm px-4 py-2 font-semibold rounded-lg hover:bg-yellow-700 duration-300 transition"
                             >
                                 SUSPEND
                             </button>
                         )}
                         <button
                             onClick={() => handleDeleteUser(user)}
-                            className="bg-errorRed text-white px-4 py-2 font-semibold rounded-md hover:bg-red-700 duration-300 transition"
+                            className="bg-errorRed text-white text-sm px-4 py-2 font-semibold rounded-md hover:bg-red-700 duration-300 transition"
                         >
                             DELETE
                         </button>

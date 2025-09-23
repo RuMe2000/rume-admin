@@ -168,7 +168,7 @@ const Transactions = () => {
                                     <td className="px-4 py-2">
                                         {transaction.createdAt
                                             ? new Date(transaction.createdAt.seconds * 1000).toLocaleDateString()
-                                            : "N/A"}
+                                            : "No date"}
                                     </td>
                                     <td className="px-4 py-2">{transaction.seekerName}</td>
                                     <td className="px-4 py-2">{transaction.userId}</td>
@@ -203,7 +203,7 @@ const Transactions = () => {
                         ) : (
                             <tr>
                                 <td colSpan="6" className="text-center py-4">
-                                    Loading transactions...
+                                    No transactions...
                                 </td>
                             </tr>
                         )}

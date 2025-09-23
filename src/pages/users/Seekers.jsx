@@ -67,10 +67,10 @@ const Seekers = () => {
                                         {seeker?.firstName || seeker?.lastName
                                             ? `${seeker.firstName.charAt(0).toUpperCase() + seeker.firstName.slice(1)} 
                                             ${seeker.lastName.charAt(0).toUpperCase() + seeker.lastName.slice(1)}`.trim()
-                                            : 'N/A'}
+                                            : 'Unknown'}
                                     </td>
-                                    <td className='px-4 py-2'>{seeker.email || 'N/A'}</td>
-                                    <td className='px-4 py-2'>{seeker.role.charAt(0).toUpperCase() + seeker.role.slice(1) || 'N/A'}</td>
+                                    <td className='px-4 py-2'>{seeker.email || 'Unknown'}</td>
+                                    <td className='px-4 py-2'>{seeker.role.charAt(0).toUpperCase() + seeker.role.slice(1) || 'Unknown'}</td>
                                     <td className='px-2 py-2'>
                                         <span className={`inline-flex items-center justify-center w-20 h-7 rounded-full text-sm font-semibold
                                             ${seeker.status === 'suspended' ? 'bg-yellow-500 text-white' : 'bg-gray-400'}
@@ -78,12 +78,12 @@ const Seekers = () => {
                                             {
                                                 seeker?.status
                                                     ? seeker.status.charAt(0).toUpperCase() + seeker.status.slice(1)
-                                                    : 'N/A'
+                                                    : 'Unkown'
                                             }
                                         </span>
                                     </td>
                                     <td className='px-4 py-2'>
-                                        {seeker.createdAt ? new Date(seeker.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                                        {seeker.createdAt ? new Date(seeker.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}
                                     </td>
                                     <td className='px-4 py-2 flex items-center justify-center gap-2'>
                                         <button
