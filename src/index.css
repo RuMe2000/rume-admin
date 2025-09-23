@@ -23,3 +23,38 @@
     font-family: 'Inter', sans-serif;
     color: black;
 }
+
+/* --- Arrows --- */
+.slick-prev:before,
+.slick-next:before {
+    color: #38bdf8;
+    /* change arrow color */
+    font-size: 50px;
+    /* arrow size */
+    opacity: 1;
+    /* make sure it’s fully visible */
+}
+
+/* Position the arrows closer/farther */
+.slick-prev {
+    left: -40px;
+    /* move arrow left */
+}
+
+.slick-next {
+    right: -40px;
+    /* move arrow right */
+}
+
+/* --- Dots --- */
+.slick-dots li button:before {
+    font-size: 14px;
+    /* dot size */
+    color: #38bdf8;
+    /* dot color (inactive) */
+}
+
+.slick-dots li.slick-active button:before {
+    color: #0ea5e9;
+    /* dot color (active) */
+}

@@ -185,8 +185,8 @@ export default function ViewProperty() {
             </div>
 
             <div className='flex flex-col ml-4 items-start overflox-x-auto'>
-                <label className='font-bold text-lg'>ID:</label>
-                <p className='mb-3'>{propertyId ?? ''}</p>
+                {/* <label className='font-bold text-lg'>ID:</label>
+                <p className='mb-3'>{propertyId ?? ''}</p> */}
                 <label className='font-bold text-lg'>Owner:</label>
                 <p className='mb-3'>{property.ownerName ?? ''}</p>
                 <label className='font-bold mb-1 text-lg'>Property Name:</label>
@@ -233,8 +233,15 @@ export default function ViewProperty() {
                     <label className="font-bold text-lg">Rooms:</label>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {property?.rooms && property.rooms.length > 0 ? (
-                            property.rooms.map((room) => 
-                            <RoomCard key={room.id} room={room} />)
+                            property.rooms.map((room) =>
+                                <RoomCard
+                                    key={room.id}
+                                    room={room}
+                                    onManage={() =>
+                                            navigate(`/properties/view/${propertyId}/room/${room.id}`, {
+                                                state: { from: location.pathname },
+                                            })}
+                                />)
                         ) : (
                             <p className="text-gray-400 italic">No rooms listed.</p>
                         )}
@@ -247,14 +254,14 @@ export default function ViewProperty() {
                 {property.status === 'pending' ? (
                     <button
                         onClick={() => handleVerify(propertyId)}
-                        className="bg-successGreen font-semibold text-lg px-8 py-2 rounded-lg hover:cursor-pointer hover:scale-105 duration-300 transition"
+                        className="bg-successGreen font-semibold text-lg px-8 py-2 rounded-lg hover:cursor-pointer hover:bg-successGreen/70 duration-300 transition"
                     >
                         VERIFY
                     </button>
                 ) : (
                     <button
                         onClick={() => handleUnverify(propertyId)}
-                        className="bg-yellow-500 font-semibold text-lg px-6 py-2 rounded-lg hover:cursor-pointer hover:scale-105 duration-300 transition"
+                        className="bg-yellow-500 font-semibold text-lg px-6 py-2 rounded-lg hover:cursor-pointer hover:bg-yellow-700 duration-300 transition"
                     >
                         UNVERIFY
                     </button>
@@ -263,7 +270,7 @@ export default function ViewProperty() {
                 {/* save button */}
                 <button
                     onClick={handleSave}
-                    className="py-2 px-8 text-lg font-semibold bg-mainBlue rounded-lg hover:scale-105 hover:cursor-pointer duration-300 transition">
+                    className="py-2 px-8 text-lg font-semibold bg-mainBlue rounded-lg hover:bg-hoverBlue hover:cursor-pointer duration-300 transition">
                     SAVE
                 </button>
             </div>

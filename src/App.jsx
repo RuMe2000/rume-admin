@@ -1,7 +1,8 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import ProtectedRoute from "./components/ProtectedRoute";
+import './index.css'; // 👈 your custom CSS
+
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -19,6 +20,7 @@ import AllProperties from "./pages/properties/AllProperties";
 import ViewProperty from "./pages/properties/ViewProperty";
 import PendingProperties from "./pages/properties/PendingProperties";
 import VerifiedProperties from "./pages/properties/VerifiedProperties";
+import ViewRoom from "./pages/properties/ViewRoom";
 
 function App() {
     return (
@@ -55,6 +57,7 @@ function App() {
                                     <Route path="/properties/pending" element={<PendingProperties />} />
                                     <Route path="/properties/verified" element={<VerifiedProperties />} />
                                     <Route path="/properties/view/:propertyId" element={<ViewProperty />} />
+                                    <Route path="/properties/view/:propertyId/room/:roomId" element={<ViewRoom />} />
 
                                     <Route path="/transactions" element={<Transactions />} />
                                     <Route path="/feedback" element={<FeedbackModeration />} />
