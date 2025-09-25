@@ -37,7 +37,7 @@ function Register() {
 
     return (
         <div className='flex items-center justify-center min-h-screen bg-white'>
-            <form onSubmit={handleRegister} className='w-full max-w-md p-8 bg-white rounded-lg shadow-lg'>
+            <form onSubmit={handleRegister} className='w-full max-w-md p-8 bg-white rounded-2xl shadow-lg'>
                 <h1 className='text-3xl font-bold text-center mb-6'>Sign Up</h1>
 
                 <div className='mb-4'>

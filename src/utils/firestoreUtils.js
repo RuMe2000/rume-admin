@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 
 //get all user count
@@ -447,7 +447,7 @@ export const getBookedRoomByUser = async (userId) => {
             if (!roomsSnap.empty) {
                 const roomDoc = roomsSnap.docs[0];
                 return {
-                    propertyId,      
+                    propertyId,
                     roomId: roomDoc.id,
                     ...roomDoc.data(),
                 };
@@ -462,3 +462,77 @@ export const getBookedRoomByUser = async (userId) => {
     }
 };
 
+//get owner name by property id
+export const getOwnerNameByPropertyId = async (propertyId) => {
+    try {
+        // fetch the property doc
+        const propertySnap = await getDoc(doc(db, "properties", propertyId));
+        if (!propertySnap.exists()) return "aaaaa";
+
+        const propertyData = propertySnap.data();
+        const ownerId = propertyData.ownerId;
+        if (!ownerId) return "bbbbb";
+
+        // fetch the owner user doc
+        const ownerSnap = await getDoc(doc(db, "users", ownerId));
+        if (!ownerSnap.exists()) return "ccccc";
+
+        const ownerData = ownerSnap.data();
+        const first =
+            ownerData.firstName?.charAt(0).toUpperCase() +
+            ownerData.firstName?.slice(1) ?? "";
+        const last =
+            ownerData.lastName?.charAt(0).toUpperCase() +
+            ownerData.lastName?.slice(1) ?? "";
+
+        return (first || last) ? `${first} ${last}`.trim() : "ddddd";
+    } catch (err) {
+        console.error("Error fetching owner name:", err);
+        return "fffff";
+    }
+};
+
+//get all transaction totalAmount
+export const getTransactionTotalAmount = async () => {
+    let total = 0;
+    const querySnapshot = await getDocs(collection(db, "transactions"));
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        // safely sum numbers
+        if (typeof data.totalAmount === "number") {
+            total += data.totalAmount;
+        }
+    });
+    return total;
+};
+
+//get all transaction totalAmount
+export const getCommission = async () => {
+    let total = 0;
+    const querySnapshot = await getDocs(collection(db, "transactions"));
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        // safely sum numbers
+        if (typeof data.commission === "number") {
+            total += data.commission;
+        }
+    });
+    return total;
+}
+
+export function listenSystemLogs(callback) {
+    const logsRef = query(
+        collection(db, "systemLogs"),
+        orderBy("timestamp", "desc")
+    );
+
+    const unsub = onSnapshot(logsRef, (snapshot) => {
+        const logs = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        callback(logs);
+    });
+
+    return unsub;
+}

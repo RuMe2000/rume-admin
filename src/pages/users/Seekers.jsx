@@ -21,17 +21,17 @@ const Seekers = () => {
     }, []);
 
     return (
-        <div>
-            <div className="flex flex-row items-center text-white gap-3 mb-6">
+        <div className="p-6">
+            <div className="flex flex-row items-center text-white gap-3 mb-2">
                 <button
                     onClick={() => navigate('/users')}
-                    className="cursor-pointer hover:scale-115 p-1 rounded-lg duration-200 transition"
+                    className="cursor-pointer hover:scale-115 p-1 rounded-2xl duration-200 transition"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#FFFFFF">
                         <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
                     </svg>
                 </button>
-                <h1 className="text-3xl font-semibold">Seekers</h1>
+                <h1 className="text-3xl font-bold">Seekers</h1>
             </div>
 
             <div className="overflow-x-auto">
@@ -88,7 +88,7 @@ const Seekers = () => {
                                     <td className='px-4 py-2 flex items-center justify-center gap-2'>
                                         <button
                                             onClick={() => setSelectedUserId(seeker.id)}
-                                            className='bg-transparent px-3 py-1 rounded-lg hover:scale-120 hover:cursor-pointer duration-300 transition'
+                                            className='bg-transparent px-3 py-1 rounded-2xl hover:scale-120 hover:cursor-pointer duration-300 transition'
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF">
                                                 <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />

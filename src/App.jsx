@@ -40,7 +40,7 @@ function App() {
                             </div>
                             
                             {/* <ProtectedRoute> */}
-                            <div className="flex-1 ml-64 overflow-y-auto p-5 bg-radial from-hoverBlue via-darkBlue to-bgBlue text-white">
+                            <div className="flex-1 ml-64 overflow-y-auto p-4 bg-radial from-hoverBlue via-darkBlue to-bgBlue text-white">
                                 <Routes>
                                     <Route path="/dashboard" element={<Dashboard />} />
 

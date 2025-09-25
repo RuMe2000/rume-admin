@@ -1,4 +1,4 @@
-import { getTransactions } from "../../utils/firestoreUtils";
+import { getTransactions, getOwnerNameByPropertyId } from "../../utils/firestoreUtils";
 import { useState, useEffect } from "react";
 // import MyDatePicker from "../../components/MyDatePicker";
 // import Datepicker from 'react-datepicker'
@@ -12,12 +12,25 @@ const Transactions = () => {
     // const [startDate, setStartDate] = useState("");
     // const [endDate, setEndDate] = useState("");
     const [sortDirection, setSortDirection] = useState("desc");
+    const [ownerNames, setOwnerNames] = useState({}); // { propertyId: ownerName }
 
     useEffect(() => {
         const fetchTransactions = async () => {
-            const data = await getTransactions();
-            setTransactions(data);
+            try {
+                const txs = await getTransactions(); // your util should return an array
+                setTransactions(txs);
+
+                // Optionally prefetch owner names for all unique propertyIds:
+                const uniqueIds = [...new Set(txs.map(t => t.propertyId))];
+                for (const id of uniqueIds) {
+                    const name = await getOwnerNameByPropertyId(id);
+                    setOwnerNames(prev => ({ ...prev, [id]: name }));
+                }
+            } catch (err) {
+                console.error("Error fetching transactions:", err);
+            }
         };
+
         fetchTransactions();
     }, []);
 
@@ -78,9 +91,9 @@ const Transactions = () => {
 
 
     return (
-        <div>
+        <div className="p-6">
             <div className="flex flex-col md:flex-row md:items-center text-white mb-6 justify-between gap-4">
-                <h1 className="text-3xl font-semibold">Transactions</h1>
+                <h1 className="text-3xl font-bold">Transactions</h1>
 
                 {/* filters */}
                 <div className="flex flex-wrap gap-2">
@@ -92,7 +105,7 @@ const Transactions = () => {
                         title="Search by User"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="bg-hoverBlue text-white px-2 py-1 rounded-xl border border-gray-600 focus:outline-none"
+                        className="bg-hoverBlue text-white px-2 py-1 rounded-2xl border border-gray-600 focus:outline-none"
                     />
 
                     {/* time range */}
@@ -100,7 +113,7 @@ const Transactions = () => {
                         value={filter}
                         title="Time Period"
                         onChange={(e) => setFilter(e.target.value)}
-                        className="bg-hoverBlue text-white px-3 py-2 rounded-xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
+                        className="bg-hoverBlue text-white px-3 py-2 rounded-2xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
                     >
                         <option className="bg-blue-950" value="all">
                             All Time
@@ -118,7 +131,7 @@ const Transactions = () => {
                         value={statusFilter}
                         title="Status"
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-hoverBlue text-white px-3 py-2 rounded-xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
+                        className="bg-hoverBlue text-white px-3 py-2 rounded-2xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
                     >
                         <option className="bg-blue-950" value="all">
                             All
@@ -154,8 +167,8 @@ const Transactions = () => {
                                     {sortDirection === "desc" ? "  ▼" : "  ▲"}
                                 </span>
                             </th>
-                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Payer</th>
-                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Payee</th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Paid By</th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Paid To</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Amount</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
                             <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
@@ -171,8 +184,10 @@ const Transactions = () => {
                                             : "No date"}
                                     </td>
                                     <td className="px-4 py-2">{transaction.seekerName}</td>
-                                    <td className="px-4 py-2">{transaction.userId}</td>
-                                    <td className="px-4 py-2">{transaction.amount}</td>
+                                    <td className="px-4 py-2">
+                                        {ownerNames[transaction.propertyId] ?? "Loading..."}
+                                    </td>
+                                    <td className="px-4 py-2">{transaction.totalAmount/100}</td>
                                     <td className="px-4 py-2">
                                         <span
                                             className={`inline-flex items-center justify-center w-23 h-7 rounded-full text-sm font-semibold

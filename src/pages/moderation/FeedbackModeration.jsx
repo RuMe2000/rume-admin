@@ -1,6 +1,6 @@
 const FeedbackModeration = () => {
     return (
-        <div>
+        <div className="p-6">
             <h1 className="text-start text-3xl font-semibold mb-4">Feedback Moderation</h1>
             <p>Welcome to feedback moderation!</p>
         </div>

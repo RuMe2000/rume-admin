@@ -146,9 +146,9 @@ const UserCard = ({ userId, onClose }) => {
                         <>
                             {/* Profile picture centered */}
                             <div className="flex justify-center mb-4">
-                                {profilePicUrl ? (
+                                {user.profileImageUrl ? (
                                     <img
-                                        src={profilePicUrl}
+                                        src={user.profileImageUrl}
                                         alt="Profile"
                                         className="w-26 h-26 rounded-full object-cover border-2 border-darkGray"
                                     />
@@ -236,14 +236,14 @@ const UserCard = ({ userId, onClose }) => {
                             user.status === 'verified' ? (
                                 <button
                                     onClick={() => handleUnverifyOwner(user)}
-                                    className="bg-yellow-500 font-semibold text-white text-sm px-4 py-2 rounded-lg hover:bg-yellow-700 duration-300 transition"
+                                    className="bg-yellow-500 font-semibold text-white text-sm px-4 py-2 rounded-2xl hover:bg-yellow-700 duration-300 transition"
                                 >
                                     UNVERIFY
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => handleVerifyOwner(user)}
-                                    className="bg-green-600 font-semibold text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 duration-300 transition"
+                                    className="bg-green-600 font-semibold text-white text-sm px-4 py-2 rounded-2xl hover:bg-green-700 duration-300 transition"
                                 >
                                     VERIFY
                                 </button>
@@ -254,14 +254,14 @@ const UserCard = ({ userId, onClose }) => {
                         {user.status === 'suspended' ? (
                             <button
                                 onClick={() => handleUnsuspendUser(user)}
-                                className="bg-mainBlue text-white text-sm px-4 py-2 font-semibold rounded-lg hover:bg-hoverBlue duration-300 transition"
+                                className="bg-mainBlue text-white text-sm px-4 py-2 font-semibold rounded-2xl hover:bg-hoverBlue duration-300 transition"
                             >
                                 UNSUSPEND
                             </button>
                         ) : (
                             <button
                                 onClick={() => handleSuspendUser(user)}
-                                className="bg-yellow-500 text-white text-sm px-4 py-2 font-semibold rounded-lg hover:bg-yellow-700 duration-300 transition"
+                                className="bg-yellow-500 text-white text-sm px-4 py-2 font-semibold rounded-2xl hover:bg-yellow-700 duration-300 transition"
                             >
                                 SUSPEND
                             </button>

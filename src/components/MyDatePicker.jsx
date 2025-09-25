@@ -54,7 +54,7 @@ const MyDatePicker = ({ value, onChange, placeholder = "Pick a date" }) => {
                             }
                         }}
                         classNames={{
-                            root: "bg-mainBlue text-white rounded-lg shadow-lg p-4 text-lg w-96", // <-- bigger
+                            root: "bg-mainBlue text-white rounded-2xl shadow-lg p-4 text-lg w-96", // <-- bigger
                             caption: "mb-4 flex justify-center text-xl font-semibold",
                             head: "text-white",
                             head_row: "text-center",

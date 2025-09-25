@@ -27,7 +27,7 @@ export default function RoomImagesCarousel({ images }) {
                         <img
                             src={url}
                             alt={`Room image ${idx + 1}`}
-                            className="rounded-lg max-h-[400px] w-auto object-contain mx-auto"
+                            className="rounded-2xl max-h-[400px] w-auto object-contain mx-auto border border-gray-400"
                         />
                     </div>
                 ))}

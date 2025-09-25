@@ -36,8 +36,8 @@ const UserManagement = () => {
     };
 
     return (
-        <div>
-            <h1 className="text-start text-3xl font-semibold mb-4">User Management</h1>
+        <div className='p-6'>
+            <h1 className="text-start text-3xl font-bold mb-4">User Management</h1>
 
             <div className='flex flex-row'>
                 <UserButton roleName="Owners" count={ownersCount} onManage={() => handleNavigate('Owners')} />

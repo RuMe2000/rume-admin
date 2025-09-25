@@ -81,7 +81,7 @@ function Login() {
                             id='email'
                             name='email'
                             type='email'
-                            className="w-full p-3 px-4 mb-2 text-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-mainBlue transition"
+                            className="w-full p-3 px-4 mb-2 text-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-mainBlue transition"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -93,13 +93,13 @@ function Login() {
                             id='password'
                             name='password'
                             type='password'
-                            className='w-full p-3 px-4 text-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-mainBlue transition'
+                            className='w-full p-3 px-4 text-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-mainBlue transition'
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
 
-                    <button type='submit' className='w-full p-3 mt-5 bg-mainBlue text-xl text-white font-bold rounded-xl hover:bg-hoverBlue cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300'>
+                    <button type='submit' className='w-full p-3 mt-5 bg-mainBlue text-xl text-white font-bold rounded-2xl hover:bg-hoverBlue cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300'>
                         Login
                     </button>
                 </form>
@@ -115,7 +115,7 @@ function Login() {
                         transition={{ duration: 0.3 }}
                     >
                         <motion.div
-                            className="bg-mainBlue text-white px-13 py-5 rounded-lg shadow-lg"
+                            className="bg-mainBlue text-white px-13 py-5 rounded-2xl shadow-lg"
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.8, opacity: 0 }}

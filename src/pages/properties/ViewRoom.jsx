@@ -40,19 +40,19 @@ function AmenitiesSection({ room, propertyId, roomId, setRoom }) {
     };
 
     return (
-        <div className="mt-4">
-            <label className="font-bold text-lg">Amenities:</label>
-            <div className="flex flex-wrap gap-2 mt-2">
+        <div>
+            <label className="font-bold text-xl">Amenities:</label>
+            <div className="flex flex-wrap gap-2">
                 {room?.amenities && room.amenities.length > 0 ? (
                     room.amenities.map((amenity, idx) => (
                         <span
                             key={idx}
-                            className="flex items-center gap-1 px-3 py-1 bg-mainBlue rounded-full text-white"
+                            className="mt-1 flex items-center gap-1 px-3 py-1 bg-hoverBlue rounded-full text-white"
                         >
                             {amenity}
                             <button
                                 onClick={() => handleDeleteAmenity(amenity)}
-                                className="ml-1 text-white hover:scale-130 font-bold transition duration-200"
+                                className="ml-1 text-lg text-white hover:scale-130 font-bold transition duration-200"
                                 title="Remove"
                             >
                                 ×
@@ -70,14 +70,14 @@ function AmenitiesSection({ room, propertyId, roomId, setRoom }) {
                     value={newAmenity}
                     onChange={(e) => setNewAmenity(e.target.value)}
                     placeholder="Add amenity"
-                    className="px-3 py-1 w-40 h-10 rounded-lg bg-darkGray/30 text-white focus:outline-none"
+                    className="px-3 py-1 w-40 h-10 rounded-2xl bg-darkGray/30 text-white border-0 border-b-2 border-transparent focus:outline-none focus:border-b-white"
                 />
                 <button
                     onClick={handleAddAmenity}
                     title="Add"
                     className="px-2 py-2 bg-mainBlue text-white font-bold rounded-lg hover:bg-hoverBlue transition duration-300"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="#FFFFFF"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" /></svg>
                 </button>
             </div>
         </div>
@@ -149,21 +149,21 @@ export default function ViewRoom() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p className="text-xl text-white italic">Loading room details...</p>
+                <p className="text-lg text-white italic">Loading room details...</p>
             </div>
         );
     };
 
     return (
-        <div>
+        <div className="p-6">
             <div className='flex flex-row items-center text-white justify-between'>
                 <div className='flex flex-row gap-3'>
-                    <button 
-                    onClick={() => navigate(from || `/properties/view/${propertyId}`, { replace: true })}
-                    className='cursor-pointer hover:scale-115 p-1 rounded-lg duration-200 transition'>
+                    <button
+                        onClick={() => navigate(from || `/properties/view/${propertyId}`, { replace: true })}
+                        className='cursor-pointer hover:scale-115 p-1 rounded-2xl duration-200 transition'>
                         <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#FFFFFF"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" /></svg>
                     </button>
-                    <h1 className="text-3xl font-semibold">
+                    <h1 className="text-3xl font-bold">
                         {propertyName && room?.name ? `${propertyName} – ${room.name}` : "Loading…"}
                     </h1>
                 </div>
@@ -187,16 +187,20 @@ export default function ViewRoom() {
                 <RoomImagesCarousel images={room?.images} />
             </div>
 
-            <div className='flex flex-col mt-6 ml-4 items-start overflox-x-auto'>
-                <label className='font-bold text-lg'>Monthly Rent:</label>
-                <p className='mb-3'>₱{room.price ?? ''}.00</p>
+            <div className='pl-4 pb-4 mt-4 flex flex-col items-start overflox-x-auto rounded-2xl'>
+                <label className='font-bold text-lg mt-4'>Monthly Rent:</label>
+                <p
+                    className='px-2 py-2 mt-1 mb-3 text-lg bg-darkGray/30 rounded-2xl border-0 border-b-2 border-transparent text-white'>
+                    ₱{room.price ?? ''}.00
+                </p>
+
                 <label className='font-bold text-lg'>Capacity:</label>
                 <div className="flex flex-row items-center">
                     <input
                         value={room.capacity ?? ''}
                         onChange={(e) => handleChange("capacity", e.target.value)}
                         style={{ width: 40 }}
-                        className='px-2 py-2 bg-darkGray/30 rounded-lg text-center border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
+                        className='px-2 py-2 bg-darkGray/30 rounded-2xl text-lg mt-1 mb-3 text-center border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
                     />
                     <p className="ml-1">person(s)</p>
                 </div>
@@ -210,7 +214,7 @@ export default function ViewRoom() {
 
             </div>
 
-            <div className="flex flex-row gap-3 fixed bottom-6 right-7">
+            <div className="flex flex-row gap-3 fixed bottom-6 right-10">
                 {/* save button */}
                 <button
                     onClick={handleSave}
@@ -229,7 +233,7 @@ export default function ViewRoom() {
                         transition={{ duration: 0.3 }}
                     >
                         <motion.div
-                            className="bg-successGreen text-white px-8 py-5 rounded-lg shadow-lg"
+                            className="bg-successGreen text-white px-8 py-5 rounded-2xl shadow-lg"
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.8, opacity: 0 }}
