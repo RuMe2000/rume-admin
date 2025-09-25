@@ -33,7 +33,7 @@ const VerifiedProperties = () => {
                             <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Owner</th>
                             <th className="w-80 px-4 py-2 border-b-3 border-darkGray text-center">Address</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
-                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
+                            {/* <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th> */}
                             <th className='w-30 px-4 py-2 border-b-3 border-darkGray text-center'>ID</th>
                             <th className="w-15 px-4 py-2 border-b-3 border-darkGray text-center"></th>
                         </tr>
@@ -55,7 +55,7 @@ const VerifiedProperties = () => {
                                         }
                                     </span>
                                 </td>
-                                <td className='px-2 py-2'>{property.timestamp ? new Date(property.timestamp.seconds * 1000).toLocaleDateString() : 'Unknown'}</td>
+                                {/* <td className='px-2 py-2'>{property.timestamp ? new Date(property.timestamp.seconds * 1000).toLocaleDateString() : 'Unknown'}</td> */}
                                 <td className='px-4 py-2 relative group cursor-pointer'>
                                     <span className='group-hover:hidden'>
                                         {property.id.substring(0, 12)}...

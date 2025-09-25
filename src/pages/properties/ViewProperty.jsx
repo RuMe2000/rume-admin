@@ -209,7 +209,7 @@ export default function ViewProperty() {
                 <label className='font-bold text-lg'>Owner</label>
                 <p
                     className='px-2 py-2 mt-1 mb-3 text-lg bg-darkGray/30 rounded-2xl border-0 border-b-2 border-transparent text-white'
-                    style={{ width: `${(property.ownerName ?? '').length + 1 || 1}ch` }}
+                    style={{ width: `${(property.address ?? '').length + 3 || 1}ch` }}
                 >
                     {property.ownerName ?? ''}
                 </p>
@@ -218,7 +218,7 @@ export default function ViewProperty() {
                 <input
                     value={property.name ?? ''}
                     onChange={(e) => handleChange("name", e.target.value)}
-                    style={{ width: `${(property.name ?? '').length || 1}ch` }}
+                    style={{ width: `${(property.address ?? '').length + 3 || 1}ch` }}
                     className='px-2 py-2 mt-1 mb-3 text-lg bg-darkGray/30 rounded-2xl border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
                 />
 
@@ -226,7 +226,7 @@ export default function ViewProperty() {
                 <input
                     value={property.address ?? ''}
                     onChange={(e) => handleChange("address", e.target.value)}
-                    style={{ width: `${(property.address ?? '').length || 1}ch` }}
+                    style={{ width: `${(property.address ?? '').length + 3 || 1}ch` }}
                     className='px-2 py-2 mt-1 text-lg bg-darkGray/30 rounded-2xl border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
                 />
 
@@ -260,14 +260,14 @@ export default function ViewProperty() {
                 {property.status === 'pending' ? (
                     <button
                         onClick={() => handleVerify(propertyId)}
-                        className="bg-successGreen font-semibold text-lg px-8 py-2 rounded-2xl hover:cursor-pointer hover:bg-successGreen/70 duration-300 transition"
+                        className="bg-successGreen font-semibold text-lg px-8 py-2 rounded-xl hover:cursor-pointer hover:bg-successGreen/70 duration-300 transition"
                     >
                         VERIFY
                     </button>
                 ) : (
                     <button
                         onClick={() => handleUnverify(propertyId)}
-                        className="bg-yellow-500 font-semibold text-lg px-6 py-2 rounded-2xl hover:cursor-pointer hover:bg-yellow-700 duration-300 transition"
+                        className="bg-yellow-500 font-semibold text-lg px-6 py-2 rounded-xl hover:cursor-pointer hover:bg-yellow-700 duration-300 transition"
                     >
                         UNVERIFY
                     </button>
@@ -276,7 +276,7 @@ export default function ViewProperty() {
                 {/* save button */}
                 <button
                     onClick={handleSave}
-                    className="py-2 px-8 text-lg font-semibold bg-successGreen rounded-2xl hover:bg-successGreen/70 hover:cursor-pointer duration-300 transition">
+                    className="py-2 px-8 text-lg font-semibold bg-successGreen rounded-xl hover:bg-successGreen/70 hover:cursor-pointer duration-300 transition">
                     SAVE
                 </button>
             </div>

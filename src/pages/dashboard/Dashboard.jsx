@@ -50,10 +50,10 @@ const AdminDashboard = () => {
     ];
 
     const revenueData = [
-        { month: "May", revenue: 1075 },
-        { month: "Jun", revenue: 1500 },
-        { month: "Jul", revenue: 2300 },
-        { month: "Aug", revenue: 1200 },
+        { month: "May", revenue: 275 },
+        { month: "Jun", revenue: 500 },
+        { month: "Jul", revenue: 400 },
+        { month: "Aug", revenue: 1000 },
         { month: "Sep", revenue: gross/100 },
     ];
 
@@ -101,7 +101,7 @@ const AdminDashboard = () => {
 
                 {/* Revenue chart */}
                 <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">
-                    <h2 className="text-xl font-semibold mb-4">Revenue per Month</h2>
+                    <h2 className="text-xl font-semibold mb-4">Gross Revenue per Month</h2>
                     <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={revenueData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -115,12 +115,12 @@ const AdminDashboard = () => {
             </div>
 
             {/* Quick Actions section */}
-            <div className="mt-5 bg-blue-950 rounded-2xl p-4 shadow-lg">
+            <div className="mt-8 bg-blue-950 rounded-2xl p-4 shadow-lg">
                 <h2 className="text-xl font-semibold mb-4">System Logs</h2>
 
                 {/* 🟢 Added a scrollable container here */}
-                <div className="max-h-64 overflow-y-auto w-full">
-                    <ul>
+                <div className="max-h-50 overflow-y-auto w-full">
+                    <ul className="list-disc pl-5">
                         {logs.map((log, index) => {
                             const ts = log.timestamp;
                             const date =

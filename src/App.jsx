@@ -21,6 +21,7 @@ import ViewProperty from "./pages/properties/ViewProperty";
 import PendingProperties from "./pages/properties/PendingProperties";
 import VerifiedProperties from "./pages/properties/VerifiedProperties";
 import ViewRoom from "./pages/properties/ViewRoom";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
     return (
@@ -28,7 +29,7 @@ function App() {
             <ToastContainer />
 
             <Routes>
-                {/* <Route path="/login" element={<Login />} /> */}
+                <Route path="/login" element={<Login />} />
 
                 {/* protected routes */}
                 <Route
@@ -39,7 +40,7 @@ function App() {
                                 <Sidebar />
                             </div>
                             
-                            {/* <ProtectedRoute> */}
+                            <ProtectedRoute>
                             <div className="flex-1 ml-64 overflow-y-auto p-4 bg-radial from-hoverBlue via-darkBlue to-bgBlue text-white">
                                 <Routes>
                                     <Route path="/dashboard" element={<Dashboard />} />
@@ -68,7 +69,7 @@ function App() {
                                 </Routes>
                             </div>
 
-                            {/* </ProtectedRoute> */}
+                            </ProtectedRoute>
                         </div>
                     }
                 />

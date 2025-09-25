@@ -167,8 +167,8 @@ const Transactions = () => {
                                     {sortDirection === "desc" ? "  ▼" : "  ▲"}
                                 </span>
                             </th>
-                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Paid By</th>
-                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Paid To</th>
+                            <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Paid By</th>
+                            <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Paid To</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Amount</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
                             <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
