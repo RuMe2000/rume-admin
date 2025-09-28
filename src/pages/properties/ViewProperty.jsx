@@ -127,7 +127,7 @@ export default function ViewProperty() {
         //hide popup after 2 seconds
         setTimeout(() => {
             setShowSuccess(false);
-            navigate('/properties');
+            navigate(-2, {replace:true});
         }, 2000);
     };
 
@@ -147,7 +147,7 @@ export default function ViewProperty() {
         <div className='p-6'>
             <div className='flex flex-row items-center text-white justify-between'>
                 <div className='flex flex-row gap-3'>
-                    <button onClick={() => navigate('/properties', { replace: true })}
+                    <button onClick={() => navigate(-2)}
                         className='cursor-pointer hover:scale-115 p-1 rounded-2xl duration-200 transition'>
                         <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#FFFFFF"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" /></svg>
                     </button>
