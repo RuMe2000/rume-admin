@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 //get all user count
@@ -198,3 +198,46 @@ export const getOwnerNameByPropertyId = async (propertyId) => {
         return "fffff";
     }
 };
+
+//get seeker age
+function calculateAge(dob) {
+    const today = new Date();
+    const birthDate = dob instanceof Date ? dob : dob.toDate(); // handle Timestamp or Date
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+export async function getAgeBracketDistribution() {
+    const seekersQuery = query(collection(db, "users"), where("role", "==", "seeker"));
+    const snap = await getDocs(seekersQuery);
+
+    // Initialize brackets
+    const brackets = {
+        "<18": 0,
+        "18-24": 0,
+        "25-34": 0,
+        "35-44": 0,
+        "45-54": 0,
+        "55+": 0,
+    };
+
+    snap.forEach((doc) => {
+        const data = doc.data();
+        if (data.dateOfBirth) {
+            const age = calculateAge(data.dateOfBirth);
+
+            if (age < 18) brackets["<18"]++;
+            else if (age >= 18 && age <= 24) brackets["18-24"]++;
+            else if (age >= 25 && age <= 34) brackets["25-34"]++;
+            else if (age >= 35 && age <= 44) brackets["35-44"]++;
+            else if (age >= 45 && age <= 54) brackets["45-54"]++;
+            else if (age >= 55) brackets["55+"]++;
+        }
+    });
+
+    return brackets;
+}

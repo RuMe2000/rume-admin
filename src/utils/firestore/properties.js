@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 //get all property count
@@ -165,6 +165,7 @@ export const verifyProperty = async (propertyId) => {
     const propertyDocRef = doc(db, 'properties', propertyId);
     await updateDoc(propertyDocRef, {
         status: 'verified',
+        dateVerified: serverTimestamp()
     });
 };
 
@@ -195,3 +196,15 @@ export const getPropertiesByUser = async (userId) => {
     }
 };
 
+//pending properties listener
+export const listenForPendingProperties = (callback) => {
+    const q = query(
+        collection(db, "properties"),
+        where("status", "==", "pending")
+    );
+
+    return onSnapshot(q, (snapshot) => {
+        const pending = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        callback(pending);
+    });
+};

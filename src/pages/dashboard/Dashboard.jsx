@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { getAllUserCount, getCommission, getPendingPropertyCount, getRecentTransactionCount, getTransactionTotalAmount, listenSystemLogs } from "../../utils/firestoreUtils";
 import { Timestamp } from "firebase/firestore";
+import NotificationBell from "../../components/NotificationBell";
+import WalletCard from "../../components/WalletCard";
 
 const AdminDashboard = () => {
     const [userCount, setUserCount] = useState(0);
@@ -54,20 +56,23 @@ const AdminDashboard = () => {
         { month: "Jun", revenue: 500 },
         { month: "Jul", revenue: 400 },
         { month: "Aug", revenue: 1000 },
-        { month: "Sep", revenue: gross/100 },
+        { month: "Sep", revenue: gross / 100 },
     ];
 
     const stats = [
         { title: "Total Users", value: userCount },
         { title: "Pending Properties", value: pending },
         { title: "Recent Transactions", value: recent },
-        { title: "Total Net Revenue", value: `₱${commission/100}` },
+        { title: "Net Revenue Balance", value: `₱${commission / 100}` },
         // { title: "New Signups This Week", value: 37 },
         // { title: "Flagged Reports", value: 2 },
     ];
 
     return (
         <div className="p-6 text-white">
+            <div className="fixed top-8 right-10 z-50">
+                <NotificationBell />
+            </div>
             <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
             {/* Stats grid */}
@@ -85,6 +90,7 @@ const AdminDashboard = () => {
 
             {/* Charts section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
                 {/* Bookings chart */}
                 <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">
                     <h2 className="text-xl font-semibold mb-4">Bookings per Month</h2>
@@ -114,11 +120,10 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* Quick Actions section */}
-            <div className="mt-8 bg-blue-950 rounded-2xl p-4 shadow-lg">
+            {/* system logs */}
+            {/* <div className="mt-8 bg-blue-950 rounded-2xl p-4 shadow-lg">
                 <h2 className="text-xl font-semibold mb-4">System Logs</h2>
 
-                {/* 🟢 Added a scrollable container here */}
                 <div className="max-h-50 overflow-y-auto w-full">
                     <ul className="list-disc pl-5">
                         {logs.map((log, index) => {
@@ -142,7 +147,7 @@ const AdminDashboard = () => {
                         })}
                     </ul>
                 </div>
-            </div>
+            </div> */}
 
         </div>
     );

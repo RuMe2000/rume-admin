@@ -58,3 +58,10 @@
     color: #0ea5e9;
     /* dot color (active) */
 }
+
+/* Make date picker icon white */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    /* turn black icon to white */
+    cursor: pointer;
+}

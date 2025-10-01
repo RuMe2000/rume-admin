@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { deleteUser, suspendUser, unsuspendUser, getUserById, verifyOwner, unverifyOwner, getPropertiesByUser, getBookedRoomByUser } from '../../utils/firestoreUtils';
+import { deleteUser, suspendUser, unsuspendUser, getUserById, verifyOwner, unverifyOwner, getPropertiesByUser, getBookedRoomByUser, getSeekerStayDuration } from '../../utils/firestoreUtils';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 const UserCard = ({ userId, onClose }) => {
@@ -8,7 +8,7 @@ const UserCard = ({ userId, onClose }) => {
     const [profilePicUrl, setProfilePicUrl] = useState(null);
 
     const [ownedProperties, setOwnedProperties] = useState([]);
-    const [bookedRoom, setBookedRoom] = useState(null);
+    const [bookedRoom, setBookedRoom] = useState([]);
 
     const fetchUserAndPic = async () => {
         setIsLoading(true);
@@ -42,9 +42,15 @@ const UserCard = ({ userId, onClose }) => {
         } else if (data?.role === "seeker") {
             //get booked room
             const room = await getBookedRoomByUser(userId);
-            setBookedRoom(room);
+            if (room) {
+                const duration = await getSeekerStayDuration(userId);
+                setBookedRoom({ ...room, stayDuration: duration });
+            } else {
+                setBookedRoom(null);
+            }
             setOwnedProperties([]); //clear properties
-        } else {
+        }
+        else {
             //neither role
             setOwnedProperties([]);
             setBookedRoom(null);
@@ -205,14 +211,25 @@ const UserCard = ({ userId, onClose }) => {
                                                 <div>
                                                     <p className='font-bold'>Property Booked:</p>
                                                     {bookedRoom ? (
-                                                        <p>
-                                                            {bookedRoom.propertyName} – {bookedRoom.roomName}
-                                                        </p>
+                                                        <div>
+                                                            <p>
+                                                                {bookedRoom.propertyName} – {bookedRoom.name}
+                                                            </p>
+                                                            <p className="italic text-gray-300">
+                                                                Stay duration: 
+                                                                {bookedRoom.stayDuration
+                                                                    ? ` ${bookedRoom.stayDuration.duration.days} days 
+                                                                        (${bookedRoom.stayDuration.duration.months} months, 
+                                                                        ${bookedRoom.stayDuration.duration.years} years)`
+                                                                    : "Calculating..."}
+                                                            </p>
+                                                        </div>
                                                     ) : (
                                                         <p className="italic text-gray-400">No booked room yet.</p>
                                                     )}
                                                 </div>
                                             );
+
 
                                         case 'admin':
                                             return <p>Admin</p>;
@@ -236,36 +253,20 @@ const UserCard = ({ userId, onClose }) => {
                             user.status === 'verified' ? (
                                 <button
                                     onClick={() => handleUnverifyOwner(user)}
-                                    className="bg-yellow-500 font-semibold text-white text-sm px-4 py-2 rounded-2xl hover:bg-yellow-700 duration-300 transition"
+                                    className="bg-yellow-500 font-semibold text-white text-sm px-4 py-2 rounded-md hover:bg-yellow-700 duration-300 transition"
                                 >
                                     UNVERIFY
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => handleVerifyOwner(user)}
-                                    className="bg-green-600 font-semibold text-white text-sm px-4 py-2 rounded-2xl hover:bg-green-700 duration-300 transition"
+                                    className="bg-green-600 font-semibold text-white text-sm px-4 py-2 rounded-md hover:bg-green-700 duration-300 transition"
                                 >
                                     VERIFY
                                 </button>
                             )
                         )}
 
-
-                        {user.status === 'suspended' ? (
-                            <button
-                                onClick={() => handleUnsuspendUser(user)}
-                                className="bg-mainBlue text-white text-sm px-4 py-2 font-semibold rounded-2xl hover:bg-hoverBlue duration-300 transition"
-                            >
-                                UNSUSPEND
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => handleSuspendUser(user)}
-                                className="bg-yellow-500 text-white text-sm px-4 py-2 font-semibold rounded-2xl hover:bg-yellow-700 duration-300 transition"
-                            >
-                                SUSPEND
-                            </button>
-                        )}
                         <button
                             onClick={() => handleDeleteUser(user)}
                             className="bg-errorRed text-white text-sm px-4 py-2 font-semibold rounded-md hover:bg-red-700 duration-300 transition"
