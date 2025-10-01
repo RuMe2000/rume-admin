@@ -241,3 +241,28 @@ export async function getAgeBracketDistribution() {
 
     return brackets;
 }
+
+//get verified and unverified owner count
+export const getOwnerCountByStatus = async () => {
+    try {
+        const ownersQuery = query(collection(db, "users"), where("role", "==", "owner"));
+        const snapshot = await getDocs(ownersQuery);
+
+        let verified = 0;
+        let unverified = 0;
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.status === "verified") {
+                verified++;
+            } else {
+                unverified++;
+            }
+        });
+
+        return { verified, unverified, total: verified + unverified };
+    } catch (error) {
+        console.error("Error fetching owner count by status:", error);
+        return { verified: 0, unverified: 0, total: 0 };
+    }
+};

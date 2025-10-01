@@ -19,6 +19,15 @@ export const getPendingPropertyCount = async (status) => {
     return querySnapshot.size;
 }
 
+//get verified property count
+export const getVerifiedPropertyCount = async (status) => {
+    const propertiesRef = collection(db, "properties");
+    const q = query(propertiesRef, where("status", "==", "verified"));
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.size;
+}
+
 //get property count by status
 export const getPropertyCountByStatus = async (status) => {
     const propertiesRef = collection(db, "properties");

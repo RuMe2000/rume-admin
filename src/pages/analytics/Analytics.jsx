@@ -1,6 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { getBookingSuccessRatio, getAgeBracketDistribution } from "../../utils/firestoreUtils";
+import { getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs } from "../../utils/firestoreUtils";
 import { useEffect, useState } from "react";
+import { Timestamp } from "firebase/firestore";
 
 const paymentSplitData = [
     { name: "GCash", value: 400 },
@@ -13,6 +14,7 @@ const COLORS = ["#3B82F6", "#22C55E", "#FACC15"];
 const Analytics = () => {
     const [bookingSuccess, setBookingSuccess] = useState(0);
     const [ageData, setAgeData] = useState([]);
+    const [logs, setLogs] = useState([]);
 
     const getData = async () => {
         const bsr = await getBookingSuccessRatio();
@@ -29,6 +31,13 @@ const Analytics = () => {
 
     useEffect(() => {
         getData();
+
+        // subscribe to systemLogs from Cloud Function
+        const unsubscribe = listenSystemLogs((fetchedLogs) => {
+            setLogs(fetchedLogs);
+        });
+
+        return () => unsubscribe();
     }, []);
 
     return (
@@ -37,10 +46,10 @@ const Analytics = () => {
 
             {/* quick stats cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="bg-hoverBlue rounded-2xl p-5 shadow-md">
+                <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
                     <h2 className="text-lg font-semibold mb-2">Booking Success Ratio</h2>
                     <p className="text-3xl font-bold">
-                        {bookingSuccess ? `${bookingSuccess.ratio}%` : "Loading..."}
+                        {bookingSuccess ? `${bookingSuccess.ratio}%` : "..."}
                     </p>
                     <p className="text-sm text-gray-300">
                         {bookingSuccess
@@ -49,7 +58,7 @@ const Analytics = () => {
                     </p>
 
                 </div>
-                <div className="bg-hoverBlue rounded-2xl p-5 shadow-md">
+                <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
                     <h2 className="text-lg font-semibold mb-2">Commission Revenue</h2>
                     <p className="text-3xl font-bold">₱45,000</p>
                     <p className="text-sm text-gray-300">this month</p>
@@ -58,7 +67,7 @@ const Analytics = () => {
 
             {/* charts row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-hoverBlue rounded-2xl p-5 shadow-md">
+                <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
                     <h2 className="text-lg font-semibold mb-4">Age Bracket Distribution</h2>
                     <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
@@ -78,7 +87,7 @@ const Analytics = () => {
                     </ResponsiveContainer>
                 </div>
 
-                <div className="bg-hoverBlue rounded-2xl p-5 shadow-md">
+                <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
                     <h2 className="text-lg font-semibold mb-4">Payment Method Split</h2>
                     <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
@@ -100,7 +109,7 @@ const Analytics = () => {
             </div>
 
             {/* maybe a top list */}
-            <div className="bg-hoverBlue rounded-2xl p-5 shadow-md mt-6">
+            <div className="bg-blue-950 rounded-2xl p-5 shadow-md mt-6">
                 <h2 className="text-lg font-semibold mb-4">Top 3 Properties by Bookings</h2>
                 <table className="min-w-full text-white">
                     <thead>
@@ -123,6 +132,35 @@ const Analytics = () => {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            {/* system logs */}
+            <div className="mt-8 bg-blue-950 rounded-2xl p-4 shadow-lg">
+                <h2 className="text-xl font-semibold mb-4">System Logs</h2>
+
+                <div className="max-h-50 overflow-y-auto w-full">
+                    <ul className="list-disc pl-5">
+                        {logs.map((log, index) => {
+                            const ts = log.timestamp;
+                            const date =
+                                ts instanceof Timestamp ? ts.toDate() : ts instanceof Date ? ts : new Date();
+                            const formatted = date.toLocaleString("en-US", {
+                                month: "2-digit",
+                                day: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                            });
+
+                            return (
+                                <li key={index} className="mb-1">
+                                    {formatted} – {log.message}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
             </div>
         </div>
     );

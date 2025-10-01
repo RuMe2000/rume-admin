@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { doc, getDoc, getDocs, updateDoc, GeoPoint, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, getDocs, updateDoc, GeoPoint, collection, Timestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { verifyProperty, unverifyProperty } from '../../utils/firestoreUtils';
 import RoomCard from '../../components/RoomCard';
-import { Timestamp } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 
 export default function ViewProperty() {
     const { propertyId } = useParams();
@@ -15,10 +15,40 @@ export default function ViewProperty() {
     const [loading, setLoading] = useState(true);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState("");
+    const [isEditing, setIsEditing] = useState(false);
+    const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
 
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from;
+    const auth = getAuth();
+
+    const handleEditClick = () => {
+        setShowPasswordPrompt(true);
+    };
+
+    const handleConfirmPassword = async () => {
+        setError("");
+        try {
+            const user = auth.currentUser;
+            if (!user || !user.email) {
+                setError("Admin not signed in.");
+                return;
+            }
+
+            const credential = EmailAuthProvider.credential(user.email, password);
+            await reauthenticateWithCredential(user, credential);
+
+            setIsEditing(true);
+            setShowPasswordPrompt(false);
+            setPassword("");
+        } catch (error) {
+            console.error("Reauth failed:", error);
+            setError("Invalid password.");
+        }
+    };
 
     const handleScheduleVerification = async () => {
         if (!selectedDate) {
@@ -318,7 +348,6 @@ export default function ViewProperty() {
                             </label>
                         )}
                     </li>
-
                 </ol>
             </div>
 
@@ -352,19 +381,39 @@ export default function ViewProperty() {
                     {property.ownerName ?? ''}
                 </p>
 
-                <label className='font-bold text-lg'>Property Name</label>
-                <input
-                    value={property.name ?? ''}
-                    onChange={(e) => handleChange("name", e.target.value)}
-                    className='w-70 px-3 py-2 mt-1 mb-3 text-lg bg-darkGray/30 rounded-2xl border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
-                />
+                <div className='w-full flex flex-row items-start justify-between'>
+                    <div className='flex flex-col'>
+                        <label className='font-bold text-lg'>Property Name</label>
+                        <input
+                            value={property.name ?? ''}
+                            onChange={(e) => handleChange("name", e.target.value)}
+                            disabled={!isEditing}
+                            className={`w-70 px-3 py-2 mt-1 mb-3 text-lg rounded-2xl border-0 ${isEditing
+                                ? "bg-darkGray/30 text-white focus:outline-none focus:border-b-white"
+                                : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                                }`}
+                        />
+                    </div>
+
+                    <button
+                        onClick={handleEditClick}
+                        className="bg-mainBlue text-white px-5 py-2 mb-2 mt-2 rounded-lg shadow hover:bg-hoverBlue transition duration-200"
+                    >
+                        {isEditing ? "EDITING ENABLED" : "EDIT"}
+                    </button>
+
+                </div>
 
                 <label className='font-bold text-xl'>Address</label>
                 <input
                     value={property.address ?? ''}
                     onChange={(e) => handleChange("address", e.target.value)}
+                    disabled={!isEditing}
                     style={{ width: 700 }}
-                    className='px-3 py-2 mt-1 text-lg bg-darkGray/30 rounded-2xl border-0 border-b-2 border-transparent text-white focus:outline-none focus:border-b-white'
+                    className={`px-3 py-2 mt-1 mb-3 text-lg rounded-2xl border-0 ${isEditing
+                        ? "bg-darkGray/30 text-white focus:outline-none focus:border-b-white"
+                        : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                        }`}
                 />
 
                 {/* <label className='font-bold mt-4 text-lg'>Location:</label> */}
@@ -373,7 +422,7 @@ export default function ViewProperty() {
                         <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={center} zoom={15}>
                             <Marker
                                 position={center}
-                                draggable
+                                draggable={isEditing}
                                 onDragEnd={(e) => {
                                     const newLat = e.latLng.lat();
                                     const newLng = e.latLng.lng();
@@ -430,6 +479,36 @@ export default function ViewProperty() {
                     SAVE
                 </button>
             </div>
+
+            {showPasswordPrompt && (
+                <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+                    <div className="bg-bgBlue text-white p-6 rounded-xl w-80 border border-darkGray">
+                        <h2 className="text-lg font-bold mb-3">Confirm Password</h2>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter password"
+                            className="w-full px-3 py-2 mb-3 border rounded-lg"
+                        />
+                        {error && <p className="text-errorRed text-sm mb-2">{error}</p>}
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowPasswordPrompt(false)}
+                                className="bg-errorRed px-3 py-2 rounded-lg hover:bg-red-700 transition duration-200"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirmPassword}
+                                className="bg-mainBlue text-white px-3 py-2 rounded-lg hover:bg-hoverBlue transition duration-200"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <AnimatePresence>
                 {showDatePicker && (
