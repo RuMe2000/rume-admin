@@ -217,3 +217,41 @@ export const listenForPendingProperties = (callback) => {
         callback(pending);
     });
 };
+
+// Listener for pending properties WITH owner names
+export const listenForPendingPropertiesWithOwners = (callback) => {
+    const q = query(
+        collection(db, "properties"),
+        where("status", "==", "pending")
+    );
+
+    return onSnapshot(q, async (snapshot) => {
+        const allProperties = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // Collect unique ownerIds
+        const ownerIds = Array.from(new Set(allProperties.map(p => p.ownerId).filter(Boolean)));
+
+        // Fetch all owners at once
+        const ownerSnaps = await Promise.all(ownerIds.map(id => getDoc(doc(db, "users", id))));
+        const ownerMap = {};
+        ownerSnaps.forEach((snap, idx) => {
+            const id = ownerIds[idx];
+            if (snap.exists()) {
+                const data = snap.data();
+                const first = data.firstName ? data.firstName.charAt(0).toUpperCase() + data.firstName.slice(1) : '';
+                const last = data.lastName ? data.lastName.charAt(0).toUpperCase() + data.lastName.slice(1) : '';
+                ownerMap[id] = (first || last) ? `${first} ${last}`.trim() : "Unknown Owner";
+            } else {
+                ownerMap[id] = "Unknown Owner";
+            }
+        });
+
+        // Attach owner names to properties
+        const withOwners = allProperties.map(p => ({
+            ...p,
+            ownerName: ownerMap[p.ownerId] ?? "Unknown Owner"
+        }));
+
+        callback(withOwners);
+    });
+};

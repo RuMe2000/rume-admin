@@ -1,16 +1,26 @@
 import { useEffect, useState, useRef } from "react";
-import { listenForPendingProperties } from "../utils/firestoreUtils";
+import { listenForPendingPropertiesWithOwners, listenForPendingRoomReverifyRequests } from "../utils/firestoreUtils";
 import { useNavigate } from "react-router-dom";
 
 const NotificationBell = () => {
     const [pendingProps, setPendingProps] = useState([]);
+    const [pendingRoomRequests, setPendingRoomRequests] = useState([]);
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
 
+    //subscribe to pending properties
     useEffect(() => {
-        const unsubscribe = listenForPendingProperties((pending) => {
+        const unsubscribe = listenForPendingPropertiesWithOwners((pending) => {
             setPendingProps(pending);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    //subscribe to pending room reverify requests
+    useEffect(() => {
+        const unsubscribe = listenForPendingRoomReverifyRequests((pending) => {
+            setPendingRoomRequests(pending);
         });
         return () => unsubscribe();
     }, []);
@@ -26,6 +36,9 @@ const NotificationBell = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Total notifications (sum of properties + room requests)
+    const totalNotifications = pendingProps.length + pendingRoomRequests.length;
+
     return (
         <div className="relative" ref={dropdownRef}>
             {/* Bell Icon */}
@@ -35,7 +48,7 @@ const NotificationBell = () => {
                 {/* Badge */}
                 {pendingProps.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-600 text-white text-sm font-bold px-1.5 rounded-full">
-                        {pendingProps.length}
+                        {totalNotifications}
                     </span>
                 )}
             </div>
@@ -47,20 +60,35 @@ const NotificationBell = () => {
                         Notifications
                     </div>
                     <ul className="divide-y divide-darkGray">
-                        {pendingProps.length > 0 ? (
-                            pendingProps.map((prop) => (
-                                <li
-                                    key={prop.id}
-                                    className="p-3 hover:bg-mainBlue cursor-pointer transition duration-200"
-                                    onClick={() => navigate(`/properties/view/${prop.id}`)}
-                                >
-                                    <p className="text-sm text-yellow-500 text-right italic">Pending verification</p>
-                                    <p className="font-medium text-white">{prop.name || "Unnamed Property"}</p>
-                                    <p className="text-sm text-white">Owner: {prop.ownerName || "Unknown"}</p>
-                                </li>
-                            ))
-                        ) : (
-                            <li className="p-3 text-sm text-gray-500">No pending properties</li>
+                        {/* Pending Properties */}
+                        {pendingProps.map((prop) => (
+                            <li
+                                key={`prop-${prop.id}`}
+                                className="p-3 hover:bg-mainBlue cursor-pointer transition duration-200"
+                                onClick={() => navigate(`/properties/view/${prop.id}`)}
+                            >
+                                <p className="text-sm text-yellow-500 text-right italic">Pending property verification</p>
+                                <p className="font-medium text-white">{prop.name || "Unnamed Property"}</p>
+                                <p className="text-sm text-white">Owner: {prop.ownerName || "Unknown"}</p>
+                            </li>
+                        ))}
+
+                        {/* Pending Room Reverify Requests */}
+                        {pendingRoomRequests.map((req) => (
+                            <li
+                                key={`room-${req.id}`}
+                                className="p-3 hover:bg-mainBlue cursor-pointer transition duration-200"
+                                onClick={() => navigate(`/properties/view/${req.propertyId}/room/${req.id}`)}
+                            >
+                                <p className="text-sm text-yellow-500 text-right italic">Pending room re-verification</p>
+                                <p className="font-medium text-white">{req.roomName || "Unnamed Room"}</p>
+                                <p className="text-sm text-white">Property: {req.propertyName || "Unknown Property"}</p>
+                            </li>
+                        ))}
+
+                        {/* Empty state */}
+                        {totalNotifications === 0 && (
+                            <li className="p-3 text-sm text-gray-500">No pending requests</li>
                         )}
                     </ul>
                     <div

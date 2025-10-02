@@ -5,4 +5,4 @@ export * from './firestore/transactions';
 export * from './firestore/bookings';
 export * from './firestore/wallets';
 export * from './firestore/systemLogs';
-
+export * from './firestore/roomReverify';

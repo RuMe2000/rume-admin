@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs } from "../../utils/firestoreUtils";
 import { useEffect, useState } from "react";
 import { Timestamp } from "firebase/firestore";
@@ -73,9 +73,13 @@ const Analytics = () => {
                         <PieChart>
                             <Pie
                                 data={ageData}
+                                cx="50%"
+                                cy="50%"
                                 dataKey="value"
                                 nameKey="name"
+                                innerRadius={60}
                                 outerRadius={100}
+                                // paddingAngle={3}
                                 label
                             >
                                 {ageData.map((entry, index) => (
@@ -83,6 +87,7 @@ const Analytics = () => {
                                 ))}
                             </Pie>
                             <Tooltip />
+                            {/* <Legend /> */}
                         </PieChart>
                     </ResponsiveContainer>
                 </div>

@@ -104,8 +104,9 @@ const AdminDashboard = () => {
                                 cy="50%"
                                 innerRadius={60}
                                 outerRadius={100}
-                                paddingAngle={3}
+                                // paddingAngle={3}
                                 dataKey="value"
+                                label
                             >
                                 {propertyData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
