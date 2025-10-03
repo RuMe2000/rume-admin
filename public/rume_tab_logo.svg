@@ -1,8 +1,16 @@
 <svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g clip-path="url(#clip0_248_2021)">
-<rect width="300" height="300" fill="white"/>
 <circle cx="150" cy="150" r="150" fill="#4E5AEA"/>
 <rect x="29" y="23" width="241" height="254" fill="url(#pattern0_248_2021)" style="mix-blend-mode:plus-lighter"/>
+<ellipse cx="153" cy="85" rx="57" ry="40" fill="white"/>
+<ellipse cx="185" cy="120" rx="57" ry="40" fill="white"/>
+<ellipse cx="126" cy="110" rx="59" ry="40" fill="white"/>
+<ellipse cx="115" cy="125" rx="59" ry="40" fill="white"/>
+<ellipse cx="149" cy="150" rx="93" ry="40" fill="white"/>
+<ellipse cx="86" cy="188.5" rx="30" ry="63.5" fill="white"/>
+<ellipse cx="96" cy="198.5" rx="30" ry="63.5" fill="white"/>
+<ellipse cx="210" cy="190.5" rx="30" ry="63.5" fill="white"/>
+<ellipse cx="204" cy="198.5" rx="30" ry="63.5" fill="white"/>
 </g>
 <defs>
 <pattern id="pattern0_248_2021" patternContentUnits="objectBoundingBox" width="1" height="1">
