@@ -1,5 +1,5 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs } from "../../utils/firestoreUtils";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission } from "../../utils/firestoreUtils";
 import { useEffect, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 
@@ -9,16 +9,32 @@ const paymentSplitData = [
     { name: "Cash", value: 300 },
 ];
 
-const COLORS = ["#3B82F6", "#22C55E", "#FACC15"];
+const bookingsData = [
+    { month: "May", bookings: 10 },
+    { month: "Jun", bookings: 20 },
+    { month: "Jul", bookings: 15 },
+    { month: "Aug", bookings: 30 },
+    { month: "Sep", bookings: 25 },
+];
+
+const COLORS = ["#22AED1", "#EA7AF4", "#9B5DE5"];
 
 const Analytics = () => {
     const [bookingSuccess, setBookingSuccess] = useState(0);
     const [ageData, setAgeData] = useState([]);
     const [logs, setLogs] = useState([]);
+    const [gross, setGross] = useState(0);
+    const [commission, setCommission] = useState(0);
 
     const getData = async () => {
         const bsr = await getBookingSuccessRatio();
         setBookingSuccess(bsr);
+
+        const grossRev = await getTransactionTotalAmount();
+        setGross(grossRev);
+
+        const comm = await getCommission();
+        setCommission(comm);
 
         const ageDist = await getAgeBracketDistribution();
         // transform { "18-24": 10, "25-34": 20 } -> [{ name: "18-24", value: 10}, ...]
@@ -40,6 +56,14 @@ const Analytics = () => {
         return () => unsubscribe();
     }, []);
 
+    const revenueData = [
+        { month: "May", revenue: 275 },
+        { month: "Jun", revenue: 500 },
+        { month: "Jul", revenue: 400 },
+        { month: "Aug", revenue: 1000 },
+        { month: "Sep", revenue: gross / 100 },
+    ];
+
     return (
         <div className="p-6 text-white">
             <h1 className="text-3xl font-bold mb-6">Analytics & Performance</h1>
@@ -58,15 +82,18 @@ const Analytics = () => {
                     </p>
 
                 </div>
-                <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
-                    <h2 className="text-lg font-semibold mb-2">Commission Revenue</h2>
-                    <p className="text-3xl font-bold">₱45,000</p>
-                    <p className="text-sm text-gray-300">this month</p>
+                <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
+                    <h2 className="text-lg font-semibold mb-2">Total Net Revenue</h2>
+                    <p className="text-3xl font-bold">₱{commission / 100}.00</p>
+                </div>
+                <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
+                    <h2 className="text-lg font-semibold mb-2">Total Transactions Amount</h2>
+                    <p className="text-3xl font-bold">₱{gross / 100}.00</p>
                 </div>
             </div>
 
             {/* charts row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
                     <h2 className="text-lg font-semibold mb-4">Age Bracket Distribution</h2>
                     <ResponsiveContainer width="100%" height={250}>
@@ -113,35 +140,41 @@ const Analytics = () => {
                 </div>
             </div>
 
-            {/* maybe a top list */}
-            <div className="bg-blue-950 rounded-2xl p-5 shadow-md mt-6">
-                <h2 className="text-lg font-semibold mb-4">Top 3 Properties by Bookings</h2>
-                <table className="min-w-full text-white">
-                    <thead>
-                        <tr className="text-left border-b border-gray-700">
-                            <th className="py-2 px-3">Property</th>
-                            <th className="py-2 px-3">Owner</th>
-                            <th className="py-2 px-3">Bookings</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b border-gray-700">
-                            <td className="py-2 px-3">Dormitory A</td>
-                            <td className="py-2 px-3">Juan Dela Cruz</td>
-                            <td className="py-2 px-3">42</td>
-                        </tr>
-                        <tr className="border-b border-gray-700">
-                            <td className="py-2 px-3">Apartment B</td>
-                            <td className="py-2 px-3">Maria Santos</td>
-                            <td className="py-2 px-3">35</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Revenue chart */}
+                <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">
+                    <h2 className="text-xl font-semibold mb-4">Transactions Amount per Month</h2>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={revenueData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
+                            <XAxis dataKey="month" stroke="#cbd5e1" />
+                            <YAxis stroke="#cbd5e1" />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="revenue" stroke="#22c55e" strokeWidth={3} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Bookings chart */}
+                <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">
+                    <h2 className="text-xl font-semibold mb-4">Bookings per Month</h2>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={bookingsData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
+                            <XAxis dataKey="month" stroke="#cbd5e1" />
+                            <YAxis stroke="#cbd5e1" />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="bookings" stroke="#3b82f6" strokeWidth={3} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
+
+
 
             {/* system logs */}
             <div className="mt-8 bg-blue-950 rounded-2xl p-4 shadow-lg">
-                <h2 className="text-xl font-semibold mb-4">System Logs</h2>
+                <h2 className="text-xl font-semibold mb-4">Logs</h2>
 
                 <div className="max-h-50 overflow-y-auto w-full">
                     <ul className="list-disc pl-5">

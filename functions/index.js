@@ -167,7 +167,7 @@ export const logTransactionPayments = functions.firestore
         // seekerId, ownerId, totalAmount, description
         const seekerId = data.userId || "unknown-seeker";
         const ownerId = data.ownerId || "unknown-owner";
-        const totalAmount = data.totalAmount/100 ?? 0;
+        const totalAmount = data.totalAmount / 100 ?? 0;
         const description = data.description || "unspecified";
 
         const log = {
@@ -184,3 +184,62 @@ export const logTransactionPayments = functions.firestore
         await db.collection("systemLogs").add(log);
         console.log("System log added:", log);
     });
+
+/**
+ * 1. Set default status for new seekers
+ */
+export const setDefaultSeekerStatus = functions.firestore.onDocumentCreated(
+    "users/{userId}",
+    async (event) => {
+        const newUser = event.data?.data();
+
+        if (!newUser) return;
+        if (newUser.role === "seeker") {
+            await db.collection("users").doc(event.params.userId).update({
+                status: "searching",
+            });
+            console.log(`✅ Set seeker ${event.params.userId} to "searching"`);
+        }
+    }
+);
+
+/**
+ * 2. Update seeker status when bookings change
+ */
+export const updateSeekerStatusOnBookingChange = functions.firestore.onDocumentWritten(
+    "bookings/{bookingId}",
+    async (event) => {
+        const before = event.data?.before?.data();
+        const after = event.data?.after?.data();
+
+        // If booking was deleted
+        if (before && !after) {
+            const seekerId = before.seekerId;
+            await checkAndUpdateSeekerStatus(seekerId);
+            return;
+        }
+
+        // If booking was created or updated
+        if (after) {
+            const seekerId = after.seekerId;
+            await checkAndUpdateSeekerStatus(seekerId);
+        }
+    }
+);
+
+/**
+ * Helper: Check if seeker has bookings and update status
+ */
+async function checkAndUpdateSeekerStatus(seekerId) {
+    const bookingsSnap = await db
+        .collection("bookings")
+        .where("seekerId", "==", seekerId)
+        .where("status", "==", "booked")
+        .get();
+
+    const hasBooking = !bookingsSnap.empty;
+    const newStatus = hasBooking ? "booked" : "searching";
+
+    await db.collection("users").doc(seekerId).update({ status: newStatus });
+    console.log(`🔄 Seeker ${seekerId} updated to ${newStatus}`);
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, useLocation, replace } from 'react-router-dom';
 import { doc, getDoc, getDocs, updateDoc, GeoPoint, collection, Timestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
@@ -243,7 +243,7 @@ export default function ViewProperty() {
             </div>
 
             <div className='flex flex-row gap-3'>
-                <button onClick={() => navigate(-2)}
+                <button onClick={() => navigate('/properties', replace(true))}
                     className='cursor-pointer hover:scale-115 p-1 rounded-2xl duration-200 transition'>
                     <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#FFFFFF"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" /></svg>
                 </button>

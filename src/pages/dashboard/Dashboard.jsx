@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { getAllUserCount, getCommission, getPendingPropertyCount, getVerifiedPropertyCount, getRecentTransactionCount, getTransactionTotalAmount, listenSystemLogs, getOwnerCountByStatus } from "../../utils/firestoreUtils";
+import { getAllUserCount, getCommission, getPendingPropertyCount, getVerifiedPropertyCount, getRecentTransactionCount, getTransactionTotalAmount, getOwnerCountByStatus, listenForPendingRoomReverifyRequestsCount, listenForPendingPropertiesWithOwners, getUserRoleCounts } from "../../utils/firestoreUtils";
 import NotificationBell from "../../components/NotificationBell";
 
 const AdminDashboard = () => {
@@ -10,14 +10,24 @@ const AdminDashboard = () => {
     const [recent, setRecent] = useState(0);
     const [gross, setGross] = useState(0);
     const [commission, setCommission] = useState(0);
-    
+    const [verifiedOwner, setVerifiedOwner] = useState(0);
+    const [unverifiedOwner, setUnverifiedOwner] = useState(0);
+    const [reverify, setReverify] = useState(0);
+    const [userRoles, setUserRoles] = useState({ seekers: 0, owners: 0 });
+
 
     const fetchCardData = async () => {
         const count = await getAllUserCount();
         setUserCount(count);
 
-        const pend = await getPendingPropertyCount();
-        setPending(pend);
+        const roleCount = await getUserRoleCounts();
+        setUserRoles(roleCount);
+
+        const verified = await getOwnerCountByStatus();
+        setVerifiedOwner(verified.verified);
+
+        const unverified = await getOwnerCountByStatus();
+        setUnverifiedOwner(unverified.unverified);
 
         const ver = await getVerifiedPropertyCount();
         setVerified(ver);
@@ -34,6 +44,22 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchCardData();
+    })
+
+    useEffect(() => {
+        const unsubscribe = listenForPendingRoomReverifyRequestsCount((count) => {
+            setReverify(count);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const unsubscribe = listenForPendingPropertiesWithOwners((count) => {
+            setPending(count.length);
+        });
+
+        return () => unsubscribe();
     }, []);
 
     // dummy data for charts
@@ -53,20 +79,31 @@ const AdminDashboard = () => {
         { month: "Sep", revenue: gross / 100 },
     ];
 
-    // donut data
     const propertyData = [
         { name: "Verified", value: verified },
         { name: "Pending", value: pending },
     ];
 
-    const COLORS = ["#00a63e", "#facc15"]; // green = verified, yellow = pending
+    const ownerData = [
+        { name: "Verified", value: verifiedOwner },
+        { name: "Unverified", value: unverifiedOwner },
+    ];
+
+    const COLORS1 = ["#01db62", "#FA7D09"];
+
+    const userRoleCountData = [
+        { name: "Owners", value: userRoles.owners },
+        { name: "Seekers", value: userRoles.seekers },
+    ]
+
+    const COLORS2 = ["#9B5DE5", "#22AED1"];
 
     const stats = [
         { title: "Total Users", value: userCount },
         { title: "Pending Properties", value: pending },
+        { title: "Reverification Requests", value: reverify },
         { title: "Recent Transactions", value: recent },
         { title: "Commission Revenue", value: `₱${commission / 100}` },
-        // { title: "New Signups This Week", value: 37 },
         // { title: "Flagged Reports", value: 2 },
     ];
 
@@ -91,7 +128,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Charts section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
                 {/* Verified vs Pending Properties (Donut) */}
                 <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">
@@ -109,7 +146,7 @@ const AdminDashboard = () => {
                                 label
                             >
                                 {propertyData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    <Cell key={`cell-${index}`} fill={COLORS1[index % COLORS1.length]} />
                                 ))}
                             </Pie>
                             <Tooltip />
@@ -118,34 +155,55 @@ const AdminDashboard = () => {
                     </ResponsiveContainer>
                 </div>
 
-
-                {/* Bookings chart */}
                 <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">
-                    <h2 className="text-xl font-semibold mb-4">Bookings per Month</h2>
+                    <h2 className="text-xl font-semibold mb-4">Owners Status</h2>
                     <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={bookingsData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
-                            <XAxis dataKey="month" stroke="#cbd5e1" />
-                            <YAxis stroke="#cbd5e1" />
+                        <PieChart>
+                            <Pie
+                                data={ownerData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={100}
+                                // paddingAngle={3}
+                                dataKey="value"
+                                label
+                            >
+                                {propertyData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS1[index % COLORS1.length]} />
+                                ))}
+                            </Pie>
                             <Tooltip />
-                            <Line type="monotone" dataKey="bookings" stroke="#3b82f6" strokeWidth={3} />
-                        </LineChart>
+                            <Legend />
+                        </PieChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Revenue chart */}
                 <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">
-                    <h2 className="text-xl font-semibold mb-4">Gross Payment per Month</h2>
+                    <h2 className="text-xl font-semibold mb-4">User Segmentation</h2>
                     <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={revenueData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
-                            <XAxis dataKey="month" stroke="#cbd5e1" />
-                            <YAxis stroke="#cbd5e1" />
+                        <PieChart>
+                            <Pie
+                                data={userRoleCountData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={100}
+                                // paddingAngle={3}
+                                dataKey="value"
+                                label
+                            >
+                                {userRoleCountData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS2[index % COLORS2.length]} />
+
+                                ))}
+                            </Pie>
                             <Tooltip />
-                            <Line type="monotone" dataKey="revenue" stroke="#22c55e" strokeWidth={3} />
-                        </LineChart>
+                            <Legend />
+                        </PieChart>
                     </ResponsiveContainer>
                 </div>
+
             </div>
 
         </div>

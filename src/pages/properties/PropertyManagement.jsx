@@ -2,6 +2,7 @@ import { getAllPropertyCount, getPropertyCountByStatus } from "../../utils/fires
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AllPropertyButton, StatusPropertyButton } from "../../components/PropertyButton";
+import PropertyCard from "../../components/PropertyCard";
 
 const PropertyManagement = () => {
     //get all property count
@@ -33,6 +34,7 @@ const PropertyManagement = () => {
                 <StatusPropertyButton statusName="Verified" count={verifiedPropertiesCount} onManage={() => navigate('/properties/verified')} />
                 <StatusPropertyButton statusName="Pending" count={pendingPropertiesCount} onManage={() => navigate('/properties/pending')} />
             </div>
+            <PropertyCard />
         </div>
     );
 };

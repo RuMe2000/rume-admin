@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { deleteUser, suspendUser, unsuspendUser, getUserById, verifyOwner, unverifyOwner, getPropertiesByUser, getBookedRoomByUser, getSeekerStayDuration } from '../../utils/firestoreUtils';
-import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 const UserCard = ({ userId, onClose }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [profilePicUrl, setProfilePicUrl] = useState(null);
 
     const [ownedProperties, setOwnedProperties] = useState([]);
     const [bookedRoom, setBookedRoom] = useState([]);
@@ -16,22 +14,6 @@ const UserCard = ({ userId, onClose }) => {
         //fetch user info
         const data = await getUserById(userId);
         setUser(data);
-
-        //fetch profile pic if exists
-        if (data?.email) {
-            try {
-                const storage = getStorage();
-                const picRef = ref(
-                    storage,
-                    `${data.role}/${data.email}/profile_pictures/profile.jpg`
-                );
-                const url = await getDownloadURL(picRef);
-                setProfilePicUrl(url);
-            } catch (err) {
-                console.warn("No profile picture found:", err.message);
-                setProfilePicUrl(null);
-            }
-        }
 
         //fetch properties or booked room
         if (data?.role === "owner") {
@@ -179,9 +161,9 @@ const UserCard = ({ userId, onClose }) => {
                                 <p className="mb-3">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
                                 <p className='font-bold'>Status:</p>
                                 <p
-                                    className={`mb-3 rounded-full px-3 ${(user?.status === 'active' || user?.status === 'verified')
+                                    className={`mb-3 rounded-full px-3 ${(user?.status === 'booked' || user?.status === 'verified')
                                         ? 'bg-successGreen'
-                                        : (user?.status === 'suspended' || user?.status === 'unverified')
+                                        : (user?.status === 'searching' || user?.status === 'unverified')
                                             ? 'bg-yellow-500'
                                             : 'bg-gray-400'
                                         }`}
@@ -216,12 +198,12 @@ const UserCard = ({ userId, onClose }) => {
                                                                 {bookedRoom.propertyName} – {bookedRoom.name}
                                                             </p>
                                                             <p className="italic text-gray-300">
-                                                                Stay duration: 
-                                                                {bookedRoom.stayDuration
-                                                                    ? ` ${bookedRoom.stayDuration.duration.days} days 
-                                                                        (${bookedRoom.stayDuration.duration.months} months, 
-                                                                        ${bookedRoom.stayDuration.duration.years} years)`
-                                                                    : "Calculating..."}
+                                                                Stay duration:{" "}
+                                                                {bookedRoom?.stayDuration?.duration
+                                                                    ? `${bookedRoom.stayDuration.duration.days} days 
+                                                                    (${bookedRoom.stayDuration.duration.months} months, 
+                                                                    ${bookedRoom.stayDuration.duration.years} years)`
+                                                                    : "No booking found"}
                                                             </p>
                                                         </div>
                                                     ) : (

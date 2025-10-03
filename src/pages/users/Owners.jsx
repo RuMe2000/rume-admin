@@ -38,12 +38,11 @@ const Owners = () => {
                 <table className="min-w-full text-white rounded-md">
                     <thead>
                         <tr>
-                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
                             <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
                             <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Email</th>
-                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Role</th>
-                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
-                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
+                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Joined On</th>
                             <th className="w-15 px-4 py-2 border-b-3 border-darkGray text-center"></th>
                         </tr>
                     </thead>
@@ -55,22 +54,6 @@ const Owners = () => {
                         ) : owners.length > 0 ? (
                             owners.map((owner) => (
                                 <tr key={owner.id} className='text-center border-b border-darkGray'>
-                                    <td className='px-4 py-2 relative group cursor-pointer transition-all duration-200'>
-                                        <span className='group-hover:hidden'>
-                                            {owner.id.substring(0, 12)}...
-                                        </span>
-                                        <span className='hidden group-hover:inline-block transition-all duration-200'>
-                                            {owner.id}
-                                        </span>
-                                    </td>
-                                    <td className='px-4 py-2'>
-                                        {owner?.firstName || owner?.lastName
-                                            ? `${owner.firstName.charAt(0).toUpperCase() + owner.firstName.slice(1)} 
-                                            ${owner.lastName.charAt(0).toUpperCase() + owner.lastName.slice(1)}`.trim()
-                                            : 'Unknown'}
-                                    </td>
-                                    <td className='px-4 py-2'>{owner.email || 'Unknown'}</td>
-                                    <td className='px-4 py-2'>{owner.role.charAt(0).toUpperCase() + owner.role.slice(1) || 'Unknown'}</td>
                                     <td className='px-2 py-2'>
                                         <span className={`inline-flex items-center justify-center w-20 h-7 rounded-full text-sm font-semibold
                                             ${owner.status === 'unverified' ? 'bg-yellow-500 text-white' : 'bg-gray-400'}
@@ -80,6 +63,21 @@ const Owners = () => {
                                                     ? owner.status.charAt(0).toUpperCase() + owner.status.slice(1)
                                                     : 'Unknown'
                                             }
+                                        </span>
+                                    </td>
+                                    <td className='px-4 py-2'>
+                                        {owner?.firstName || owner?.lastName
+                                            ? `${owner.firstName.charAt(0).toUpperCase() + owner.firstName.slice(1)} 
+                                            ${owner.lastName.charAt(0).toUpperCase() + owner.lastName.slice(1)}`.trim()
+                                            : 'Unknown'}
+                                    </td>
+                                    <td className='px-4 py-2'>{owner.email || 'Unknown'}</td>
+                                    <td className='px-4 py-2 relative group cursor-pointer transition-all duration-200'>
+                                        <span className='group-hover:hidden'>
+                                            {owner.id.substring(0, 12)}...
+                                        </span>
+                                        <span className='hidden group-hover:inline-block transition-all duration-200'>
+                                            {owner.id}
                                         </span>
                                     </td>
                                     <td className='px-4 py-2'>

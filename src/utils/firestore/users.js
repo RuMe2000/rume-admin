@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, getCountFromServer, onSnapshot, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 //get all user count
@@ -266,3 +266,25 @@ export const getOwnerCountByStatus = async () => {
         return { verified: 0, unverified: 0, total: 0 };
     }
 };
+
+// Get count of Seekers and Owners
+export const getUserRoleCounts = async () => {
+    try {
+        const seekersQuery = query(collection(db, "users"), where("role", "==", "seeker"));
+        const ownersQuery = query(collection(db, "users"), where("role", "==", "owner"));
+
+        const [seekersSnap, ownersSnap] = await Promise.all([
+            getCountFromServer(seekersQuery),
+            getCountFromServer(ownersQuery),
+        ]);
+
+        return {
+            seekers: seekersSnap.data().count,
+            owners: ownersSnap.data().count,
+        };
+    } catch (error) {
+        console.error("Error getting user role counts:", error);
+        return { seekers: 0, owners: 0 };
+    }
+};
+
