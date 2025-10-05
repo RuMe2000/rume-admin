@@ -185,6 +185,13 @@ export const unverifyProperty = async (propertyId) => {
     });
 };
 
+export const rejectProperty = async (propertyId) => {
+    const propertyDocRef = doc(db, "properties", propertyId);
+    await updateDoc(propertyDocRef, {
+        status: 'rejected',
+    });
+};
+
 //get all properties where ownerId === userId
 export const getPropertiesByUser = async (userId) => {
     if (!userId) return [];

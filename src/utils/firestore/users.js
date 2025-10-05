@@ -288,3 +288,34 @@ export const getUserRoleCounts = async () => {
     }
 };
 
+// Get gender count among seekers
+export const getGenderCount = async () => {
+    try {
+        // Query all users with role = seeker
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("role", "==", "seeker"));
+        const querySnapshot = await getDocs(q);
+
+        let maleCount = 0;
+        let femaleCount = 0;
+        let otherCount = 0;
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const sex = (data.sex || "").toLowerCase(); // handles either field name
+
+            if (sex === "male") maleCount++;
+            else if (sex === "female") femaleCount++;
+            else otherCount++;
+        });
+
+        return {
+            male: maleCount,
+            female: femaleCount,
+            total: maleCount + femaleCount,
+        };
+    } catch (error) {
+        console.error("Error fetching gender count:", error);
+        return { male: 0, female: 0, other: 0, total: 0 };
+    }
+};

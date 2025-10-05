@@ -47,7 +47,7 @@ const PropertyCard = () => {
                         mr-2 text-center rounded-full p-2 shadow-xl
                         ${property.status === 'verified' ? 'bg-successGreen' : ''}
                         ${property.status === 'pending' ? 'bg-yellow-500' : ''}
-                        ${property.status !== 'verified' && property.status !== 'pending' ? 'bg-gray-400' : ''}
+                        ${property.status !== 'verified' && property.status !== 'pending' && property.status !== 'rejected' ? 'bg-gray-400' : ''}
                     `}
                         >
                             <h1

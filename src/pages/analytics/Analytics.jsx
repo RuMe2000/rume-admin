@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission } from "../../utils/firestoreUtils";
+import { getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount } from "../../utils/firestoreUtils";
 import { useEffect, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 
@@ -17,7 +17,7 @@ const bookingsData = [
     { month: "Sep", bookings: 25 },
 ];
 
-const COLORS = ["#22AED1", "#EA7AF4", "#9B5DE5"];
+const COLORS = ["#22AED1", "#EA7AF4", "#9B5DE5", "#FFB963", "#B1FFA9"];
 
 const Analytics = () => {
     const [bookingSuccess, setBookingSuccess] = useState(0);
@@ -25,6 +25,7 @@ const Analytics = () => {
     const [logs, setLogs] = useState([]);
     const [gross, setGross] = useState(0);
     const [commission, setCommission] = useState(0);
+    const [genderData, setGenderData] = useState([]);
 
     const getData = async () => {
         const bsr = await getBookingSuccessRatio();
@@ -43,6 +44,13 @@ const Analytics = () => {
             value: count,
         }));
         setAgeData(formatted);
+
+        const genderCount = await getGenderCount();
+        const formattedGender = [
+            { name: "Male", value: genderCount.male },
+            { name: "Female", value: genderCount.female },
+        ];
+        setGenderData(formattedGender);
     };
 
     useEffect(() => {
@@ -88,7 +96,7 @@ const Analytics = () => {
                 </div>
                 <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
                     <h2 className="text-lg font-semibold mb-2">Total Transactions Amount</h2>
-                    <p className="text-3xl font-bold">₱{gross / 100}.00</p>
+                    <p className="text-3xl font-bold">₱{gross / 100}</p>
                 </div>
             </div>
 
@@ -115,6 +123,28 @@ const Analytics = () => {
                             </Pie>
                             <Tooltip />
                             {/* <Legend /> */}
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
+                    <h2 className="text-lg font-semibold mb-4">Gender Distribution (Seekers)</h2>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                            <Pie
+                                data={genderData}
+                                dataKey="value"
+                                nameKey="name"
+                                innerRadius={60}   // 👈 creates the donut hole
+                                outerRadius={100}
+                                label
+                            >
+                                {genderData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>

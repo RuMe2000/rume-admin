@@ -30,7 +30,7 @@ const PropertyManagement = () => {
         <div className="p-6">
             <h1 className="text-start text-3xl font-bold mb-4">Property Management</h1>
             <div className="flex flex-row">
-                <AllPropertyButton count={allPropertiesCount} onManage={() => navigate('/properties/all')} />
+                {/* <AllPropertyButton count={allPropertiesCount} onManage={() => navigate('/properties/all')} /> */}
                 <StatusPropertyButton statusName="Verified" count={verifiedPropertiesCount} onManage={() => navigate('/properties/verified')} />
                 <StatusPropertyButton statusName="Pending" count={pendingPropertiesCount} onManage={() => navigate('/properties/pending')} />
             </div>

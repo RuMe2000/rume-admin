@@ -4,7 +4,7 @@ import { doc, getDoc, getDocs, updateDoc, GeoPoint, collection, Timestamp } from
 import { db } from '../../firebase';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { verifyProperty, unverifyProperty } from '../../utils/firestoreUtils';
+import { verifyProperty, unverifyProperty, rejectProperty } from '../../utils/firestoreUtils';
 import RoomCard from '../../components/RoomCard';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
@@ -165,19 +165,18 @@ export default function ViewProperty() {
         }
     };
 
-    const handleUnverify = async (propertyId) => {
+    const handleReject = async (propertyId) => {
         try {
-            await unverifyProperty(propertyId); // update Firestore
+            await rejectProperty(propertyId); // update Firestore
             setProperty(prev => ({
                 ...prev,
-                status: 'pending'
+                status: 'rejected'
             }));
         } catch (error) {
-            console.error('Error unverifying property:', error);
+            console.error('Error rejecting property:', error);
             alert(error.message);
         }
     };
-
 
     const handleChange = (field, value) => {
         setProperty(prev => ({ ...prev, [field]: value }));
@@ -228,7 +227,8 @@ export default function ViewProperty() {
                             mr-2 text-center rounded-full p-2 shadow-xl
                             ${property.status === 'verified' ? 'bg-successGreen' : ''}
                             ${property.status === 'pending' ? 'bg-yellow-500' : ''}
-                            ${property.status !== 'verified' && property.status !== 'pending' ? 'bg-gray-400' : ''}
+                            ${property.status === 'rejected' ? 'bg-errorRed' : ''}
+                            ${property.status !== 'verified' && property.status !== 'pending' && property.status !== 'rejected' ? 'bg-gray-400' : ''}
                         `}
                 >
                     <h1
@@ -238,6 +238,8 @@ export default function ViewProperty() {
                             <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="m344-60-76-128-144-32 14-148-98-112 98-112-14-148 144-32 76-128 136 58 136-58 76 128 144 32-14 148 98 112-98 112 14 148-144 32-76 128-136-58-136 58Zm34-102 102-44 104 44 56-96 110-26-10-112 74-84-74-86 10-112-110-24-58-96-102 44-104-44-56 96-110 24 10 112-74 86 74 84-10 114 110 24 58 96Zm102-318Zm-42 142 226-226-56-58-170 170-86-84-56 56 142 142Z" /></svg>
                         ) : property.status === 'pending' ? (
                             <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="m586-486 78-78-56-58-79 79 57 57Zm248 248-88-88-6-70 74-84-74-86 10-112-110-24-58-96-102 44-104-44-37 64-59-59 64-107 136 58 136-58 76 128 144 32-14 148 98 112-98 112 12 130Zm-456 76 102-44 104 44 38-64-148-148-36 36-142-142 56-56 86 84-21 21-203-203 6 68-74 86 74 84-10 114 110 24 58 96ZM344-60l-76-128-144-32 14-148-98-112 98-112-12-130-70-70 56-56 736 736-56 56-112-112-64 108-136-58-136 58Zm185-483Zm-145 79Z" /></svg>
+                        ) : property.status === 'rejected' ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="M280-440h400v-80H280v80ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
                         ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z" /></svg>
                         )}
@@ -522,25 +524,38 @@ export default function ViewProperty() {
 
             <div className="flex flex-row gap-3 fixed bottom-6 right-10">
                 {property.status === 'pending' ? (
+                    <div className='flex flex-row gap-3'>
                     <button
                         onClick={() => handleVerify(propertyId)}
-                        className="bg-successGreen font-semibold text-lg px-8 py-2 shadow-xl rounded-xl hover:cursor-pointer hover:bg-successGreen/70 duration-300 transition"
-                    >
+                        className='font-semibold text-lg px-8 py-2 shadow-xl rounded-xl bg-successGreen text-white hover:cursor-pointer hover:bg-successGreen/70 transition duration-300'>
                         VERIFY
                     </button>
+                    <button
+                        onClick={() => handleReject(propertyId)}
+                        className='font-semibold text-lg px-6 py-2 shadow-xl rounded-xl bg-errorRed text-white hover:cursor-pointer hover:bg-red-700 transition duration-300'>
+                        REJECT ANG KUPAL
+                    </button>
+                    </div>
                 ) : (
                     <button
-                        onClick={() => handleUnverify(propertyId)}
-                        className="bg-yellow-500 font-semibold text-lg px-6 py-2 shadow-xl rounded-xl hover:cursor-pointer hover:bg-yellow-700 duration-300 transition"
-                    >
-                        UNVERIFY
+                        disabled={!isEditing}
+                        onClick={() => handleReject(propertyId)}
+                        className={`font-semibold text-lg px-6 py-2 shadow-xl rounded-xl ${isEditing
+                        ? "bg-errorRed text-white hover:cursor-pointer hover:bg-red-700 transition duration-300"
+                        : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                        }`}>
+                        REJECT ANG KUPAL
                     </button>
                 )}
 
                 {/* save button */}
                 <button
                     onClick={handleSave}
-                    className="py-2 px-8 text-lg font-semibold bg-successGreen shadow-xl rounded-xl hover:bg-successGreen/70 hover:cursor-pointer duration-300 transition">
+                    disabled={!isEditing}
+                    className={`font-semibold text-lg px-8 py-2 shadow-xl rounded-xl ${isEditing
+                        ? "bg-successGreen text-white hover:cursor-pointer hover:bg-successGreen/70 transition duration-300"
+                        : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                        }`}>
                     SAVE
                 </button>
             </div>
