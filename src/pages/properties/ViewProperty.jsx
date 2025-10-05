@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation, replace } from 'react-router-dom';
 import { doc, getDoc, getDocs, updateDoc, GeoPoint, collection, Timestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { verifyProperty, unverifyProperty } from '../../utils/firestoreUtils';
 import RoomCard from '../../components/RoomCard';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+
+const libraries = ['marker'];
 
 export default function ViewProperty() {
     const { propertyId } = useParams();
@@ -95,7 +97,8 @@ export default function ViewProperty() {
         '';
 
     const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: GOOGLE_MAPS_API_KEY
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries,
     });
 
     const fetchProperty = async () => {
@@ -222,11 +225,11 @@ export default function ViewProperty() {
             <div className="flex flex-col gap-3 items-center fixed top-8 right-10">
                 <div
                     className={`
-                        mr-2 text-center rounded-full p-2 shadow-xl
-                        ${property.status === 'verified' ? 'bg-successGreen' : ''}
-                        ${property.status === 'pending' ? 'bg-yellow-500' : ''}
-                        ${property.status !== 'verified' && property.status !== 'pending' ? 'bg-gray-400' : ''}
-                    `}
+                            mr-2 text-center rounded-full p-2 shadow-xl
+                            ${property.status === 'verified' ? 'bg-successGreen' : ''}
+                            ${property.status === 'pending' ? 'bg-yellow-500' : ''}
+                            ${property.status !== 'verified' && property.status !== 'pending' ? 'bg-gray-400' : ''}
+                        `}
                 >
                     <h1
                         title={property.status.charAt(0).toUpperCase() + property.status.slice(1)}
@@ -379,7 +382,7 @@ export default function ViewProperty() {
                 </div>
 
                 {/* <label className='font-bold text-lg'>ID:</label>
-                <p className='mb-3'>{propertyId ?? ''}</p> */}
+                    <p className='mb-3'>{propertyId ?? ''}</p> */}
                 <label className='font-bold text-lg'>Owner</label>
                 <p
                     className='w-70 px-3 py-2 mt-1 mb-3 text-lg bg-darkGray/30 rounded-2xl border-0 border-b-2 border-transparent text-white'
@@ -425,20 +428,36 @@ export default function ViewProperty() {
                 {/* <label className='font-bold mt-4 text-lg'>Location:</label> */}
                 <div className='flex flex-col mt-3'>
                     <div className='rounded-2xl overflow-hidden' style={{ height: 400, width: 700 }}>
-                        <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={center} zoom={15}>
-                            <Marker
-                                position={center}
-                                draggable={isEditing}
-                                onDragEnd={(e) => {
-                                    const newLat = e.latLng.lat();
-                                    const newLng = e.latLng.lng();
-                                    setProperty(prev => ({
+                        <GoogleMap
+                            mapContainerStyle={{ width: '100%', height: '100%' }}
+                            center={center}
+                            zoom={15}
+                            options={{
+                                mapId: import.meta.env.VITE_GOOGLE_MAP_ID,
+                                disableDefaultUI: true,
+                            }}
+                            onLoad={(mapInstance) => {
+                                const { AdvancedMarkerElement } = google.maps.marker;
+                                const marker = new AdvancedMarkerElement({
+                                    map: mapInstance,
+                                    position: center,
+                                    title: property.name || "Property Location",
+                                    gmpDraggable: isEditing,
+                                });
+
+                                // Optional: handle drag end if draggable
+                                marker.addListener("dragend", (event) => {
+                                    const newLat = event.latLng.lat();
+                                    const newLng = event.latLng.lng();
+                                    setProperty((prev) => ({
                                         ...prev,
                                         location: { latitude: newLat, longitude: newLng },
                                     }));
-                                }}
-                            />
-                        </GoogleMap>
+                                });
+                            }}
+                        />
+
+
                     </div>
                     <p className="text-sm text-gray-400 italic">
                         Latitude: {Math.abs(property.location.latitude).toFixed(7)}° {property.location.latitude >= 0 ? 'N' : 'S'},
