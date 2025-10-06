@@ -41,7 +41,7 @@ export const getAllProperties = async () => {
     try {
         //get all properties
         const propertiesRef = collection(db, "properties");
-        const q = query(propertiesRef);
+        const q = query(propertiesRef, orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
 
         const allProperties = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -82,7 +82,7 @@ export const getPendingProperties = async () => {
     try {
         //get all properties
         const propertiesRef = collection(db, "properties");
-        const q = query(propertiesRef, where("status", "==", "pending"));
+        const q = query(propertiesRef, where("status", "==", "pending"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
 
         const allProperties = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -123,7 +123,7 @@ export const getVerifiedProperties = async () => {
     try {
         //get all properties
         const propertiesRef = collection(db, "properties");
-        const q = query(propertiesRef, where("status", "==", "verified"));
+        const q = query(propertiesRef, where("status", "==", "verified"), orderBy("dateVerified", "desc"));
         const querySnapshot = await getDocs(q);
 
         const allProperties = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));

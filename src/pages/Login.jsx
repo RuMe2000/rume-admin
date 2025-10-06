@@ -57,7 +57,7 @@ function Login() {
     }
 
     return (
-        <div className='flex min-h-screen bg-bgBlue'>
+        <div className='flex min-h-screen min-w-screen bg-bgBlue overflow-hidden fixed top-0 left-0'>
             {/* Oversized Logo */}
             <img
                 src={logo}

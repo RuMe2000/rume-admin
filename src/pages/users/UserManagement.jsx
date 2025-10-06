@@ -80,18 +80,19 @@ const UserManagement = () => {
             </div>
 
             <div className="overflow-x-auto mt-8">
-                <div className="max-h-110 overflow-y-auto rounded-xl border border-darkGray">
+                <div className="max-h-[56vh] overflow-y-auto rounded-xl border border-darkGray">
                     <table className="min-w-full text-white rounded-xl">
-                        <thead className='sticky top-0 z-10 bg-mainBlue'>
+                        <thead className='sticky top-0 z-10 bg-darkBlue'>
                             <tr>
                                 {/* 🔽 Clickable "Role" header */}
                                 <th
                                     onClick={toggleRole}
-                                    className="w-30 px-4 py-2 border-b-3 border-darkGray text-center cursor-pointer hover:bg-mainBlue/80 transition"
+                                    title='Toggle Role'
+                                    className="w-30 px-4 py-2 border-b-3 border-darkGray text-center cursor-pointer hover:bg-hoverBlue transition"
                                 >
                                     Role ({filterRole === "owners" ? "Owners" : "Seekers"})
                                 </th>
-                                <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
+                                <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
                                 <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Email</th>
                                 <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
                                 <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
