@@ -6,7 +6,7 @@ export default function RoomCard({ room, onManage }) {
         >
             {/* Background Image */}
             <img
-                src={room.images && room.images[1] ? room.images[1] : "/fallback-image.jpg"}
+                src={room.images[1]}
                 alt={room.name}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-110"
             />
