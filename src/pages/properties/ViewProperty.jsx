@@ -21,6 +21,7 @@ export default function ViewProperty() {
     const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [marker, setMarker] = useState(null);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -149,6 +150,30 @@ export default function ViewProperty() {
     useEffect(() => {
         fetchProperty();
     }, [propertyId]);
+
+    // Update marker draggable state when isEditing changes
+    useEffect(() => {
+        if (marker) {
+            marker.gmpDraggable = isEditing;
+
+            if (isEditing) {
+                // Enable drag listener
+                const handleDragEnd = (event) => {
+                    const newLat = event.latLng.lat();
+                    const newLng = event.latLng.lng();
+                    setProperty((prev) => ({
+                        ...prev,
+                        location: { latitude: newLat, longitude: newLng },
+                    }));
+                };
+                marker.addListener("dragend", handleDragEnd);
+
+                return () => google.maps.event.clearListeners(marker, "dragend");
+            } else {
+                google.maps.event.clearListeners(marker, "dragend");
+            }
+        }
+    }, [isEditing, marker]);
 
     const handleVerify = async (propertyId) => {
         try {
@@ -440,26 +465,21 @@ export default function ViewProperty() {
                             }}
                             onLoad={(mapInstance) => {
                                 const { AdvancedMarkerElement } = google.maps.marker;
-                                const marker = new AdvancedMarkerElement({
+
+                                // Create marker and store in state
+                                const newMarker = new AdvancedMarkerElement({
                                     map: mapInstance,
                                     position: center,
                                     title: property.name || "Property Location",
                                     gmpDraggable: isEditing,
                                 });
 
-                                // Optional: handle drag end if draggable
-                                marker.addListener("dragend", (event) => {
-                                    const newLat = event.latLng.lat();
-                                    const newLng = event.latLng.lng();
-                                    setProperty((prev) => ({
-                                        ...prev,
-                                        location: { latitude: newLat, longitude: newLng },
-                                    }));
-                                });
+                                setMarker(newMarker); // ✅ link marker to state
+
+                                // Allow map panning and marker dragging
+                                mapInstance.setOptions({ gestureHandling: "greedy" });
                             }}
                         />
-
-
                     </div>
                     <p className="text-sm text-gray-400 italic">
                         Latitude: {Math.abs(property.location.latitude).toFixed(7)}° {property.location.latitude >= 0 ? 'N' : 'S'},

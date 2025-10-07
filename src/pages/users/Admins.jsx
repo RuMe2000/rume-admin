@@ -28,7 +28,7 @@ const Admins = () => {
     return (
         <div className="p-6">
             <div className="flex flex-row items-center text=white gap-3 mb-2">
-                <button onClick={() => navigate('/users')} className="cursor-pointer hover:scale-115 p-1 rounded-2xl duration-200 transition">
+                <button onClick={() => navigate('/users') } className="cursor-pointer hover:scale-115 p-1 rounded-2xl duration-200 transition">
                     <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#FFFFFF"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" /></svg>
                 </button>
                 <h1 className="text-3xl font-bold">Admins</h1>
@@ -43,7 +43,7 @@ const Admins = () => {
                             <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Email</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Role</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
-                            <th className="w-15 px-4 py-2 border-b-3 border-darkGray text-center"></th>
+                            {/* <th className="w-15 px-4 py-2 border-b-3 border-darkGray text-center"></th> */}
                         </tr>
                     </thead>
                     <tbody>
@@ -66,13 +66,13 @@ const Admins = () => {
                                 <td className='px-4 py-2'>{admin.email || 'Unknown'}</td>
                                 <td className='px-4 py-2'>{admin.role.charAt(0).toUpperCase() + admin.role.slice(1) || 'Unknown'}</td>
                                 <td className='px-4 py-2'>{admin.createdAt ? new Date(admin.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</td>
-                                <td className='px-4 py-2'>
+                                {/* <td className='px-4 py-2'>
                                     <button
                                         // onClick={() => handleDelete(admin.id)}
                                         className='bg-errorRed px-3 py-1 rounded-2xl hover:bg-red-700 duration-300 transition'>
                                         Delete
                                     </button>
-                                </td>
+                                </td> */}
 
                             </tr>
                         ))}
