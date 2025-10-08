@@ -79,7 +79,7 @@ const FeedbackModeration = () => {
         <div className="p-6 text-white">
             <h1 className="text-start text-3xl font-bold mb-6">Feedback Moderation</h1>
 
-            {feedbacks.length === 0 ? (
+            {!feedbacks || feedbacks.length === 0 ? (
                 <p className="text-center text-white/70">No pending feedbacks.</p>
             ) : (
                 <div className="flex flex-col gap-4">
@@ -90,8 +90,8 @@ const FeedbackModeration = () => {
                         >
                             <div className="flex flex-col gap-2 mb-4">
                                 <div className="flex justify-between items-center">
-                                    <p className="font-semibold text-lg text-mainBlue">
-                                        {fb.propertyId ? `Property: ${fb.propertyId}` : "Unknown Property"}
+                                    <p className="font-semibold text-lg text-white">
+                                        {fb.propertyId ? `Property: ${fb.propertyName}` : "Unknown Property"}
                                     </p>
                                     <p className="text-sm text-gray-400">
                                         {fb.createdAt
@@ -100,7 +100,7 @@ const FeedbackModeration = () => {
                                     </p>
                                 </div>
 
-                                <p className="text-gray-300">Room: {fb.roomId || "N/A"}</p>
+                                <p className="text-gray-300">Room: {fb.roomName || "N/A"}</p>
                                 <p className="text-gray-300">By: {fb.seekerId || "Anonymous User"}</p>
 
                                 {/* ⭐ Rating display */}
