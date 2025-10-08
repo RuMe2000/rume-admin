@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount } from "../../utils/firestoreUtils";
+import { getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount, listenTransactionAmountsPerMonth, listenBookingsPerMonth, listenCommissionPerMonth } from "../../utils/firestoreUtils";
 import { useEffect, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 
@@ -7,14 +7,6 @@ const paymentSplitData = [
     { name: "GCash", value: 400 },
     { name: "Card", value: 300 },
     { name: "Cash", value: 300 },
-];
-
-const bookingsData = [
-    { month: "May", bookings: 10 },
-    { month: "Jun", bookings: 20 },
-    { month: "Jul", bookings: 15 },
-    { month: "Aug", bookings: 30 },
-    { month: "Sep", bookings: 25 },
 ];
 
 const COLORS = ["#22AED1", "#EA7AF4", "#9B5DE5", "#FFB963", "#B1FFA9"];
@@ -26,6 +18,9 @@ const Analytics = () => {
     const [gross, setGross] = useState(0);
     const [commission, setCommission] = useState(0);
     const [genderData, setGenderData] = useState([]);
+    const [revenueData, setRevenueData] = useState([]);
+    const [bookingsData, setBookingsData] = useState([]);
+    const [commissionData, setCommissionData] = useState([]);
 
     const getData = async () => {
         const bsr = await getBookingSuccessRatio();
@@ -64,13 +59,27 @@ const Analytics = () => {
         return () => unsubscribe();
     }, []);
 
-    const revenueData = [
-        { month: "May", revenue: 275 },
-        { month: "Jun", revenue: 500 },
-        { month: "Jul", revenue: 400 },
-        { month: "Aug", revenue: 1000 },
-        { month: "Sep", revenue: gross / 100 },
-    ];
+    useEffect(() => {
+        // Listen in real time
+        const unsubscribe = listenTransactionAmountsPerMonth((data) => {
+            setRevenueData(data);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const unsubscribeBookings = listenBookingsPerMonth((data) => {
+            setBookingsData(data);
+        });
+
+        return () => unsubscribeBookings();
+    }, []);
+
+    useEffect(() => {
+        const unsubscribe = listenCommissionPerMonth((data) => setCommissionData(data));
+        return () => unsubscribe();
+    }, []);
 
     return (
         <div className="p-6 text-white">
@@ -92,11 +101,11 @@ const Analytics = () => {
                 </div>
                 <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
                     <h2 className="text-lg font-semibold mb-2">Total Net Revenue</h2>
-                    <p className="text-3xl font-bold">₱{commission / 100}.00</p>
+                    <p className="text-3xl font-bold">₱{commission}</p>
                 </div>
                 <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
                     <h2 className="text-lg font-semibold mb-2">Total Transactions Amount</h2>
-                    <p className="text-3xl font-bold">₱{gross / 100}</p>
+                    <p className="text-3xl font-bold">₱{gross}</p>
                 </div>
             </div>
 
@@ -135,7 +144,7 @@ const Analytics = () => {
                                 data={genderData}
                                 dataKey="value"
                                 nameKey="name"
-                                innerRadius={60}   // 👈 creates the donut hole
+                                innerRadius={60}
                                 outerRadius={100}
                                 label
                             >
@@ -184,6 +193,26 @@ const Analytics = () => {
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
+
+                <div className="bg-darkGray/30 p-4 rounded-2xl shadow-md">
+                    <h2 className="text-xl font-semibold mb-3 text-white">Commission Amount per Month</h2>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={commissionData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
+                            <XAxis dataKey="month" stroke="#cbd5e1" />
+                            <YAxis stroke="#cbd5e1" />
+                            <Tooltip />
+                            <Line
+                                type="monotone"
+                                dataKey="commission"
+                                stroke="#10b981"
+                                strokeWidth={3}
+                                name="Commission"
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+
 
                 {/* Bookings chart */}
                 <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">

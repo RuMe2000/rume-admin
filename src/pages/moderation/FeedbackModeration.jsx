@@ -80,7 +80,7 @@ const FeedbackModeration = () => {
             <h1 className="text-start text-3xl font-bold mb-6">Feedback Moderation</h1>
 
             {!feedbacks || feedbacks.length === 0 ? (
-                <p className="text-center text-white/70">No pending feedbacks.</p>
+                <p className="text-center text-white">No pending feedbacks.</p>
             ) : (
                 <div className="flex flex-col gap-4">
                     {feedbacks.map((fb) => (

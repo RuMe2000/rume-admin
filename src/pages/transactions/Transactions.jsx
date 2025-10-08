@@ -1,7 +1,5 @@
 import { getTransactions, getOwnerNameByPropertyId } from "../../utils/firestoreUtils";
 import { useState, useEffect } from "react";
-// import MyDatePicker from "../../components/MyDatePicker";
-// import Datepicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css';
 
 const Transactions = () => {
@@ -9,10 +7,8 @@ const Transactions = () => {
     const [filter, setFilter] = useState("all");
     const [statusFilter, setStatusFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
-    // const [startDate, setStartDate] = useState("");
-    // const [endDate, setEndDate] = useState("");
     const [sortDirection, setSortDirection] = useState("desc");
-    const [ownerNames, setOwnerNames] = useState({}); // { propertyId: ownerName }
+    const [ownerNames, setOwnerNames] = useState({});
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -62,10 +58,6 @@ const Transactions = () => {
 
         //status filter
         if (statusFilter !== "all" && t.status !== statusFilter) return false;
-
-        // // custom date range
-        // if (startDate && createdAtDate < new Date(startDate)) return false;
-        // if (endDate && createdAtDate > new Date(endDate)) return false;
 
         //search filter
         const lowerSearch = searchTerm.toLowerCase();
@@ -147,8 +139,6 @@ const Transactions = () => {
                         </option>
                     </select>
 
-                    {/* <Datepicker selected={} onChange={} /> */}
-
                 </div>
             </div>
 
@@ -187,7 +177,7 @@ const Transactions = () => {
                                     <td className="px-4 py-2">
                                         {ownerNames[transaction.propertyId] ?? "Loading..."}
                                     </td>
-                                    <td className="px-4 py-2">{transaction.totalAmount/100}</td>
+                                    <td className="px-4 py-2">{transaction.amount/100}</td>
                                     <td className="px-4 py-2">
                                         <span
                                             className={`inline-flex items-center justify-center w-23 h-7 rounded-full text-sm font-semibold

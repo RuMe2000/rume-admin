@@ -103,7 +103,7 @@ const AdminDashboard = () => {
         { title: "Pending Properties", value: pending },
         { title: "Reverification Requests", value: reverify },
         { title: "Recent Transactions", value: recent },
-        { title: "Commission Revenue", value: `₱${commission / 100}` },
+        { title: "Commission Revenue", value: `₱${commission}` },
         // { title: "Flagged Reports", value: 2 },
     ];
 

@@ -298,15 +298,13 @@ export const getGenderCount = async () => {
 
         let maleCount = 0;
         let femaleCount = 0;
-        let otherCount = 0;
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            const sex = (data.sex || "").toLowerCase(); // handles either field name
+            const sex = (data.sex || "").toLowerCase();
 
             if (sex === "male") maleCount++;
             else if (sex === "female") femaleCount++;
-            else otherCount++;
         });
 
         return {
@@ -316,6 +314,6 @@ export const getGenderCount = async () => {
         };
     } catch (error) {
         console.error("Error fetching gender count:", error);
-        return { male: 0, female: 0, other: 0, total: 0 };
+        return { male: 0, female: 0, total: 0 };
     }
 };
