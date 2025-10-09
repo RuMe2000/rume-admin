@@ -194,7 +194,7 @@ const Analytics = () => {
                     </ResponsiveContainer>
                 </div>
 
-                <div className="bg-darkGray/30 p-4 rounded-2xl shadow-md">
+                <div className="bg-blue-950 p-4 rounded-2xl shadow-md">
                     <h2 className="text-xl font-semibold mb-3 text-white">Commission Amount per Month</h2>
                     <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={commissionData}>

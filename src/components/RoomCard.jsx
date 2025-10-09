@@ -1,7 +1,15 @@
 export default function RoomCard({ room, onManage }) {
     return (
         <div
-            className="relative rounded-2xl overflow-hidden shadow-md shadow-bgBlue cursor-pointer transition duration-300 hover:scale-105 h-48 flex items-center justify-center"
+            className={`relative rounded-2xl overflow-hidden shadow-md shadow-bgBlue cursor-pointer transition duration-300 hover:scale-105 h-48 flex items-center justify-center
+                ${room.verificationStatus === 'pending'
+                    ? 'border-3 border-yellow-500'
+                    : room.verificationStatus === 'reverify'
+                    ? 'border-3 border-orange-500'
+                    : room.verificationStatus === 'verified'
+                    ? 'border-3 border-successGreen'
+                    : 'border 3 border-gray-400'
+                }`}
             onClick={onManage}
         >
             {/* Background Image */}

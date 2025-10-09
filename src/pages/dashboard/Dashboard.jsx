@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { getAllUserCount, getCommission, getPendingPropertyCount, getVerifiedPropertyCount, getRecentTransactionCount, getTransactionTotalAmount, getOwnerCountByStatus, listenForPendingRoomReverifyRequestsCount, listenForPendingPropertiesWithOwners, getUserRoleCounts } from "../../utils/firestoreUtils";
+import { getAllUserCount, getCommission, getPendingPropertyCount, getPendingAndReverifyRoomsCount, getVerifiedPropertyCount, getRecentTransactionCount, getTransactionTotalAmount, getOwnerCountByStatus, listenForPendingRoomReverifyRequestsCount, listenForPendingPropertiesWithOwners, getUserRoleCounts } from "../../utils/firestoreUtils";
 import NotificationBell from "../../components/NotificationBell";
 
 const AdminDashboard = () => {
@@ -40,44 +40,17 @@ const AdminDashboard = () => {
 
         const comm = await getCommission();
         setCommission(comm);
+
+        const rev = await getPendingAndReverifyRoomsCount();
+        setReverify(rev.total);
+
+        const pend = await getPendingPropertyCount();
+        setPending(pend);
     };
 
     useEffect(() => {
         fetchCardData();
-    })
-
-    useEffect(() => {
-        const unsubscribe = listenForPendingRoomReverifyRequestsCount((count) => {
-            setReverify(count);
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-    useEffect(() => {
-        const unsubscribe = listenForPendingPropertiesWithOwners((count) => {
-            setPending(count.length);
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-    // dummy data for charts
-    const bookingsData = [
-        { month: "May", bookings: 10 },
-        { month: "Jun", bookings: 20 },
-        { month: "Jul", bookings: 15 },
-        { month: "Aug", bookings: 30 },
-        { month: "Sep", bookings: 25 },
-    ];
-
-    const revenueData = [
-        { month: "May", revenue: 275 },
-        { month: "Jun", revenue: 500 },
-        { month: "Jul", revenue: 400 },
-        { month: "Aug", revenue: 1000 },
-        { month: "Sep", revenue: gross / 100 },
-    ];
+    });
 
     const propertyData = [
         { name: "Verified", value: verified },
@@ -101,7 +74,7 @@ const AdminDashboard = () => {
     const stats = [
         { title: "Total Users", value: userCount },
         { title: "Pending Properties", value: pending },
-        { title: "Reverification Requests", value: reverify },
+        { title: "Pending Rooms", value: reverify },
         { title: "Recent Transactions", value: recent },
         { title: "Commission Revenue", value: `₱${commission}` },
         // { title: "Flagged Reports", value: 2 },

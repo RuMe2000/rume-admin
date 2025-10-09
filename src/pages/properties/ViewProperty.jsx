@@ -22,6 +22,7 @@ export default function ViewProperty() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [marker, setMarker] = useState(null);
+    const [showRoomDatePicker, setShowRoomDatePicker] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -50,6 +51,50 @@ export default function ViewProperty() {
         } catch (error) {
             console.error("Reauth failed:", error);
             setError("Invalid password.");
+        }
+    };
+
+    const handleScheduleRoomsVerification = async () => {
+        if (!selectedDate) {
+            alert("Please select a date first.");
+            return;
+        }
+
+        try {
+            const roomsRef = collection(db, "properties", propertyId, "rooms");
+            const roomsSnap = await getDocs(roomsRef);
+
+            const batchUpdates = [];
+
+            roomsSnap.forEach((roomDoc) => {
+                const roomData = roomDoc.data();
+                if (roomData.verificationStatus === "pending" || roomData.verificationStatus === "reverify") {
+                    const roomRef = doc(db, "properties", propertyId, "rooms", roomDoc.id);
+                    batchUpdates.push(updateDoc(roomRef, {
+                        verificationSchedule: Timestamp.fromDate(new Date(selectedDate)),
+                        updatedAt: new Date(),
+                    }));
+                }
+            });
+
+            await Promise.all(batchUpdates);
+
+            // Update UI (optional)
+            setProperty((prev) => ({
+                ...prev,
+                rooms: prev.rooms.map((room) =>
+                    room.verificationStatus === "pending" || room.verificationStatus === "reverify"
+                        ? { ...room, verificationSchedule: new Date(selectedDate) }
+                        : room
+                ),
+            }));
+
+            setShowRoomDatePicker(false);
+            setSelectedDate("");
+            alert("Verification schedule updated for pending and reverify rooms!");
+        } catch (error) {
+            console.error("Error scheduling room verification:", error);
+            alert("Failed to schedule verification for rooms.");
         }
     };
 
@@ -249,7 +294,7 @@ export default function ViewProperty() {
             <div className="flex flex-col gap-3 items-center fixed top-8 right-10">
                 <div
                     className={`
-                            mr-2 text-center rounded-full p-2 shadow-xl
+                            mr-2 text-center rounded-full px-6 py-2 shadow-xl
                             ${property.status === 'verified' ? 'bg-successGreen' : ''}
                             ${property.status === 'pending' ? 'bg-yellow-500' : ''}
                             ${property.status === 'rejected' ? 'bg-errorRed' : ''}
@@ -387,10 +432,21 @@ export default function ViewProperty() {
                 </ol>
             </div>
 
-
             <div className='pb-4 flex flex-col items-start overflox-x-auto rounded-2xl'>
                 <div className="mt-4 w-full">
-                    <label className="font-bold text-xl mt-3">Rooms</label>
+                    <div className="flex items-center justify-between w-full mt-3">
+                        <label className="font-bold text-xl">Rooms</label>
+                        <button
+                            onClick={() => setShowRoomDatePicker(true)}
+                            className="flex items-center gap-2 bg-mainBlue text-white px-4 py-2 rounded-xl shadow hover:bg-hoverBlue transition duration-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="#FFFFFF">
+                                <path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Z" />
+                            </svg>
+                            Schedule Rooms Verification
+                        </button>
+                    </div>
+
                     <div className="grid grid-cols-4 gap-3 mt-2 mb-3">
                         {property?.rooms && property.rooms.length > 0 ? (
                             property.rooms.map((room) =>
@@ -670,6 +726,48 @@ export default function ViewProperty() {
             </AnimatePresence>
 
             <AnimatePresence>
+                {showRoomDatePicker && (
+                    <motion.div
+                        className="fixed inset-0 flex items-center justify-center bg-black/20 z-50"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <motion.div
+                            className="bg-bgBlue text-white w-90 px-5 py-6 rounded-2xl shadow-lg flex flex-col gap-4"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <h2 className="text-xl font-semibold">Schedule Verification for Rooms</h2>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                className="px-3 py-2 rounded-lg text-white"
+                            />
+                            <div className="flex flex-row justify-end gap-3">
+                                <button
+                                    onClick={() => setShowRoomDatePicker(false)}
+                                    className="bg-errorRed px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleScheduleRoomsVerification}
+                                    className="bg-mainBlue px-4 py-2 rounded-lg hover:bg-hoverBlue transition duration-200"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
                 {showSuccess && (
                     <motion.div
                         className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
@@ -693,4 +791,4 @@ export default function ViewProperty() {
 
         </div>
     );
-}
+};

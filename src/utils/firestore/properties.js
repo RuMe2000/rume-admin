@@ -170,12 +170,34 @@ export const deleteProperty = async (propertyId) => {
     }
 }
 
+//verify property
 export const verifyProperty = async (propertyId) => {
-    const propertyDocRef = doc(db, 'properties', propertyId);
-    await updateDoc(propertyDocRef, {
-        status: 'verified',
-        dateVerified: serverTimestamp()
-    });
+    try {
+        const propertyRef = doc(db, "properties", propertyId);
+        const propertySnap = await getDoc(propertyRef);
+
+        if (!propertySnap.exists()) {
+            throw new Error("Property not found.");
+        }
+
+        const propertyData = propertySnap.data();
+        const ownerId = propertyData.ownerId;
+
+        await updateDoc(propertyRef, {
+            status: "verified",
+            dateVerified: serverTimestamp(),
+        });
+
+        if (ownerId) {
+            const ownerRef = doc(db, "users", ownerId);
+            await updateDoc(ownerRef, { status: "verified" });
+        }
+
+        console.log("Property and owner verified successfully.");
+    } catch (error) {
+        console.error("Error verifying property:", error);
+        throw error;
+    }
 };
 
 export const unverifyProperty = async (propertyId) => {

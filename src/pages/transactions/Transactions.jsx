@@ -1,6 +1,7 @@
 import { getTransactions, getOwnerNameByPropertyId } from "../../utils/firestoreUtils";
 import { useState, useEffect } from "react";
 import 'react-datepicker/dist/react-datepicker.css';
+import TransactionCard from "./TransactionCard";
 
 const Transactions = () => {
     const [transactions, setTransactions] = useState([]);
@@ -8,25 +9,18 @@ const Transactions = () => {
     const [statusFilter, setStatusFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
     const [sortDirection, setSortDirection] = useState("desc");
-    const [ownerNames, setOwnerNames] = useState({});
+    const [selectedTransactionId, setSelectedTransactionId] = useState(null);
+
+    const fetchTransactions = async () => {
+        try {
+            const txs = await getTransactions();
+            setTransactions(txs);
+        } catch (err) {
+            console.error("Error fetching transactions:", err);
+        }
+    };
 
     useEffect(() => {
-        const fetchTransactions = async () => {
-            try {
-                const txs = await getTransactions(); // your util should return an array
-                setTransactions(txs);
-
-                // Optionally prefetch owner names for all unique propertyIds:
-                const uniqueIds = [...new Set(txs.map(t => t.propertyId))];
-                for (const id of uniqueIds) {
-                    const name = await getOwnerNameByPropertyId(id);
-                    setOwnerNames(prev => ({ ...prev, [id]: name }));
-                }
-            } catch (err) {
-                console.error("Error fetching transactions:", err);
-            }
-        };
-
         fetchTransactions();
     }, []);
 
@@ -162,6 +156,7 @@ const Transactions = () => {
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Amount</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
                             <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
+                            <th className="w-15 px-4 py-2 border-b-3 border-darkGray text-center"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -173,14 +168,14 @@ const Transactions = () => {
                                             ? new Date(transaction.createdAt.seconds * 1000).toLocaleDateString()
                                             : "No date"}
                                     </td>
-                                    <td className="px-4 py-2">{transaction.seekerName}</td>
+                                    <td className="px-4 py-2">{transaction.payerName}</td>
                                     <td className="px-4 py-2">
-                                        {ownerNames[transaction.propertyId] ?? "Loading..."}
+                                        {transaction.ownerName ?? "Loading..."}
                                     </td>
-                                    <td className="px-4 py-2">{transaction.amount/100}</td>
+                                    <td className="px-4 py-2">{transaction.amount / 100}</td>
                                     <td className="px-4 py-2">
                                         <span
-                                            className={`inline-flex items-center justify-center w-23 h-7 rounded-full text-sm font-semibold
+                                            className={`inline-flex capitalize items-center justify-center w-23 h-7 rounded-full text-sm font-semibold
                                                     ${transaction.status === 'failed'
                                                     ? 'bg-errorRed text-white'
                                                     : transaction.status === 'succeeded'
@@ -191,7 +186,7 @@ const Transactions = () => {
                                                 }`}
                                         >
                                             {transaction.status
-                                                ? transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)
+                                                ? transaction.status
                                                 : 'Unknown'}
                                         </span>
                                     </td>
@@ -202,6 +197,16 @@ const Transactions = () => {
                                         <span className='hidden group-hover:inline-block transition-all duration-200'>
                                             {transaction.id}
                                         </span>
+                                    </td>
+                                    <td className='px-4 py-2 flex items-center justify-center gap-2'>
+                                        <button
+                                            onClick={() => setSelectedTransactionId(transaction.id)}
+                                            className='bg-transparent px-3 py-1 rounded-2xl hover:scale-120 hover:cursor-pointer duration-300 transition'
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF">
+                                                <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
+                                            </svg>
+                                        </button>
                                     </td>
                                 </tr>
                             ))
@@ -215,6 +220,17 @@ const Transactions = () => {
                     </tbody>
                 </table>
             </div>
+
+            {selectedTransactionId && (
+                <TransactionCard
+                    transactionId={selectedTransactionId}
+                    // role="owner"
+                    onClose={() => {
+                        setSelectedTransactionId(null);
+                        fetchTransactions();
+                    }}
+                />
+            )}
         </div>
     );
 };

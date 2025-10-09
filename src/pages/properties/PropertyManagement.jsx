@@ -1,8 +1,9 @@
 import { getAllPropertyCount, getPropertyCountByStatus } from "../../utils/firestoreUtils";
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { replace, useNavigate } from 'react-router-dom';
 import { AllPropertyButton, StatusPropertyButton } from "../../components/PropertyButton";
 import PropertyCard from "../../components/PropertyCard";
+import { RoomVerificationCard } from "../../components/RoomVerificationCard";
 
 const PropertyManagement = () => {
     //get all property count
@@ -33,6 +34,7 @@ const PropertyManagement = () => {
                 {/* <AllPropertyButton count={allPropertiesCount} onManage={() => navigate('/properties/all')} /> */}
                 <StatusPropertyButton statusName="Verified" count={verifiedPropertiesCount} onManage={() => navigate('/properties/verified')} />
                 <StatusPropertyButton statusName="Pending" count={pendingPropertiesCount} onManage={() => navigate('/properties/pending')} />
+                <RoomVerificationCard onManage={() => navigate('/properties/pendingRooms')} />
             </div>
             <PropertyCard />
         </div>

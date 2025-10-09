@@ -22,6 +22,7 @@ import PendingProperties from "./pages/properties/PendingProperties";
 import VerifiedProperties from "./pages/properties/VerifiedProperties";
 import ViewRoom from "./pages/properties/ViewRoom";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PendingRooms from "./pages/properties/PendingRooms";
 
 function App() {
     return (
@@ -59,6 +60,7 @@ function App() {
                                     <Route path="/properties/all" element={<AllProperties />} />
                                     <Route path="/properties/pending" element={<PendingProperties />} />
                                     <Route path="/properties/verified" element={<VerifiedProperties />} />
+                                    <Route path="/properties/pendingRooms" element={<PendingRooms />} />
                                     <Route path="/properties/view/:propertyId" element={<ViewProperty />} />
                                     <Route path="/properties/view/:propertyId/room/:roomId" element={<ViewRoom />} />
 

@@ -44,8 +44,8 @@ const StatusPropertyCard = ({ status }) => {
             {properties.map((property) => (
                 <div
                     key={property.id}
-                    className="relative h-64 rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition duration-300"
-                    onClick={() => navigate(`view/${property.id}`)}
+                    className="relative h-64 rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition duration-300 cursor-pointer"
+                    onClick={() => navigate(`/properties/view/${property.id}`)}
                 >
                     {/* Background Image */}
                     <img
@@ -55,18 +55,18 @@ const StatusPropertyCard = ({ status }) => {
                     />
 
                     {/* Overlay */}
-                    <div className="absolute inset-0 bg-black/10"></div>
+                    <div className="absolute inset-0 bg-black/20"></div>
 
                     {/* Top left: property name */}
-                    <div className="absolute top-2 left-2 text-white text-xl font-bold px-2 py-1 rounded">
+                    <div className="absolute top-5 left-5 text-white text-xl font-bold px-2 py-1 rounded">
                         {property.name}
                     </div>
 
                     {/* Top right: property status */}
-                    <div className="absolute top-2 right-2 text-white px-2 py-1 rounded-full">
+                    <div className="absolute top-5 right-5 text-white px-2 py-1 rounded-full">
                         <div
                             className={`
-                mr-2 text-center rounded-full p-2 shadow-xl
+                mr-2 text-center rounded-full px-4 py-1 shadow-xl
                 ${property.status === "verified" ? "bg-successGreen" : ""}
                 ${property.status === "pending" ? "bg-yellow-500" : ""}
                 ${property.status !== "verified" &&
@@ -119,7 +119,7 @@ const StatusPropertyCard = ({ status }) => {
                     </div>
 
                     {/* Bottom left: owner name */}
-                    <div className="absolute bottom-2 left-2 text-white text-lg font-semibold px-2 py-1 rounded">
+                    <div className="absolute bottom-5 left-5 text-white text-lg font-semibold px-2 py-1 rounded">
                         {property.ownerName}
                     </div>
                 </div>

@@ -39,10 +39,10 @@ const Admins = () => {
                     <thead>
                         <tr>
                             <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">ID</th>
-                            <th className="w-70 px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
+                            <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Name</th>
                             <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Email</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Role</th>
-                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
+                            <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Date Created</th>
                             {/* <th className="w-15 px-4 py-2 border-b-3 border-darkGray text-center"></th> */}
                         </tr>
                     </thead>

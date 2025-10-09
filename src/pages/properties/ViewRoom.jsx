@@ -4,6 +4,7 @@ import { doc, getDoc, updateDoc, arrayRemove, arrayUnion, Timestamp } from "fire
 import { db } from "../../firebase";
 import RoomImagesCarousel from "../../components/RoomImagesCarousel";
 import { motion, AnimatePresence } from "framer-motion";
+import { deleteRoom } from "../../utils/firestoreUtils";
 
 // ✅ AMENITIES SECTION (same as yours)
 function AmenitiesSection({ room, propertyId, roomId, setRoom }) {
@@ -209,11 +210,12 @@ export default function ViewRoom() {
                 <div className="flex flex-col gap-3 items-center fixed top-8 right-10">
                     <div
                         className={`
-                            mr-2 text-center rounded-full p-2 shadow-xl
+                            mr-2 text-center rounded-full px-6 py-2 shadow-xl
                             ${room.verificationStatus === 'verified' ? 'bg-successGreen' : ''}
                             ${room.verificationStatus === 'pending' ? 'bg-yellow-500' : ''}
+                            ${room.verificationStatus === 'reverify' ? 'bg-orange-500' : ''}
                             ${room.verificationStatus === 'rejected' ? 'bg-errorRed' : ''}
-                            ${room.verificationStatus !== 'verified' && room.verificationStatus !== 'pending' && room.verificationStatus !== 'rejected' ? 'bg-gray-400' : ''}
+                            ${room.verificationStatus !== 'verified' && room.verificationStatus !== 'pending' && room.verificationStatus !== 'rejected' && room.verificationStatus !== 'reverify' ? 'bg-gray-400' : ''}
                         `}
                     >
                         <h1
@@ -225,6 +227,8 @@ export default function ViewRoom() {
                                 <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="m586-486 78-78-56-58-79 79 57 57Zm248 248-88-88-6-70 74-84-74-86 10-112-110-24-58-96-102 44-104-44-37 64-59-59 64-107 136 58 136-58 76 128 144 32-14 148 98 112-98 112 12 130Zm-456 76 102-44 104 44 38-64-148-148-36 36-142-142 56-56 86 84-21 21-203-203 6 68-74 86 74 84-10 114 110 24 58 96ZM344-60l-76-128-144-32 14-148-98-112 98-112-12-130-70-70 56-56 736 736-56 56-112-112-64 108-136-58-136 58Zm185-483Zm-145 79Z" /></svg>
                             ) : room.verificationStatus === 'rejected' ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="M280-440h400v-80H280v80ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" /></svg>
+                            ) : room.verificationStatus === 'reverify' ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="m482-200 114-113-114-113-42 42 43 43q-28 1-54.5-9T381-381q-20-20-30.5-46T340-479q0-17 4.5-34t12.5-33l-44-44q-17 25-25 53t-8 57q0 38 15 75t44 66q29 29 65 43.5t74 15.5l-38 38 42 42Zm165-170q17-25 25-53t8-57q0-38-14.5-75.5T622-622q-29-29-65.5-43T482-679l38-39-42-42-114 113 114 113 42-42-44-44q27 0 55 10.5t48 30.5q20 20 30.5 46t10.5 52q0 17-4.5 34T603-414l44 44ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" /></svg>
                             ) : (
                                 <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z" /></svg>
                             )}
@@ -264,6 +268,16 @@ export default function ViewRoom() {
 
             {/* ROOM DETAILS */}
             <div className="pl-4 mt-4">
+                <label className="font-bold text-lg">Name</label>
+                <div className="flex items-left">
+                    <input
+                        value={room.name ?? ""}
+                        onChange={(e) => handleChange("name", e.target.value)}
+                        style={{ width: 120 }}
+                        className="px-2 py-2 bg-darkGray/30 rounded-2xl text-center text-lg mt-1 mb-3 border-0 text-white focus:outline-none focus:border-b-white"
+                    />
+                </div>
+
                 <label className="font-bold text-lg">Monthly Rent</label>
                 <p
                     className="mt-1 mb-3 text-lg bg-darkGray/30 rounded-2xl px-3 py-2"
@@ -289,25 +303,28 @@ export default function ViewRoom() {
                     roomId={roomId}
                     setRoom={setRoom}
                 />
-            </div>
 
-            <div className="flex flex-row gap-3 fixed bottom-6 left-77">
-                {room.verificationStatus === 'pending' ? (
-                    <button
-                        onClick={() => setShowDatePicker(true)}
-                        className="bg-blue-500 font-semibold text-lg px-5 py-3 shadow-xl rounded-xl hover:cursor-pointer hover:bg-blue-700 duration-300 transition"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-160 0q-17 0-28.5-11.5T280-440q0-17 11.5-28.5T320-480q17 0 28.5 11.5T360-440q0 17-11.5 28.5T320-400Zm320 0q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-160 0q-17 0-28.5-11.5T280-280q0-17 11.5-28.5T320-320q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240Zm320 0q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z" /></svg>
-                    </button>
-                ) : (
-                    <div>
-                    </div>
-                )}
+                <label
+                    className="text-errorRed hover:underline mt-6 text-sm inline-block cursor-pointer"
+                    onClick={async () => {
+                        if (window.confirm("Are you sure you want to delete this room? This action cannot be undone.")) {
+                            try {
+                                await deleteRoom(propertyId, roomId);
+                                alert("Room deleted successfully!");
+                                navigate(-1, { replace: true });
+                            } catch (error) {
+                                alert("Failed to delete room: " + error.message);
+                            }
+                        }
+                    }}
+                >
+                    Delete Room
+                </label>
             </div>
 
             {/* ACTION BUTTONS */}
             <div className="flex gap-3 fixed bottom-6 right-10">
-                {room.verificationStatus === 'pending' ? (
+                {room.verificationStatus === 'pending' || room.verificationStatus === 'reverify' ? (
                     <div className='flex flex-row gap-3'>
                         <button
                             onClick={() => handleVerify(roomId)}

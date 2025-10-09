@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, collectionGroup, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 // Fixed getSeekerStayDuration - Added missing bookingDate variable
@@ -15,7 +15,7 @@ export const getSeekerStayDuration = async (userId) => {
         const bookingDoc = bookingsSnap.docs[0];
         const bookingData = bookingDoc.data();
         const roomId = bookingData.roomId;
-        
+
         // FIX: Get bookingDate from the booking data
         const bookingDate = bookingData.bookingDate?.toDate() || new Date();
 
@@ -99,5 +99,104 @@ export const getBookedRoomByUser = async (userId) => {
     } catch (error) {
         console.error("Error fetching booked room:", error);
         return null;
+    }
+};
+
+//get pending and reverify room count
+export const getPendingAndReverifyRoomsCount = async () => {
+    try {
+        const roomsRef = collectionGroup(db, 'rooms');
+
+        const pendingQuery = query(roomsRef, where('verificationStatus', '==', 'pending'));
+        const pendingSnapshot = await getDocs(pendingQuery);
+        const pendingCount = pendingSnapshot.size;
+
+        const reverifyQuery = query(roomsRef, where('verificationStatus', '==', 'reverify'));
+        const reverifySnapshot = await getDocs(reverifyQuery);
+        const reverifyCount = reverifySnapshot.size;
+
+        return {
+            pending: pendingCount,
+            reverify: reverifyCount,
+            total: pendingCount + reverifyCount,
+        };
+    } catch (error) {
+        console.error('Error fetching room counts:', error);
+        throw error;
+    }
+};
+
+//get properties with pending or reverify rooms
+export async function getPropertiesWithPendingOrReverifyRooms() {
+    const propertiesRef = collection(db, "properties");
+    const propertySnapshots = await getDocs(propertiesRef);
+
+    const matchingProperties = [];
+
+    // loop through each property
+    for (const propertyDoc of propertySnapshots.docs) {
+        const propertyData = propertyDoc.data();
+
+        // fetch rooms inside each property
+        const roomsRef = collection(db, "properties", propertyDoc.id, "rooms");
+        const roomsSnapshot = await getDocs(roomsRef);
+
+        if (roomsSnapshot.empty) continue; // no rooms at all
+
+        // filter only rooms that are pending or reverify
+        const filteredRooms = roomsSnapshot.docs
+            .map((roomDoc) => ({ id: roomDoc.id, ...roomDoc.data() }))
+            .filter((room) => {
+                const status = room.verificationStatus?.toLowerCase();
+                return status === "pending" || status === "reverify";
+            });
+
+        // only include property if at least 1 room qualifies
+        if (filteredRooms.length > 0) {
+            // fetch owner name from users collection
+            let ownerName = "Unknown Owner";
+            if (propertyData.ownerId) {
+                try {
+                    const userRef = doc(db, "users", propertyData.ownerId);
+                    const userSnapshot = await getDoc(userRef);
+
+                    if (userSnapshot.exists()) {
+                        const userData = userSnapshot.data();
+                        const firstName = userData.firstName || "";
+                        const lastName = userData.lastName || "";
+                        ownerName = `${firstName} ${lastName}`.trim() || "Unknown Owner";
+                    }
+                } catch (error) {
+                    console.error(`Error fetching owner for property ${propertyDoc.id}:`, error);
+                }
+            }
+
+            matchingProperties.push({
+                id: propertyDoc.id,
+                ...propertyData,
+                ownerName,
+                rooms: filteredRooms,
+            });
+        }
+    }
+
+    return matchingProperties;
+};
+
+// Delete a specific room under a given property
+export const deleteRoom = async (propertyId, roomId) => {
+    if (!propertyId || !roomId) {
+        console.error("❌ Missing propertyId or roomId.");
+        return;
+    }
+
+    try {
+        const roomRef = doc(db, "properties", propertyId, "rooms", roomId);
+        await deleteDoc(roomRef);
+        console.log(`✅ Room ${roomId} successfully deleted from property ${propertyId}.`);
+        return true;
+    } catch (error) {
+        console.error("🔥 Error deleting room:", error);
+        throw error;
     }
 };

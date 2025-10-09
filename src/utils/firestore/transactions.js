@@ -23,43 +23,43 @@ export const getRecentTransactionCount = async () => {
     return querySnapshot.size;
 }
 
-//get all transactions
+// Get all transactions
 export const getTransactions = async () => {
     try {
-        //get all transactions
+        // Get all transactions
         const transactionsRef = collection(db, "transactions");
         const q = query(transactionsRef);
         const querySnapshot = await getDocs(q);
 
         const transactions = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        //get all seeker ids
-        const seekerIds = Array.from(new Set(transactions.map(p => p.userId).filter(Boolean)));
+        // Get all unique owner IDs
+        const ownerIds = Array.from(new Set(transactions.map(t => t.ownerId).filter(Boolean)));
 
-        //fetch seekers
-        const seekerSnaps = await Promise.all(seekerIds.map(id => getDoc(doc(db, 'users', id))));
-        const seekerMap = {};
-        seekerSnaps.forEach((snap, idx) => {
-            const id = seekerIds[idx];
+        // Fetch owner documents
+        const ownerSnaps = await Promise.all(ownerIds.map(id => getDoc(doc(db, 'users', id))));
+        const ownerMap = {};
+        ownerSnaps.forEach((snap, idx) => {
+            const id = ownerIds[idx];
             if (snap.exists()) {
                 const data = snap.data();
                 const first = data.firstName ?? '';
                 const last = data.lastName ?? '';
-                seekerMap[id] = (first || last) ? `${first} ${last}`.trim() : 'Unknown Seeker';
+                ownerMap[id] = (first || last) ? `${first} ${last}`.trim() : 'Unknown Owner';
             } else {
-                seekerMap[id] = 'Unknown Seeker';
+                ownerMap[id] = 'Unknown Owner';
             }
         });
 
-        //attach seeker name to transaction
-        const withSeekers = transactions.map(p => ({
-            ...p,
-            seekerName: seekerMap[p.userId] ?? 'Unknown Seeker'
+        // Attach owner name to each transaction
+        const withOwners = transactions.map(t => ({
+            ...t,
+            ownerName: ownerMap[t.ownerId] ?? 'Unknown Owner',
         }));
 
-        return withSeekers;
+        return withOwners;
     } catch (error) {
-        console.error('Error fetching seekers:', error);
+        console.error('Error fetching owners:', error);
         return [];
     }
 };
@@ -165,4 +165,12 @@ export function listenCommissionPerMonth(callback) {
     });
 
     return unsubscribe;
-}
+};
+
+//get transaction by id
+export const getTransactionById = async (transactionId) => {
+    const docRef = doc(db, 'transactions', transactionId);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+};
+
