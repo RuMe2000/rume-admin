@@ -8,6 +8,7 @@ import { verifyProperty, unverifyProperty, rejectProperty, deleteProperty } from
 import RoomCard from '../../components/RoomCard';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 const libraries = ['marker'];
 
@@ -23,6 +24,7 @@ export default function ViewProperty() {
     const [error, setError] = useState("");
     const [marker, setMarker] = useState(null);
     const [showRoomDatePicker, setShowRoomDatePicker] = useState(false);
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -585,20 +587,24 @@ export default function ViewProperty() {
 
                 <label
                     className="text-errorRed hover:underline mt-6 text-sm inline-block cursor-pointer"
-                    onClick={async () => {
-                        if (window.confirm("Are you sure you want to delete this property? This action cannot be undone.")) {
-                            try {
-                                await deleteProperty(propertyId);
-                                alert("Property deleted successfully!");
-                                navigate("/properties", { replace: true });
-                            } catch (error) {
-                                alert("Failed to delete property: " + error.message);
-                            }
-                        }
-                    }}
+                    onClick={() => setShowConfirmDelete(true)}
                 >
                     Delete Property
                 </label>
+
+                <ConfirmDialog
+                    visible={showConfirmDelete}
+                    title="Delete Property"
+                    message="Are you sure you want to delete this property? This action cannot be undone."
+                    confirmText="Delete"
+                    cancelText="Cancel"
+                    onConfirm={async () => {
+                        setShowConfirmDelete(false);
+                        await handleDeleteProperty();
+                    }}
+                    onCancel={() => setShowConfirmDelete(false)}
+                />
+
             </div>
 
             <div className="flex flex-row gap-3 fixed bottom-6 left-77">

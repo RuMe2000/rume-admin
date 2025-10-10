@@ -54,8 +54,8 @@ const TransactionCard = ({ transactionId, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
-            <div className="bg-bgBlue text-white rounded-2xl shadow-lg w-[450px] h-[680px] relative p-6 flex flex-col border-2 border-darkGray">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+            <div className="bg-bgBlue text-white rounded-2xl shadow-lg w-[450px] h-[680px] relative p-6 flex flex-col border border-darkGray">
                 {/* X Button */}
                 <button
                     onClick={onClose}
