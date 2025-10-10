@@ -274,3 +274,93 @@ export function listenForPendingOrReverifyRooms(callback) {
     // Return unsubscribe for cleanup
     return unsubscribeProperties;
 }
+
+//count rooms by verification status across all properties
+export async function getRoomVerificationStatusCounts() {
+    try {
+        const propertiesRef = collection(db, "properties");
+        const propertiesSnapshot = await getDocs(propertiesRef);
+
+        // Initialize counters
+        let verifiedCount = 0;
+        let pendingCount = 0;
+        let reverifyCount = 0;
+
+        // Iterate over each property
+        for (const propertyDoc of propertiesSnapshot.docs) {
+            const propertyId = propertyDoc.id;
+            const roomsRef = collection(db, "properties", propertyId, "rooms");
+            const roomsSnapshot = await getDocs(roomsRef);
+
+            roomsSnapshot.forEach((roomDoc) => {
+                const roomData = roomDoc.data();
+                const status = roomData.verificationStatus?.toLowerCase();
+
+                if (status === "verified") verifiedCount++;
+                else if (status === "pending") pendingCount++;
+                else if (status === "reverify") reverifyCount++;
+            });
+        }
+
+        return {
+            verified: verifiedCount,
+            pending: pendingCount,
+            reverify: reverifyCount,
+            total: verifiedCount + pendingCount + reverifyCount,
+        };
+    } catch (error) {
+        console.error("Error counting rooms by verification status:", error);
+        return { verified: 0, pending: 0, reverify: 0, total: 0 };
+    }
+};
+
+// Get top amenities based on booked rooms
+export async function getTopBookedAmenities(limit = 10) {
+    try {
+        const bookingsRef = collection(db, "bookings");
+        const bookingsSnapshot = await getDocs(bookingsRef);
+
+        if (bookingsSnapshot.empty) return [];
+
+        const amenityCounts = {};
+
+        // Loop through all bookings
+        for (const bookingDoc of bookingsSnapshot.docs) {
+            const bookingData = bookingDoc.data();
+            const propertyId = bookingData.propertyId;
+            const roomId = bookingData.roomId;
+
+            if (!propertyId || !roomId) continue;
+
+            try {
+                const roomRef = doc(db, "properties", propertyId, "rooms", roomId);
+                const roomSnap = await getDoc(roomRef);
+                if (!roomSnap.exists()) continue;
+
+                const roomData = roomSnap.data();
+                const amenities = roomData.amenities || [];
+
+                // Count each amenity
+                amenities.forEach((a) => {
+                    if (!a) return;
+                    const amenityName = a.trim();
+                    amenityCounts[amenityName] = (amenityCounts[amenityName] || 0) + 1;
+                });
+            } catch (err) {
+                console.error("Error fetching room data:", err);
+            }
+        }
+
+        // Sort amenities by count (descending)
+        const sortedAmenities = Object.entries(amenityCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, limit)
+            .map(([name, count]) => ({ name, count }));
+
+        return sortedAmenities;
+    } catch (error) {
+        console.error("Error fetching top amenities:", error);
+        return [];
+    }
+};
+

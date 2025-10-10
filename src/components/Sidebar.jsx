@@ -39,9 +39,9 @@ const Sidebar = () => {
 
     const handleSignOut = async () => {
         await signOut(auth);
-        toast.success('Signed out.', {
-            position: 'top-center',
-        })
+        // toast.success('Signed out.', {
+        //     position: 'top-center',
+        // })
 
         navigate('./login');
     };

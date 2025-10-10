@@ -660,7 +660,7 @@ export default function ViewProperty() {
             </div>
 
             {showPasswordPrompt && (
-                <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
                     <div className="bg-bgBlue text-white p-6 rounded-xl w-80 border border-darkGray">
                         <h2 className="text-lg font-bold mb-3">Confirm Password</h2>
                         <input
@@ -692,7 +692,7 @@ export default function ViewProperty() {
             <AnimatePresence>
                 {showDatePicker && (
                     <motion.div
-                        className="fixed inset-0 flex items-center justify-center bg-black/20 z-50"
+                        className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -734,7 +734,7 @@ export default function ViewProperty() {
             <AnimatePresence>
                 {showRoomDatePicker && (
                     <motion.div
-                        className="fixed inset-0 flex items-center justify-center bg-black/20 z-50"
+                        className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -776,7 +776,7 @@ export default function ViewProperty() {
             <AnimatePresence>
                 {showSuccess && (
                     <motion.div
-                        className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+                        className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}

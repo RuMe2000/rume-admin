@@ -5,8 +5,8 @@ import { db } from "../../firebase";
 import RoomImagesCarousel from "../../components/RoomImagesCarousel";
 import { motion, AnimatePresence } from "framer-motion";
 import { deleteRoom } from "../../utils/firestoreUtils";
+import ConfirmDialog from "../../components/ConfirmDialog";
 
-// ✅ AMENITIES SECTION (same as yours)
 function AmenitiesSection({ room, propertyId, roomId, setRoom }) {
     const [newAmenity, setNewAmenity] = useState("");
     const roomRef = doc(db, "properties", propertyId, "rooms", roomId);
@@ -91,6 +91,7 @@ export default function ViewRoom() {
     const [showSuccess, setShowSuccess] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState("");
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -306,20 +307,23 @@ export default function ViewRoom() {
 
                 <label
                     className="text-errorRed hover:underline mt-6 text-sm inline-block cursor-pointer"
-                    onClick={async () => {
-                        if (window.confirm("Are you sure you want to delete this room? This action cannot be undone.")) {
-                            try {
-                                await deleteRoom(propertyId, roomId);
-                                alert("Room deleted successfully!");
-                                navigate(-1, { replace: true });
-                            } catch (error) {
-                                alert("Failed to delete room: " + error.message);
-                            }
-                        }
-                    }}
+                    onClick={() => setShowConfirmDelete(true)}
                 >
                     Delete Room
                 </label>
+
+                <ConfirmDialog
+                    visible={showConfirmDelete}
+                    title="Delete Room"
+                    message="Are you sure you want to delete this room? This action cannot be undone."
+                    confirmText="Delete"
+                    cancelText="Cancel"
+                    onConfirm={async () => {
+                        setShowConfirmDelete(false);
+                        await handleDeleteRoom();
+                    }}
+                    onCancel={() => setShowConfirmDelete(false)}
+                />
             </div>
 
             {/* ACTION BUTTONS */}
@@ -355,7 +359,7 @@ export default function ViewRoom() {
             <AnimatePresence>
                 {showDatePicker && (
                     <motion.div
-                        className="fixed inset-0 flex items-center justify-center bg-black/20 z-50"
+                        className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -398,7 +402,7 @@ export default function ViewRoom() {
             <AnimatePresence>
                 {showSuccess && (
                     <motion.div
-                        className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+                        className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}

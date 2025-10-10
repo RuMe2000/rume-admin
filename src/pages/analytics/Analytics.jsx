@@ -1,5 +1,5 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount, listenTransactionAmountsPerMonth, listenBookingsPerMonth, listenCommissionPerMonth } from "../../utils/firestoreUtils";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, AreaChart, Area } from "recharts";
+import { getUserRoleCounts, getTopBookedAmenities, getTop5PropertiesByBookings, getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount, listenTransactionAmountsPerMonth, listenBookingsPerMonth, listenCommissionPerMonth } from "../../utils/firestoreUtils";
 import { useEffect, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 
@@ -21,6 +21,11 @@ const Analytics = () => {
     const [revenueData, setRevenueData] = useState([]);
     const [bookingsData, setBookingsData] = useState([]);
     const [commissionData, setCommissionData] = useState([]);
+    const [stackedData, setStackedData] = useState([]);
+    const [topProperties, setTopProperties] = useState([]);
+    const [topAmenities, setTopAmenities] = useState([]);
+    const [activeIndex, setActiveIndex] = useState(null);
+    const [userRoles, setUserRoles] = useState({ seekers: 0, owners: 0 });
 
     const getData = async () => {
         const bsr = await getBookingSuccessRatio();
@@ -29,8 +34,14 @@ const Analytics = () => {
         const grossRev = await getTransactionTotalAmount();
         setGross(grossRev);
 
+        const roleCount = await getUserRoleCounts();
+        setUserRoles(roleCount);
+
         const comm = await getCommission();
         setCommission(comm);
+
+        const amens = await getTopBookedAmenities(10);
+        setTopAmenities(amens);
 
         const ageDist = await getAgeBracketDistribution();
         // transform { "18-24": 10, "25-34": 20 } -> [{ name: "18-24", value: 10}, ...]
@@ -77,9 +88,49 @@ const Analytics = () => {
     }, []);
 
     useEffect(() => {
+        const fetchTopProps = async () => {
+            const data = await getTop5PropertiesByBookings();
+            setTopProperties(data);
+        };
+        fetchTopProps();
+    }, []);
+
+    useEffect(() => {
         const unsubscribe = listenCommissionPerMonth((data) => setCommissionData(data));
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        let unsubscribeRevenue = null;
+        let unsubscribeCommission = null;
+
+        unsubscribeRevenue = listenTransactionAmountsPerMonth((revenueData) => {
+            unsubscribeCommission = listenCommissionPerMonth((commissionData) => {
+                // Merge both datasets by month
+                const merged = revenueData.map((rev) => {
+                    const matchingComm = commissionData.find((c) => c.month === rev.month);
+                    return {
+                        month: rev.month,
+                        grossRevenue: rev.revenue || 0,
+                        commission: matchingComm ? matchingComm.commission || 0 : 0,
+                    };
+                });
+                setStackedData(merged);
+            });
+        });
+
+        return () => {
+            if (unsubscribeRevenue) unsubscribeRevenue();
+            if (unsubscribeCommission) unsubscribeCommission();
+        };
+    }, []);
+
+    const userRoleCountData = [
+        { name: "Owners", value: userRoles.owners },
+        { name: "Seekers", value: userRoles.seekers },
+    ]
+
+    // const COLORS2 = ["#9B5DE5", "#22AED1"];
 
     return (
         <div className="p-6 text-white">
@@ -109,6 +160,80 @@ const Analytics = () => {
                 </div>
             </div>
 
+            <div className="bg-blue-950 rounded-2xl p-5 shadow-md my-6">
+                <h2 className="text-lg font-semibold mb-4">Top 5 Properties by Bookings</h2>
+
+                {topProperties.length > 0 ? (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full border-collapse text-white">
+                            <thead>
+                                <tr className="border-b border-gray-700 text-left">
+                                    <th className="py-2 px-3 text-white font-medium w-16">Rank</th>
+                                    <th className="py-2 px-3 text-white font-medium">Property Name</th>
+                                    <th className="py-2 px-3 text-white font-medium">Owner</th>
+                                    <th className="py-2 px-3 text-white font-medium text-right">Bookings</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {topProperties.map((prop, index) => (
+                                    <tr
+                                        key={prop.propertyId}
+                                        className={`border-b border-darkGray hover:bg-hoverBlue transition`}
+                                    >
+                                        <td className="py-2 px-3 text-lg font-semibold">{index + 1}</td>
+                                        <td className="py-2 px-3 font-semibold text-lg">{prop.propertyName}</td>
+                                        <td className="py-2 px-3 text-gray-300">{prop.ownerName}</td>
+                                        <td className="py-2 px-9 text-xl text-right font-bold text-white">
+                                            {prop.bookingsCount}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <p className="text-gray-400">No bookings data available</p>
+                )}
+            </div>
+
+            {/* top booked amenities */}
+            <div className="bg-blue-950 rounded-2xl p-4 shadow-lg mb-6">
+                <h2 className="text-lg font-semibold mb-4">Top Amenities in Booked Rooms</h2>
+                <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={topAmenities} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                        <CartesianGrid stroke="#364153" strokeDasharray="3 3" />
+                        <XAxis dataKey="name" tick={{ fill: "white", fontSize: 13 }} />
+                        <YAxis tick={{ fill: "white", fontSize: 12 }} />
+                        <Tooltip
+                            cursor={false}
+                            contentStyle={{
+                                backgroundColor: "#001740",
+                                border: "none",
+                                borderRadius: "8px",
+                                color: "#ffffff",
+                                fontSize: "13px",
+                            }}
+                            itemStyle={{ color: "#ffffff" }} // makes both name & count white
+                            labelStyle={{ color: "#ffffff" }} // makes the label (name) white
+                        />
+                        <Bar
+                            dataKey="count"
+                            radius={[5, 5, 0, 0]}
+                            onMouseEnter={(_, index) => setActiveIndex(index)}
+                            onMouseLeave={() => setActiveIndex(null)}
+                        >
+                            {topAmenities.map((entry, index) => (
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill={index === activeIndex ? "#383cc44d" : "#3539cb"}
+                                />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+
+
             {/* charts row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
@@ -124,14 +249,14 @@ const Analytics = () => {
                                 innerRadius={60}
                                 outerRadius={100}
                                 // paddingAngle={3}
-                                label
+                                label={false}
                             >
                                 {ageData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
                             <Tooltip />
-                            {/* <Legend /> */}
+                            <Legend />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
@@ -146,7 +271,7 @@ const Analytics = () => {
                                 nameKey="name"
                                 innerRadius={60}
                                 outerRadius={100}
-                                label
+                                label={false}
                             >
                                 {genderData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -158,22 +283,27 @@ const Analytics = () => {
                     </ResponsiveContainer>
                 </div>
 
-                <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
-                    <h2 className="text-lg font-semibold mb-4">Payment Method Split</h2>
+                <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">
+                    <h2 className="text-xl font-semibold mb-4">User Segmentation</h2>
                     <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
                             <Pie
-                                data={paymentSplitData}
-                                dataKey="value"
-                                nameKey="name"
+                                data={userRoleCountData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
                                 outerRadius={100}
-                                label
+                                // paddingAngle={3}
+                                dataKey="value"
+                                label={false}
                             >
-                                {paymentSplitData.map((entry, index) => (
+                                {userRoleCountData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+
                                 ))}
                             </Pie>
                             <Tooltip />
+                            <Legend />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
@@ -229,7 +359,39 @@ const Analytics = () => {
                 </div>
             </div>
 
-
+            <div className="bg-blue-950 rounded-2xl p-4 shadow-lg mt-6">
+                <h2 className="text-xl font-semibold mb-4">Gross Revenue vs Commission</h2>
+                <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart
+                        data={stackedData}
+                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
+                        <XAxis dataKey="month" stroke="#cbd5e1" />
+                        <YAxis stroke="#cbd5e1" />
+                        <Tooltip />
+                        <Legend />
+                        <Area
+                            type="monotone"
+                            dataKey="grossRevenue"
+                            stackId="1"
+                            stroke="#3b82f6"
+                            fill="#3b82f6"
+                            name="Gross Revenue"
+                            fillOpacity={0.5}
+                        />
+                        <Area
+                            type="monotone"
+                            dataKey="commission"
+                            stackId="1"
+                            stroke="#10b981"
+                            fill="#10b981"
+                            name="Commission Revenue"
+                            fillOpacity={0.7}
+                        />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
 
             {/* system logs */}
             <div className="mt-8 bg-blue-950 rounded-2xl p-4 shadow-lg">

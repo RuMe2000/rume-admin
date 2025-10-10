@@ -61,4 +61,68 @@ export function listenBookingsPerMonth(callback) {
     });
 
     return unsubscribe;
-}
+};
+
+//get top properties based on booking counts
+export async function getTop5PropertiesByBookings() {
+    try {
+        const bookingsRef = collection(db, "bookings");
+        const bookedQuery = query(bookingsRef, where('status', '==', 'booked'));
+        const bookingsSnapshot = await getDocs(bookedQuery);
+
+        if (bookingsSnapshot.empty) return [];
+
+        // Count bookings per propertyId
+        const bookingCounts = {};
+        bookingsSnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const propertyId = data.propertyId;
+            if (propertyId) {
+                bookingCounts[propertyId] = (bookingCounts[propertyId] || 0) + 1;
+            }
+        });
+
+        // Sort by booking count (descending)
+        const sortedPropertyIds = Object.entries(bookingCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5); // top 3
+
+        // Fetch property details
+        const topProperties = [];
+        for (const [propertyId, count] of sortedPropertyIds) {
+            const propertyRef = doc(db, "properties", propertyId);
+            const propertySnap = await getDoc(propertyRef);
+
+            if (!propertySnap.exists()) continue;
+
+            const propertyData = propertySnap.data();
+
+            // Get owner name
+            let ownerName = "Unknown Owner";
+            if (propertyData.ownerId) {
+                try {
+                    const ownerRef = doc(db, "users", propertyData.ownerId);
+                    const ownerSnap = await getDoc(ownerRef);
+                    if (ownerSnap.exists()) {
+                        const ownerData = ownerSnap.data();
+                        ownerName = `${ownerData.firstName || ""} ${ownerData.lastName || ""}`.trim() || "Unknown Owner";
+                    }
+                } catch (error) {
+                    console.error("Error fetching owner info:", error);
+                }
+            }
+
+            topProperties.push({
+                propertyId,
+                propertyName: propertyData.name || "Unnamed Property",
+                ownerName,
+                bookingsCount: count,
+            });
+        }
+
+        return topProperties;
+    } catch (error) {
+        console.error("Error fetching top properties:", error);
+        return [];
+    }
+};
