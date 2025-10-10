@@ -1,15 +1,18 @@
 import { useEffect, useState, useRef } from "react";
-import { listenForPendingPropertiesWithOwners, listenForPendingRoomReverifyRequests } from "../utils/firestoreUtils";
+import {
+    listenForPendingPropertiesWithOwners,
+    listenForPendingOrReverifyRooms, // ✅ updated import
+} from "../utils/firestoreUtils";
 import { useNavigate } from "react-router-dom";
 
 const NotificationBell = () => {
     const [pendingProps, setPendingProps] = useState([]);
-    const [pendingRoomRequests, setPendingRoomRequests] = useState([]);
+    const [pendingRooms, setPendingRooms] = useState([]); // ✅ renamed from pendingRoomRequests
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
 
-    //subscribe to pending properties
+    // Subscribe to pending properties
     useEffect(() => {
         const unsubscribe = listenForPendingPropertiesWithOwners((pending) => {
             setPendingProps(pending);
@@ -17,10 +20,10 @@ const NotificationBell = () => {
         return () => unsubscribe();
     }, []);
 
-    //subscribe to pending room reverify requests
+    // ✅ Subscribe to pending & reverify rooms (real-time)
     useEffect(() => {
-        const unsubscribe = listenForPendingRoomReverifyRequests((pending) => {
-            setPendingRoomRequests(pending);
+        const unsubscribe = listenForPendingOrReverifyRooms((rooms) => {
+            setPendingRooms(rooms);
         });
         return () => unsubscribe();
     }, []);
@@ -36,17 +39,28 @@ const NotificationBell = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Total notifications (sum of properties + room requests)
-    const totalNotifications = pendingProps.length + pendingRoomRequests.length;
+    // Total notifications (sum of properties + rooms)
+    const totalNotifications = pendingProps.length + pendingRooms.length;
 
     return (
         <div className="relative" ref={dropdownRef}>
             {/* Bell Icon */}
-            <div className="relative cursor-pointer hover:scale-110 transition duration-200" onClick={() => setOpen(!open)}>
-                <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="M160-200v-80h80v-280q0-83 50-147.5T420-792v-28q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820v28q80 20 130 84.5T720-560v280h80v80H160Zm320-300Zm0 420q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80ZM320-280h320v-280q0-66-47-113t-113-47q-66 0-113 47t-47 113v280Z" /></svg>
+            <div
+                className="relative cursor-pointer hover:scale-110 transition duration-200"
+                onClick={() => setOpen(!open)}
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="32px"
+                    viewBox="0 -960 960 960"
+                    width="32px"
+                    fill="#FFFFFF"
+                >
+                    <path d="M160-200v-80h80v-280q0-83 50-147.5T420-792v-28q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820v28q80 20 130 84.5T720-560v280h80v80H160Zm320-300Zm0 420q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80ZM320-280h320v-280q0-66-47-113t-113-47q-66 0-113 47t-47 113v280Z" />
+                </svg>
 
                 {/* Badge */}
-                {pendingProps.length > 0 && (
+                {totalNotifications > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-600 text-white text-sm font-bold px-1.5 rounded-full">
                         {totalNotifications}
                     </span>
@@ -64,31 +78,47 @@ const NotificationBell = () => {
                         {pendingProps.map((prop) => (
                             <li
                                 key={`prop-${prop.id}`}
-                                className="p-3 hover:bg-mainBlue cursor-pointer transition duration-200"
+                                className="p-3 hover:bg-white/10 cursor-pointer transition duration-200"
                                 onClick={() => navigate(`/properties/view/${prop.id}`)}
                             >
-                                <p className="text-sm text-yellow-500 text-right italic">Pending property verification</p>
-                                <p className="font-medium text-white">{prop.name || "Unnamed Property"}</p>
-                                <p className="text-sm text-white">Owner: {prop.ownerName || "Unknown"}</p>
+                                <p className="text-sm text-yellow-500 text-right italic">
+                                    Pending property verification
+                                </p>
+                                <p className="font-medium text-white">
+                                    {prop.name || "Unnamed Property"}
+                                </p>
+                                <p className="text-sm text-white">
+                                    Owner: {prop.ownerName || "Unknown"}
+                                </p>
                             </li>
                         ))}
 
-                        {/* Pending Room Reverify Requests */}
-                        {pendingRoomRequests.map((req) => (
+                        {/* ✅ Pending or Reverify Rooms */}
+                        {pendingRooms.map((room) => (
                             <li
-                                key={`room-${req.id}`}
-                                className="p-3 hover:bg-mainBlue cursor-pointer transition duration-200"
-                                onClick={() => navigate(`/properties/view/${req.propertyId}/room/${req.id}`)}
+                                key={`room-${room.roomId}`}
+                                className="p-3 hover:bg-white/10 cursor-pointer transition duration-200"
+                                onClick={() => navigate(`/properties/view/${room.propertyId}`)}
                             >
-                                <p className="text-sm text-yellow-500 text-right italic">Pending room re-verification</p>
-                                <p className="font-medium text-white">{req.roomName || "Unnamed Room"}</p>
-                                <p className="text-sm text-white">Property: {req.propertyName || "Unknown Property"}</p>
+                                <p className="text-sm text-yellow-500 text-right italic">
+                                    {room.verificationStatus === "reverify"
+                                        ? "Room re-verification required"
+                                        : "Pending room verification"}
+                                </p>
+                                <p className="font-medium text-white">
+                                    {room.name || "Unnamed Room"}
+                                </p>
+                                <p className="text-sm text-white">
+                                    Property: {room.propertyName || "Unknown Property"}
+                                </p>
                             </li>
                         ))}
 
                         {/* Empty state */}
                         {totalNotifications === 0 && (
-                            <li className="p-3 text-sm text-gray-500">No pending requests</li>
+                            <li className="p-3 text-sm text-gray-500">
+                                No pending requests
+                            </li>
                         )}
                     </ul>
                     <div

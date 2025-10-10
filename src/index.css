@@ -12,8 +12,9 @@
     --color-darkGray: oklch(37.3% 0.034 259.733);
     --color-errorRed: oklch(0.6355 0.2502 29.13);
     --color-successGreen: oklch(62.7% 0.194 149.214);
-    --color-orange: oklch(0.607 0.2239 31.25);
-    --color-yellow: oklch(0.8828 0.1811 94.46)
+    --color-orange: oklch(0.6726 0.1926 33.35);
+    --color-yellow: oklch(0.8417 0.1722 92.63);
+    --color-purple: oklch(0.4993 0.1486 284.31);
 }
 
 /* in your global.css or a module */

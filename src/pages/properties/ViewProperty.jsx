@@ -489,7 +489,7 @@ export default function ViewProperty() {
 
                     <button
                         onClick={handleEditClick}
-                        className="bg-mainBlue text-white px-5 py-2 mb-2 mt-2 rounded-lg shadow hover:bg-hoverBlue transition duration-200"
+                        className="bg-orange text-white px-5 py-2 mb-2 mt-2 rounded-lg shadow hover:bg-orange/70 transition duration-200"
                     >
                         {isEditing ? "EDITING ENABLED" : "EDIT"}
                     </button>
@@ -553,7 +553,7 @@ export default function ViewProperty() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title="View Business Permit"
-                                className="px-4 py-2 bg-mainBlue text-white rounded-xl shadow hover:bg-hoverBlue hover:scale-105 transition duration-200"
+                                className="px-4 py-2 bg-yellow text-white rounded-xl shadow hover:bg-yellow/70 hover:scale-105 transition duration-200"
                             >
                                 Business Permit
                             </a>
@@ -563,7 +563,7 @@ export default function ViewProperty() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title="View Valid ID (Front)"
-                                className="px-4 py-2 bg-mainBlue text-white rounded-xl shadow hover:bg-hoverBlue hover:scale-105 transition duration-200"
+                                className="px-4 py-2 bg-yellow text-white rounded-xl shadow hover:bg-yellow/70 hover:scale-105 transition duration-200"
                             >
                                 Valid ID (Front)
                             </a>
@@ -573,7 +573,7 @@ export default function ViewProperty() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title="View Valid ID (Back)"
-                                className="px-4 py-2 bg-mainBlue text-white rounded-xl shadow hover:bg-hoverBlue hover:scale-105 transition duration-200"
+                                className="px-4 py-2 bg-yellow text-white rounded-xl shadow hover:bg-yellow/70 hover:scale-105 transition duration-200"
                             >
                                 Valid ID (Back)
                             </a>

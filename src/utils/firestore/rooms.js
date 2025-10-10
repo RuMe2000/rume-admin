@@ -200,3 +200,77 @@ export const deleteRoom = async (propertyId, roomId) => {
         throw error;
     }
 };
+
+//listen for pending and reverify rooms in real time
+export function listenForPendingOrReverifyRooms(callback) {
+    const propertiesRef = collection(db, "properties");
+
+    // Listen to all properties
+    const unsubscribeProperties = onSnapshot(propertiesRef, async (propertySnapshots) => {
+        const allMatchingRooms = [];
+
+        // Iterate over each property
+        for (const propertyDoc of propertySnapshots.docs) {
+            const propertyData = propertyDoc.data();
+            const propertyId = propertyDoc.id;
+
+            const roomsRef = collection(db, "properties", propertyId, "rooms");
+
+            // Listen to rooms in this property
+            onSnapshot(roomsRef, async (roomsSnapshot) => {
+                const matchingRooms = [];
+
+                for (const roomDoc of roomsSnapshot.docs) {
+                    const roomData = roomDoc.data();
+                    const status = roomData.verificationStatus?.toLowerCase();
+
+                    if (status === "pending" || status === "reverify") {
+                        let ownerName = "Unknown Owner";
+                        let propertyName = "Unnamed Property";
+
+                        // ✅ Fetch property name using propertyId
+                        try {
+                            const propertyRef = doc(db, "properties", propertyId);
+                            const propertySnap = await getDoc(propertyRef);
+                            if (propertySnap.exists()) {
+                                const propData = propertySnap.data();
+                                propertyName = propData.name || "Unnamed Property";
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching property name for ${propertyId}:`, error);
+                        }
+
+                        // Fetch owner name
+                        if (propertyData.ownerId) {
+                            try {
+                                const userRef = doc(db, "users", propertyData.ownerId);
+                                const userSnap = await getDoc(userRef);
+                                if (userSnap.exists()) {
+                                    const userData = userSnap.data();
+                                    ownerName = `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unknown Owner";
+                                }
+                            } catch (error) {
+                                console.error(`Error fetching owner for property ${propertyId}:`, error);
+                            }
+                        }
+
+                        matchingRooms.push({
+                            propertyId,
+                            propertyName,
+                            ownerName,
+                            roomId: roomDoc.id,
+                            ...roomData,
+                        });
+                    }
+                }
+
+                // Update main list and trigger callback
+                allMatchingRooms.push(...matchingRooms);
+                callback(allMatchingRooms);
+            });
+        }
+    });
+
+    // Return unsubscribe for cleanup
+    return unsubscribeProperties;
+}
