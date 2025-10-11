@@ -364,3 +364,47 @@ export async function getTopBookedAmenities(limit = 10) {
     }
 };
 
+//get top amenities prediction
+export async function getPredictedTopAmenities() {
+    try {
+        const bookingsRef = collection(db, "bookings");
+        const bookedSnapshot = await getDocs(query(bookingsRef, where("status", "==", "booked")));
+        if (bookedSnapshot.empty) return [];
+
+        const bookedRoomIds = bookedSnapshot.docs.map(doc => doc.data().roomId);
+        const roomsRef = collectionGroup(db, "rooms");
+        const roomsSnapshot = await getDocs(roomsRef);
+
+        const bookedAmenitiesCount = {};
+        const totalAmenitiesCount = {};
+
+        roomsSnapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const amenities = data.amenities || [];
+            const roomId = docSnap.id;
+
+            amenities.forEach(a => {
+                totalAmenitiesCount[a] = (totalAmenitiesCount[a] || 0) + 1;
+                if (bookedRoomIds.includes(roomId)) {
+                    bookedAmenitiesCount[a] = (bookedAmenitiesCount[a] || 0) + 1;
+                }
+            });
+        });
+
+        // Compute likelihood score
+        const results = Object.keys(totalAmenitiesCount).map(a => ({
+            name: a,
+            count: bookedAmenitiesCount[a] || 0,
+            likelihood: (bookedAmenitiesCount[a] || 0) / totalAmenitiesCount[a],
+        }));
+
+        // Sort by likelihood descending
+        results.sort((a, b) => b.likelihood - a.likelihood);
+
+        return results.slice(0, 5); // Top 5 predicted amenities
+    } catch (error) {
+        console.error("Error predicting top amenities:", error);
+        return [];
+    }
+};
+

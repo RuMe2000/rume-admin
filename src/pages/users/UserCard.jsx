@@ -10,6 +10,9 @@ import {
     getBookedRoomByUser,
     getSeekerStayDuration,
 } from '../../utils/firestoreUtils';
+import useAlerts from '../../hooks/useAlerts';
+import AlertContainer from '../../components/AlertContainer';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 const UserCard = ({ userId, onClose }) => {
     const [user, setUser] = useState(null);
@@ -17,6 +20,9 @@ const UserCard = ({ userId, onClose }) => {
 
     const [ownedProperties, setOwnedProperties] = useState([]);
     const [bookedRoom, setBookedRoom] = useState([]);
+
+    const { alerts, showAlert, removeAlert } = useAlerts();
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
     const fetchUserAndPic = async () => {
         setIsLoading(true);
@@ -50,18 +56,13 @@ const UserCard = ({ userId, onClose }) => {
     }, [userId]);
 
     const handleDeleteUser = async (userToDelete) => {
-        const confirmed = window.confirm(
-            `Are you sure you want to permanently delete ${userToDelete.email}? This action cannot be undone.`
-        );
-        if (confirmed) {
-            try {
-                await deleteUser(userToDelete.id);
-                alert(`User ${userToDelete.email} has been permanently deleted.`);
-                onClose();
-            } catch (error) {
-                console.error('Error deleting user:', error);
-                alert(`Failed to delete user: ${error.message}`);
-            }
+        try {
+            await deleteUser(userToDelete.id);
+            showAlert("info", `User ${userToDelete.email} has been permanently deleted.`);
+            onClose();
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            showAlert("error", `Failed to delete user.`);
         }
     };
 
@@ -69,9 +70,10 @@ const UserCard = ({ userId, onClose }) => {
         try {
             await verifyOwner(userToVerify.id);
             await fetchUserAndPic();
-            alert(`Owner ${userToVerify.email} has been verified.`);
+            showAlert("success", `Owner ${userToVerify.email} verified successfully!.`);
         } catch (error) {
             console.error('Error verifying user:', error);
+            showAlert("error", "Error verifying owner.");
         }
     };
 
@@ -79,9 +81,10 @@ const UserCard = ({ userId, onClose }) => {
         try {
             await unverifyOwner(userToUnverify.id);
             await fetchUserAndPic();
-            alert(`Owner ${userToUnverify.email} has been unverified.`);
+            showAlert("info", `Owner ${userToUnverify.email} has been unverified.`);
         } catch (error) {
-            console.error('Error unverifying user:', error);
+            console.error('Error unverifying owner:', error);
+            showAlert("error", "Error unverifying owner.");
         }
     };
 
@@ -100,7 +103,7 @@ const UserCard = ({ userId, onClose }) => {
 
                 {isLoading ? (
                     <div className="flex flex-1 items-center justify-center">
-                        <p className="text-gray-300 text-lg">Loading user...</p>
+                        <p className="text-gray-300">Loading user...</p>
                     </div>
                 ) : user ? (
                     <>
@@ -125,10 +128,10 @@ const UserCard = ({ userId, onClose }) => {
                             {/* Status Badge */}
                             <div
                                 className={`mt-3 px-4 py-1 rounded-full text-sm font-semibold ${user.status === 'verified' || user.status === 'booked'
-                                        ? 'bg-successGreen text-white'
-                                        : user.status === 'unverified' || user.status === 'searching'
-                                            ? 'bg-yellow-500 text-white'
-                                            : 'bg-gray-500 text-white'
+                                    ? 'bg-successGreen text-white'
+                                    : user.status === 'unverified' || user.status === 'searching'
+                                        ? 'bg-yellow-500 text-white'
+                                        : 'bg-gray-500 text-white'
                                     }`}
                             >
                                 {user.status === 'verified'
@@ -204,22 +207,22 @@ const UserCard = ({ userId, onClose }) => {
                                 user.status === 'verified' ? (
                                     <button
                                         onClick={() => handleUnverifyOwner(user)}
-                                        className="bg-yellow-500 font-semibold text-white text-sm px-4 py-2 rounded-md hover:bg-yellow-600 transition"
+                                        className="bg-yellow-500 font-semibold text-white text-sm px-4 py-2 rounded-lg hover:bg-yellow-600 transition duration-200"
                                     >
                                         UNVERIFY
                                     </button>
                                 ) : (
                                     <button
                                         onClick={() => handleVerifyOwner(user)}
-                                        className="bg-green-600 font-semibold text-white text-sm px-4 py-2 rounded-md hover:bg-green-700 transition"
+                                        className="bg-green-600 font-semibold text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200"
                                     >
                                         VERIFY
                                     </button>
                                 )
                             )}
                             <button
-                                onClick={() => handleDeleteUser(user)}
-                                className="bg-errorRed font-semibold text-white text-sm px-4 py-2 rounded-md hover:bg-red-700 transition"
+                                onClick={() => setShowConfirmDelete(true)}
+                                className="bg-errorRed font-semibold text-white text-sm px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
                             >
                                 DELETE
                             </button>
@@ -229,6 +232,22 @@ const UserCard = ({ userId, onClose }) => {
                     <p className="text-center text-gray-300 mt-10">User not found</p>
                 )}
             </div>
+
+            <AlertContainer alerts={alerts} removeAlert={removeAlert} />
+
+            <ConfirmDialog
+                visible={showConfirmDelete}
+                title="Delete User"
+                message="Are you sure you want to delete this user? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                onConfirm={async () => {
+                    setShowConfirmDelete(false);
+                    await handleDeleteUser(user);
+                }}
+                onCancel={() => setShowConfirmDelete(false)}
+            />
+
         </div>
     );
 };

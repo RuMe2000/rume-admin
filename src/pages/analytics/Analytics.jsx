@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, AreaChart, Area } from "recharts";
-import { getUserRoleCounts, getTopBookedAmenities, getTop5PropertiesByBookings, getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount, listenTransactionAmountsPerMonth, listenBookingsPerMonth, listenCommissionPerMonth } from "../../utils/firestoreUtils";
+import { getUserRoleCounts, getTopBookedAmenities, getTop5PropertiesByBookings, getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount, listenTransactionAmountsPerMonth, listenBookingsPerMonth, listenCommissionPerMonth, getPredictedTopAmenities } from "../../utils/firestoreUtils";
 import { useEffect, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 
@@ -40,7 +40,7 @@ const Analytics = () => {
         const comm = await getCommission();
         setCommission(comm);
 
-        const amens = await getTopBookedAmenities(10);
+        const amens = await getPredictedTopAmenities();
         setTopAmenities(amens);
 
         const ageDist = await getAgeBracketDistribution();
@@ -198,9 +198,14 @@ const Analytics = () => {
 
             {/* top booked amenities */}
             <div className="bg-blue-950 rounded-2xl p-4 shadow-lg mb-6">
-                <h2 className="text-lg font-semibold mb-4">Top Amenities in Booked Rooms</h2>
+                <h2 className="text-lg font-semibold mb-4">
+                    Top Amenities Likely to Be Booked
+                </h2>
                 <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={topAmenities} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                    <BarChart
+                        data={topAmenities}
+                        margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                    >
                         <CartesianGrid stroke="#364153" strokeDasharray="3 3" />
                         <XAxis dataKey="name" tick={{ fill: "white", fontSize: 13 }} />
                         <YAxis tick={{ fill: "white", fontSize: 12 }} />
@@ -213,16 +218,22 @@ const Analytics = () => {
                                 color: "#ffffff",
                                 fontSize: "13px",
                             }}
-                            itemStyle={{ color: "#ffffff" }} // makes both name & count white
-                            labelStyle={{ color: "#ffffff" }} // makes the label (name) white
+                            itemStyle={{ color: "#ffffff" }}
+                            labelStyle={{ color: "#ffffff" }}
+                            formatter={(value, name) => {
+                                if (name === "likelihood") {
+                                    return [(value * 100).toFixed(1) + "%", "Likelihood"];
+                                }
+                                return [value, "Bookings"];
+                            }}
                         />
                         <Bar
-                            dataKey="count"
+                            dataKey="likelihood"
                             radius={[5, 5, 0, 0]}
                             onMouseEnter={(_, index) => setActiveIndex(index)}
                             onMouseLeave={() => setActiveIndex(null)}
                         >
-                            {topAmenities.map((entry, index) => (
+                            {topAmenities.map((_, index) => (
                                 <Cell
                                     key={`cell-${index}`}
                                     fill={index === activeIndex ? "#383cc44d" : "#3539cb"}

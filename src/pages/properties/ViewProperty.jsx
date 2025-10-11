@@ -9,6 +9,8 @@ import RoomCard from '../../components/RoomCard';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import useAlerts from '../../hooks/useAlerts';
+import AlertContainer from '../../components/AlertContainer';
 
 const libraries = ['marker'];
 
@@ -25,6 +27,7 @@ export default function ViewProperty() {
     const [marker, setMarker] = useState(null);
     const [showRoomDatePicker, setShowRoomDatePicker] = useState(false);
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+    const { alerts, showAlert, removeAlert } = useAlerts();
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -58,7 +61,7 @@ export default function ViewProperty() {
 
     const handleScheduleRoomsVerification = async () => {
         if (!selectedDate) {
-            alert("Please select a date first.");
+            showAlert("warning", "Please select a date first.");
             return;
         }
 
@@ -93,16 +96,16 @@ export default function ViewProperty() {
 
             setShowRoomDatePicker(false);
             setSelectedDate("");
-            alert("Verification schedule updated for pending and reverify rooms!");
+            showAlert("success", "Verification schedule updated for pending and reverify rooms!");
         } catch (error) {
             console.error("Error scheduling room verification:", error);
-            alert("Failed to schedule verification for rooms.");
+            showAlert("error", "Failed to schedule verification for rooms.");
         }
     };
 
     const handleScheduleVerification = async () => {
         if (!selectedDate) {
-            alert("Please select a date first.");
+            showAlert("warning", "Please select a date first.");
             return;
         }
         try {
@@ -119,10 +122,10 @@ export default function ViewProperty() {
 
             setShowDatePicker(false);
             setSelectedDate("");
-            // alert("Verification schedule saved!");
+            showAlert("success", "Verification schedule set!");
         } catch (error) {
             console.error("Error scheduling verification:", error);
-            alert("Failed to schedule verification.");
+            showAlert("error", "Failed to schedule verification.");
         }
     };
 
@@ -137,7 +140,6 @@ export default function ViewProperty() {
             minute: "2-digit",
         });
     };
-
 
     const GOOGLE_MAPS_API_KEY =
         (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOOGLE_MAPS_API_KEY) ||
@@ -231,9 +233,10 @@ export default function ViewProperty() {
                 status: 'verified',
                 dateVerified: new Date()
             }));
+            showAlert("success", "Property verified successfully!");
         } catch (error) {
             console.error('Error verifying property:', error);
-            alert(error.message);
+            showAlert("error", "Error verifying property.");
         }
     };
 
@@ -244,9 +247,20 @@ export default function ViewProperty() {
                 ...prev,
                 status: 'rejected'
             }));
+            showAlert("error", "Property has been rejected.");
         } catch (error) {
             console.error('Error rejecting property:', error);
-            alert(error.message);
+            showAlert("error", "Error rejecting property.");
+        }
+    };
+
+    const handleDeleteProperty = async (propertyId) => {
+        try {
+            await deleteProperty(propertyId);
+            showAlert("info", "Property has been deleted.");
+        } catch (error) {
+            console.error('Error deleting property:', error);
+            showAlert("error", "Error deleting property.");
         }
     };
 
@@ -421,10 +435,10 @@ export default function ViewProperty() {
                                                 verificationSheetUrl: downloadUrl
                                             }));
 
-                                            alert("Verification sheet uploaded!");
+                                            showAlert("success", "Verification sheet uploaded!");
                                         } catch (error) {
                                             console.error("Error uploading verification sheet:", error);
-                                            alert("Failed to upload verification sheet: " + error.message);
+                                            showAlert("error", "Failed to upload verification sheet.");
                                         }
                                     }}
                                 />
@@ -532,7 +546,7 @@ export default function ViewProperty() {
                                     gmpDraggable: isEditing,
                                 });
 
-                                setMarker(newMarker); // ✅ link marker to state
+                                setMarker(newMarker);
 
                                 // Allow map panning and marker dragging
                                 mapInstance.setOptions({ gestureHandling: "greedy" });
@@ -600,7 +614,7 @@ export default function ViewProperty() {
                     cancelText="Cancel"
                     onConfirm={async () => {
                         setShowConfirmDelete(false);
-                        await handleDeleteProperty();
+                        await handleDeleteProperty(propertyId);
                     }}
                     onCancel={() => setShowConfirmDelete(false)}
                 />
@@ -794,6 +808,8 @@ export default function ViewProperty() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <AlertContainer alerts={alerts} removeAlert={removeAlert} />
 
         </div>
     );

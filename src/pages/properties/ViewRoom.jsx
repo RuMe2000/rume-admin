@@ -6,6 +6,8 @@ import RoomImagesCarousel from "../../components/RoomImagesCarousel";
 import { motion, AnimatePresence } from "framer-motion";
 import { deleteRoom } from "../../utils/firestoreUtils";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import useAlerts from "../../hooks/useAlerts";
+import AlertContainer from "../../components/AlertContainer";
 
 function AmenitiesSection({ room, propertyId, roomId, setRoom }) {
     const [newAmenity, setNewAmenity] = useState("");
@@ -93,6 +95,8 @@ export default function ViewRoom() {
     const [selectedDate, setSelectedDate] = useState("");
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
+    const { alerts, showAlert, removeAlert } = useAlerts();
+
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from;
@@ -129,7 +133,7 @@ export default function ViewRoom() {
     };
 
     const handleScheduleVerification = async () => {
-        if (!selectedDate) return alert("Please select a date first.");
+        if (!selectedDate) return showAlert("warning", "Please select a date first.");
         const roomRef = doc(db, "properties", propertyId, "rooms", roomId);
         await updateDoc(roomRef, {
             verificationSchedule: Timestamp.fromDate(new Date(selectedDate)),
@@ -152,6 +156,7 @@ export default function ViewRoom() {
             updatedAt: new Date(),
         });
         setRoom((prev) => ({ ...prev, verificationStatus: "verified", dateVerified: new Date() }));
+        showAlert("success", "Room verified successfully!");
     };
 
     const handleUnverify = async () => {
@@ -161,6 +166,7 @@ export default function ViewRoom() {
             updatedAt: new Date(),
         });
         setRoom((prev) => ({ ...prev, verificationStatus: "pending" }));
+        showAlert("info", "Room has been unverified.");
     };
 
     const handleReject = async () => {
@@ -170,6 +176,17 @@ export default function ViewRoom() {
             updatedAt: new Date(),
         });
         setRoom((prev) => ({ ...prev, verificationStatus: "rejected" }));
+        showAlert("error", "Room has been rejected.");
+    };
+
+    const handleDeleteRoom = async (propertyId, roomId) => {
+        try {
+            await deleteRoom(propertyId, roomId);
+            showAlert("info", "Room has been deleted.");
+        } catch (error) {
+            console.error('Error deleting room:', error);
+            showAlert("error", "Error deleting room")
+        }
     };
 
     const formatDate = (date) => {
@@ -320,7 +337,7 @@ export default function ViewRoom() {
                     cancelText="Cancel"
                     onConfirm={async () => {
                         setShowConfirmDelete(false);
-                        await handleDeleteRoom();
+                        await handleDeleteRoom(roomId);
                     }}
                     onCancel={() => setShowConfirmDelete(false)}
                 />
@@ -420,6 +437,8 @@ export default function ViewRoom() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <AlertContainer alerts={alerts} removeAlert={removeAlert} />
         </div>
     );
 }
