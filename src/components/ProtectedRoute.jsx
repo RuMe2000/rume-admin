@@ -1,25 +1,13 @@
 import { Navigate } from 'react-router-dom';
-import { auth } from '../firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { useAuth } from '../context/AuthContext'; // assuming path
 
 function ProtectedRoute({ children }) {
-    const [user, loading] = useAuthState(auth);
+    const { user, loading } = useAuth();
 
-    // Show loading screen while Firebase reinitializes user session
-    if (loading) {
-        return (
-            <div className='fixed top-0 left-0 w-full h-full z-50 flex bg-radial from-hoverBlue via-darkBlue to-bgBlue text-white justify-center items-center'>
-                <p className='text-center font-bold text-3xl'>Loading...</p>
-            </div>
-        );
-    }
+    if (loading) return null; // or a spinner if you want
 
-    // If no user after loading, redirect to login
-    if (!user) {
-        return <Navigate to='/login' replace />;
-    }
+    if (!user) return <Navigate to="/login" replace />;
 
-    // Otherwise, render the protected content
     return children;
 }
 
