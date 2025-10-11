@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
-import { ArrowLeft } from "lucide-react";
 
 const OwnerWalletDetails = () => {
     const { walletId } = useParams();

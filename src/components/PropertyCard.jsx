@@ -18,11 +18,11 @@ const PropertyCard = () => {
 
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
             {properties.map((property) => (
                 <div
                     key={property.id}
-                    className="relative h-64 rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition duration-300 cursor-pointer"
+                    className="relative h-64 rounded-2xl overflow-hidden shadow-lg hover:scale-103 transition duration-300 cursor-pointer"
                     onClick={() => navigate(`view/${property.id}`)}
                 >
                     {/* Background Image */}

@@ -152,11 +152,11 @@ const Analytics = () => {
                 </div>
                 <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
                     <h2 className="text-lg font-semibold mb-2">Total Net Revenue</h2>
-                    <p className="text-3xl font-bold">₱{commission}</p>
+                    <p className="text-3xl font-bold">₱{commission.toLocaleString()}</p>
                 </div>
                 <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
                     <h2 className="text-lg font-semibold mb-2">Total Transactions Amount</h2>
-                    <p className="text-3xl font-bold">₱{gross}</p>
+                    <p className="text-3xl font-bold">₱{gross.toLocaleString()}</p>
                 </div>
             </div>
 
