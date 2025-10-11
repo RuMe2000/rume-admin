@@ -67,13 +67,6 @@ const Sidebar = () => {
                         </svg>
                         <span>{adminName || "Loading..."}</span>
                     </div>
-                    <div>
-                        <button
-                            onClick={handleSignOut}
-                            className='mx-3 mb-3 text-errorRed rounded-2xl text-sm hover:text-red-700 focus:outline-none hover:cursor-pointer hover:scale-105 transition'>
-                            <span>Sign Out</span>
-                        </button>
-                    </div>
                 </div>
 
                 <ul className='divide-y divide-darkGray mt-1'>
@@ -169,7 +162,13 @@ const Sidebar = () => {
                 </ul>
             </div>
 
-
+            <div className='flex justify-end mb-1 mr-3'>
+                <button
+                    onClick={handleSignOut}
+                    className='px-4 py-1 bg-mainBlue/70 rounded-lg text-sm font-semibold hover:bg-hoverBlue focus:outline-none hover:cursor-pointer transition duration-300'>
+                    <span>Sign Out</span>
+                </button>
+            </div>
         </nav>
 
     )

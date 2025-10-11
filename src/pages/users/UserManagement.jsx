@@ -80,7 +80,7 @@ const UserManagement = () => {
             </div>
 
             <div className="overflow-x-auto mt-8">
-                <div className="max-h-[56vh] overflow-y-auto rounded-xl border border-darkGray">
+                <div className="max-h-[55vh] overflow-y-auto rounded-xl border border-darkGray">
                     <table className="min-w-full text-white rounded-xl">
                         <thead className='sticky top-0 z-10 bg-darkBlue'>
                             <tr>

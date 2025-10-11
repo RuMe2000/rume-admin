@@ -103,7 +103,7 @@ const UserCard = ({ userId, onClose }) => {
 
                 {isLoading ? (
                     <div className="flex flex-1 items-center justify-center">
-                        <p className="text-gray-300">Loading user...</p>
+                        <p className="text-white">Loading user...</p>
                     </div>
                 ) : user ? (
                     <>
@@ -174,7 +174,7 @@ const UserCard = ({ userId, onClose }) => {
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="italic text-gray-400">No properties posted yet.</p>
+                                        <p className="italic text-white">No properties posted yet.</p>
                                     )}
                                 </>
                             )}
@@ -193,7 +193,7 @@ const UserCard = ({ userId, onClose }) => {
                                             </p>
                                         </>
                                     ) : (
-                                        <p className="italic text-gray-400">No booked room yet.</p>
+                                        <p className="italic text-white">No booked room yet.</p>
                                     )}
                                 </>
                             )}
@@ -229,7 +229,7 @@ const UserCard = ({ userId, onClose }) => {
                         </div>
                     </>
                 ) : (
-                    <p className="text-center text-gray-300 mt-10">User not found</p>
+                    <p className="text-center text-white mt-10">User not found</p>
                 )}
             </div>
 

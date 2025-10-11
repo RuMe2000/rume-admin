@@ -296,7 +296,7 @@ export default function ViewProperty() {
     if (loading || !isLoaded) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p className="text-lg text-white italic">Loading property details...</p>
+                <p className="text-white">Loading property details...</p>
             </div>
         );
     }
@@ -475,7 +475,7 @@ export default function ViewProperty() {
                                         })}
                                 />)
                         ) : (
-                            <p className="text-gray-400 italic">No rooms listed.</p>
+                            <p className="text-white italic">No rooms listed.</p>
                         )}
                     </div>
                 </div>
@@ -595,7 +595,7 @@ export default function ViewProperty() {
                             </a>
                         </div>
                     ) : (
-                        <p className="text-gray-400 mt-2">No verification documents available.</p>
+                        <p className="text-white mt-2">No verification documents available.</p>
                     )}
                 </div>
 

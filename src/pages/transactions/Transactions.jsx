@@ -2,6 +2,8 @@ import { getTransactions, getOwnerNameByPropertyId } from "../../utils/firestore
 import { useState, useEffect } from "react";
 import 'react-datepicker/dist/react-datepicker.css';
 import TransactionCard from "./TransactionCard";
+import WalletCard from "../../components/WalletCard";
+import { useNavigate } from "react-router-dom";
 
 const Transactions = () => {
     const [transactions, setTransactions] = useState([]);
@@ -10,6 +12,8 @@ const Transactions = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortDirection, setSortDirection] = useState("desc");
     const [selectedTransactionId, setSelectedTransactionId] = useState(null);
+
+    const navigate = useNavigate();
 
     const fetchTransactions = async () => {
         try {
@@ -58,8 +62,9 @@ const Transactions = () => {
         if (
             lowerSearch &&
             !(
-                t.seekerName?.toLowerCase().includes(lowerSearch) ||
-                t.userId?.toLowerCase().includes(lowerSearch)
+                t.payerName?.toLowerCase().includes(lowerSearch) ||
+                t.userId?.toLowerCase().includes(lowerSearch) ||
+                t.ownerName?.toLowerCase().includes(lowerSearch)
             )
         )
             return false;
@@ -74,15 +79,18 @@ const Transactions = () => {
         return sortDirection === "desc" ? bDate - aDate : aDate - bDate;
     });
 
-
-
     return (
         <div className="p-6">
-            <div className="flex flex-col md:flex-row md:items-center text-white mb-6 justify-between gap-4">
-                <h1 className="text-3xl font-bold">Transactions</h1>
+            
+                <h1 className="text-3xl font-bold mb-4">Transactions</h1>
+
+                {/* owner wallets */}
+                <div className="mb-4">
+                    <WalletCard onManage={() => navigate('/transactions/ownerWallets')}/>
+                </div>
 
                 {/* filters */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-end gap-2 w-full mb-2">
 
                     {/* search */}
                     <input
@@ -91,7 +99,7 @@ const Transactions = () => {
                         title="Search by User"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="bg-hoverBlue text-white px-2 py-1 rounded-2xl border border-gray-600 focus:outline-none"
+                        className="bg-darkBlue text-white px-2 py-1 rounded-xl border border-gray-600 focus:outline-none"
                     />
 
                     {/* time range */}
@@ -99,15 +107,15 @@ const Transactions = () => {
                         value={filter}
                         title="Time Period"
                         onChange={(e) => setFilter(e.target.value)}
-                        className="bg-hoverBlue text-white px-3 py-2 rounded-2xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
+                        className="bg-darkBlue text-white px-3 py-2 rounded-xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
                     >
-                        <option className="bg-blue-950" value="all">
+                        <option className="bg-darkBlue" value="all">
                             All Time
                         </option>
-                        <option className="bg-blue-950" value="week">
+                        <option className="bg-darkBlue" value="week">
                             This Week
                         </option>
-                        <option className="bg-blue-950" value="month">
+                        <option className="bg-darkBlue" value="month">
                             This Month
                         </option>
                     </select>
@@ -117,28 +125,27 @@ const Transactions = () => {
                         value={statusFilter}
                         title="Status"
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-hoverBlue text-white px-3 py-2 rounded-2xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
+                        className="bg-darkBlue text-white px-3 py-2 rounded-xl font-semibold border border-gray-600 focus:outline-none cursor-pointer"
                     >
-                        <option className="bg-blue-950" value="all">
+                        <option className="bg-darkBlue" value="all">
                             All
                         </option>
-                        <option className="bg-blue-950" value="succeeded">
+                        <option className="bg-darkBlue" value="succeeded">
                             Succeeded
                         </option>
-                        <option className="bg-blue-950" value="pending">
+                        <option className="bg-darkBlue" value="pending">
                             Pending
                         </option>
-                        <option className="bg-blue-950" value="failed">
+                        <option className="bg-darkBlue" value="failed">
                             Failed
                         </option>
                     </select>
 
                 </div>
-            </div>
 
-            <div className="overflow-x-auto">
+            <div className="flex-1 overflow-y-auto rounded-xl border border-darkGray">
                 <table className="min-w-full text-white rounded-md">
-                    <thead>
+                    <thead className="sticky top-0 z-10 bg-darkBlue">
                         <tr>
                             <th
                                 onClick={() =>

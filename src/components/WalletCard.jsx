@@ -1,22 +1,34 @@
-import { Wallet } from "lucide-react"; // optional icon library
+import { useEffect, useState } from "react";
+import { getWalletCount } from "../utils/firestoreUtils";
+import { Wallet } from "lucide-react";
 
-const WalletCard = ({ balance, currency = "₱" }) => {
+const WalletCard = ({ onManage }) => {
+    const [walletCount, setWalletCount] = useState(0);
+
+    useEffect(() => {
+        const fetchWallets = async () => {
+            const count = await getWalletCount();
+            setWalletCount(count);
+        };
+        fetchWallets();
+    }, []);
+
     return (
-        <div className="bg-gradient-to-br from-mainBlue to-blue-900 text-white rounded-2xl p-6 shadow-lg w-full z-50">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Net Revenue</h2>
-                <Wallet size={28} className="opacity-80" />
+        <button
+            onClick={onManage}
+            className="w-[45vh] h-[25vh] text-left bg-mainBlue rounded-2xl shadow-xl shadow-bgBlue px-5 mr-5 py-3 flex flex-col justify-between hover:bg-hoverBlue hover:scale-105 transition duration-300 cursor-pointer"
+        >
+            <div className="flex justify-between items-start">
+                <h2 className="text-3xl font-bold text-white">Owner Wallets</h2>
+                <Wallet size={35} className="text-white opacity-80" />
             </div>
-            <p className="text-3xl font-bold tracking-wide">
-                {currency} {balance.toLocaleString()}
-            </p>
-            <div className="mt-4 flex justify-between text-sm text-gray-200">
-                <span>Last Updated: {new Date().toLocaleDateString()}</span>
-                <button className="bg-white text-indigo-700 font-semibold px-3 py-1 rounded-full hover:bg-gray-100 transition">
-                    View Details
-                </button>
+
+            <div className="flex justify-end">
+                <div className="text-3xl font-semibold text-white">
+                    {walletCount}
+                </div>
             </div>
-        </div>
+        </button>
     );
 };
 

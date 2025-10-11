@@ -1,12 +1,12 @@
 import { getAllPropertyCount, getPropertyCountByStatus } from "../../utils/firestoreUtils";
 import { useState, useEffect } from 'react';
-import { replace, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AllPropertyButton, StatusPropertyButton } from "../../components/PropertyButton";
 import PropertyCard from "../../components/PropertyCard";
 import { RoomVerificationCard } from "../../components/RoomVerificationCard";
 
 const PropertyManagement = () => {
-    //get all property count
+    // get all property count
     const [allPropertiesCount, setAllPropertiesCount] = useState(0);
     const [verifiedPropertiesCount, setVerifiedPropertiesCount] = useState(0);
     const [pendingPropertiesCount, setPendingPropertiesCount] = useState(0);
@@ -28,15 +28,33 @@ const PropertyManagement = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="p-6">
+        <div className="p-6 h-full flex flex-col">
             <h1 className="text-start text-3xl font-bold mb-4">Property Management</h1>
-            <div className="flex flex-row">
-                {/* <AllPropertyButton count={allPropertiesCount} onManage={() => navigate('/properties/all')} /> */}
-                <StatusPropertyButton statusName="Verified" count={verifiedPropertiesCount} onManage={() => navigate('/properties/verified')} />
-                <StatusPropertyButton statusName="Pending" count={pendingPropertiesCount} onManage={() => navigate('/properties/pending')} />
+
+            <div className="flex flex-row items-start mb-6">
+                <div className="flex flex-row gap-5">
+                    {/* <AllPropertyButton count={allPropertiesCount} onManage={() => navigate('/properties/all')} /> */}
+                    <StatusPropertyButton
+                        statusName="Verified"
+                        count={verifiedPropertiesCount}
+                        onManage={() => navigate('/properties/verified')}
+                    />
+                    <StatusPropertyButton
+                        statusName="Pending"
+                        count={pendingPropertiesCount}
+                        onManage={() => navigate('/properties/pending')}
+                    />
+                </div>
+
+                <div className="h-12 border-l border-gray-600 mx-4"></div>
+
                 <RoomVerificationCard onManage={() => navigate('/properties/pendingRooms')} />
             </div>
-            <PropertyCard />
+
+            {/* Scrollable PropertyCard section */}
+            <div className="flex-1 overflow-y-auto rounded-xl bg-blue-950/30 p-4 shadow-inner">
+                <PropertyCard />
+            </div>
         </div>
     );
 };

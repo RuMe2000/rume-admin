@@ -5,7 +5,7 @@ import "slick-carousel/slick/slick-theme.css";
 
 export default function RoomImagesCarousel({ images }) {
     if (!images || images.length === 0) {
-        return <p className="text-gray-400 italic">No images available.</p>;
+        return <p className="text-white italic">No images available.</p>;
     }
 
     //react-slick settings

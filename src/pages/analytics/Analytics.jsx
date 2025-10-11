@@ -192,7 +192,7 @@ const Analytics = () => {
                         </table>
                     </div>
                 ) : (
-                    <p className="text-gray-400">No bookings data available</p>
+                    <p className="text-white">No bookings data available</p>
                 )}
             </div>
 
@@ -406,16 +406,18 @@ const Analytics = () => {
 
             {/* system logs */}
             <div className="mt-8 bg-blue-950 rounded-2xl p-4 shadow-lg">
-                <h2 className="text-xl font-semibold mb-4">Logs</h2>
+                <h2 className="text-xl font-semibold mb-4 text-white">System Logs</h2>
 
-                <div className="max-h-50 overflow-y-auto w-full">
-                    <ul className="list-disc pl-5">
-                        {logs.map((log, index) => {
+                <div className="max-h-96 overflow-y-auto space-y-3 pr-2">
+                    {logs.length === 0 ? (
+                        <p className="text-white">No system logs yet.</p>
+                    ) : (
+                        logs.map((log, index) => {
                             const ts = log.timestamp;
                             const date =
                                 ts instanceof Timestamp ? ts.toDate() : ts instanceof Date ? ts : new Date();
                             const formatted = date.toLocaleString("en-US", {
-                                month: "2-digit",
+                                month: "short",
                                 day: "2-digit",
                                 year: "numeric",
                                 hour: "2-digit",
@@ -423,13 +425,42 @@ const Analytics = () => {
                                 second: "2-digit",
                             });
 
+                            // Determine badge color based on category
+                            const categoryColors = {
+                                user: "bg-blue-600",
+                                property: "bg-green-600",
+                                room: "bg-purple-600",
+                                transaction: "bg-orange-600",
+                                default: "bg-gray-600",
+                            };
+
+                            const badgeColor = categoryColors[log.category] || categoryColors.default;
+
                             return (
-                                <li key={index} className="mb-1">
-                                    {formatted} – {log.message}
-                                </li>
+                                <div
+                                    key={index}
+                                    className="flex flex-col sm:flex-row sm:items-center justify-between border-darkGray rounded-xl px-4 py-3 border transition-all duration-200"
+                                >
+                                    <div className="flex items-start sm:items-center gap-3 text-white">
+                                        {/* category badge */}
+                                        <span
+                                            className={`px-2 py-1 text-xs rounded-md uppercase font-semibold ${badgeColor}`}
+                                        >
+                                            {log.category || "general"}
+                                        </span>
+
+                                        {/* message */}
+                                        <p className="text-sm sm:text-base">{log.message}</p>
+                                    </div>
+
+                                    {/* timestamp */}
+                                    <span className="text-xs text-gray-400 mt-2 sm:mt-0 sm:text-right">
+                                        {formatted}
+                                    </span>
+                                </div>
                             );
-                        })}
-                    </ul>
+                        })
+                    )}
                 </div>
             </div>
         </div>

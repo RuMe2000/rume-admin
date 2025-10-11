@@ -61,7 +61,7 @@ function AmenitiesSection({ room, propertyId, roomId, setRoom }) {
                         </span>
                     ))
                 ) : (
-                    <p className="text-gray-400 italic">No amenities listed.</p>
+                    <p className="text-white italic">No amenities listed.</p>
                 )}
             </div>
 
@@ -204,7 +204,7 @@ export default function ViewRoom() {
     if (loading || !room) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p className="text-lg text-white italic">Loading room details...</p>
+                <p className="text-white">Loading room details...</p>
             </div>
         );
     }

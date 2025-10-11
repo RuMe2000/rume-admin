@@ -109,7 +109,7 @@ const PendingRoomWithinPropertyCard = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-gray-300 text-sm italic">No rooms requiring verification.</p>
+                                    <p className="text-white text-sm italic">No rooms requiring verification.</p>
                                 )}
                             </div>
                         </div>

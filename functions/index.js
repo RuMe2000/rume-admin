@@ -18,15 +18,13 @@ export const logPropertyChanges = functions.firestore
 
         // Determine action type
         if (!beforeData && afterData) {
-            // Created
             action = "created";
             ownerId = afterData.ownerId || "unknown";
         } else if (beforeData && afterData) {
-            // Updated
             action = "updated";
             ownerId = afterData.ownerId || beforeData.ownerId || "unknown";
 
-            // find changed fields
+            // Detect changed fields
             Object.keys(afterData).forEach((key) => {
                 if (JSON.stringify(afterData[key]) !== JSON.stringify(beforeData[key])) {
                     changedFields[key] = {
@@ -36,17 +34,15 @@ export const logPropertyChanges = functions.firestore
                 }
             });
         } else if (beforeData && !afterData) {
-            // Deleted
             action = "deleted";
             ownerId = beforeData.ownerId || "unknown";
         }
 
-        // Skip if we couldn’t determine action
         if (!action) return;
 
-        // Build log object
         const log = {
             type: "property_update",
+            category: "property",
             action,
             propertyId,
             ownerId,
@@ -55,12 +51,12 @@ export const logPropertyChanges = functions.firestore
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
         };
 
-        // Save to systemLogs
         await db.collection("systemLogs").add(log);
         console.log("System log added:", log);
     });
 
 
+// 🧑 User Logs
 export const logUserChanges = functions.firestore
     .onDocumentWritten("users/{userId}", async (event) => {
         const userId = event.params.userId;
@@ -71,17 +67,13 @@ export const logUserChanges = functions.firestore
         let changedFields = {};
         let email = "";
 
-        // Determine action type
         if (!beforeData && afterData) {
-            // Created
             action = "created";
             email = afterData.email || "unknown";
         } else if (beforeData && afterData) {
-            // Updated
             action = "updated";
             email = afterData.email || beforeData.email || "unknown";
 
-            // find changed fields
             Object.keys(afterData).forEach((key) => {
                 if (JSON.stringify(afterData[key]) !== JSON.stringify(beforeData[key])) {
                     changedFields[key] = {
@@ -91,16 +83,15 @@ export const logUserChanges = functions.firestore
                 }
             });
         } else if (beforeData && !afterData) {
-            // Deleted
             action = "deleted";
             email = beforeData.email || "unknown";
         }
 
         if (!action) return;
 
-        // Build log object
         const log = {
             type: "user_update",
+            category: "user",
             action,
             userId,
             email,
@@ -109,11 +100,12 @@ export const logUserChanges = functions.firestore
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
         };
 
-        // Save to systemLogs
         await db.collection("systemLogs").add(log);
         console.log("System log added:", log);
     });
 
+
+//Room Logs
 export const logRoomChanges = functions.firestore
     .onDocumentWritten("properties/{propertyId}/rooms/{roomId}", async (event) => {
         const propertyId = event.params.propertyId;
@@ -127,23 +119,21 @@ export const logRoomChanges = functions.firestore
 
         if (!beforeData && afterData) {
             action = "created";
-            // get ownerId from the property doc
-            const propertyDoc = await db.collection("properties").doc(propertyId).get();
-            ownerId = propertyDoc.data()?.ownerId || "unknown";
         } else if (beforeData && afterData) {
             action = "updated";
-            const propertyDoc = await db.collection("properties").doc(propertyId).get();
-            ownerId = propertyDoc.data()?.ownerId || "unknown";
         } else if (beforeData && !afterData) {
             action = "deleted";
-            const propertyDoc = await db.collection("properties").doc(propertyId).get();
-            ownerId = propertyDoc.data()?.ownerId || "unknown";
         }
+
+        // Retrieve ownerId from property doc
+        const propertyDoc = await db.collection("properties").doc(propertyId).get();
+        ownerId = propertyDoc.data()?.ownerId || "unknown";
 
         if (!action) return;
 
         const log = {
             type: "room_update",
+            category: "room",
             action,
             propertyId,
             roomId,
@@ -156,6 +146,8 @@ export const logRoomChanges = functions.firestore
         console.log("System log added:", log);
     });
 
+
+//Transaction Logs
 export const logTransactionPayments = functions.firestore
     .onDocumentCreated("transactions/{transactionId}", async (event) => {
         const transactionId = event.params.transactionId;
@@ -163,15 +155,14 @@ export const logTransactionPayments = functions.firestore
 
         if (!data) return;
 
-        // assuming these fields exist in the transaction doc:
-        // seekerId, ownerId, totalAmount, description
         const seekerId = data.userId || "unknown-seeker";
         const ownerId = data.ownerId || "unknown-owner";
-        const totalAmount = data.totalAmount / 100 ?? 0;
+        const totalAmount = data.totalAmount ? data.totalAmount / 100 : 0;
         const description = data.description || "unspecified";
 
         const log = {
             type: "transaction_payment",
+            category: "transaction",
             transactionId,
             seekerId,
             ownerId,
@@ -185,9 +176,7 @@ export const logTransactionPayments = functions.firestore
         console.log("System log added:", log);
     });
 
-/**
- * 1. Set default status for new seekers
- */
+
 export const setDefaultSeekerStatus = functions.firestore.onDocumentCreated(
     "users/{userId}",
     async (event) => {
@@ -203,9 +192,7 @@ export const setDefaultSeekerStatus = functions.firestore.onDocumentCreated(
     }
 );
 
-/**
- * 2. Update seeker status when bookings change
- */
+
 export const updateSeekerStatusOnBookingChange = functions.firestore.onDocumentWritten(
     "bookings/{bookingId}",
     async (event) => {
@@ -227,9 +214,7 @@ export const updateSeekerStatusOnBookingChange = functions.firestore.onDocumentW
     }
 );
 
-/**
- * Helper: Check if seeker has bookings and update status
- */
+
 async function checkAndUpdateSeekerStatus(seekerId) {
     const bookingsSnap = await db
         .collection("bookings")

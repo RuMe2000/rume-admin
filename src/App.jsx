@@ -23,6 +23,8 @@ import VerifiedProperties from "./pages/properties/VerifiedProperties";
 import ViewRoom from "./pages/properties/ViewRoom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PendingRooms from "./pages/properties/PendingRooms";
+import OwnerWallets from "./pages/transactions/OwnerWallets";
+import OwnerWalletDetails from "./pages/transactions/OwnerWalletDetails";
 
 function App() {
     return (
@@ -64,8 +66,13 @@ function App() {
                                     <Route path="/properties/view/:propertyId" element={<ViewProperty />} />
                                     <Route path="/properties/view/:propertyId/room/:roomId" element={<ViewRoom />} />
 
+                                    {/* transactions */}
                                     <Route path="/transactions" element={<Transactions />} />
+                                    <Route path="/transactions/ownerWallets" element={<OwnerWallets />} />
+                                    <Route path="/transactions/ownerWallets/:walletId" element={<OwnerWalletDetails />} />
+
                                     <Route path="/feedback" element={<FeedbackModeration />} />
+                                
                                     <Route path="/analytics" element={<Analytics />} />
 
                                     {/* default display after login */}
