@@ -1,7 +1,6 @@
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import { auth } from '../firebase';
-import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -11,17 +10,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
 
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrorMessage(''); // reset error each time
+
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            //get user data from firestore
+            // Get user data from Firestore
             const userDocRef = doc(db, 'users', user.uid);
             const userDocSnap = await getDoc(userDocRef);
 
@@ -31,30 +33,33 @@ function Login() {
 
             const userData = userDocSnap.data();
 
-            //check if user role is admin
+            // Check if user role is admin
             if (userData.role !== 'admin') {
                 throw new Error("Access denied!");
             }
 
-            setShowSuccess(true); //show popup
-            //hide popup after 2 seconds
+            setShowSuccess(true); // Show popup
+            // Hide popup after 2 seconds
             setTimeout(() => {
                 setShowSuccess(false);
                 navigate('/dashboard');
             }, 2000);
 
         } catch (error) {
-            console.log(error.message);
-            toast.error(error.message, {
-                position: "top-center",
-                autoClose: 1000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: false,
-                progress: undefined,
-            });
+            console.error(error.message);
+
+            // Provide user-friendly messages
+            let message = "An error occurred. Please try again.";
+            if (error.code === 'auth/invalid-credential') message = "Invalid admin credentials.";
+            else if (error.code === 'auth/user-not-found') message = "No account found with this email.";
+            else if (error.code === 'auth/invalid-credential') message = "Invalid admin credentials.";
+            else if (error.code === 'auth/too-many-requests') message = "Too many failed attempts. Try again later.";
+            else if (error.message === "Access denied!") message = "Access denied! Admins only.";
+            else if (error.message === "No user data found.") message = "User record not found.";
+
+            setErrorMessage(message);
         }
-    }
+    };
 
     return (
         <div className='flex min-h-screen min-w-screen bg-bgBlue overflow-hidden fixed top-0 left-0'>
@@ -64,19 +69,25 @@ function Login() {
                 alt="Logo"
                 className="absolute top-1/2 left-1/3 transform -translate-x-1/2 -translate-y-1/2 scale-[1.4] z-0 opacity-60 pointer-events-none"
             />
-            {/* left side for logo */}
+
+            {/* Left side for logo */}
             <div className="relative w-full h-screen overflow-hidden flex items-center justify-center">
-                {/* Foreground Text */}
                 <h1 className="text-[13rem] pt-15 font-bold text-mainBlue z-10">RuMe.</h1>
             </div>
 
-            {/* right side for form */}
+            {/* Right side for form */}
             <div className='w-1/2 bg-transparent flex items-center justify-center z-10 pr-10'>
-                <form onSubmit={handleSubmit} className='w-full max-w-md px-8 py-10 bg-blue-500/10 border border-white/20 rounded-2xl shadow-lg'>
+                <form
+                    onSubmit={handleSubmit}
+                    className='w-full max-w-md px-8 py-10 bg-blue-500/10 border border-white/20 rounded-2xl shadow-lg'
+                >
                     <h1 className='text-4xl font-bold text-center mb-8 text-white'>Login</h1>
 
+                    {/* Email */}
                     <div className='mb-4'>
-                        <label htmlFor='email' className='block text-white text-lg font-medium mb-3'>Email</label>
+                        <label htmlFor='email' className='block text-white text-lg font-medium mb-3'>
+                            Email
+                        </label>
                         <input
                             id='email'
                             name='email'
@@ -87,8 +98,11 @@ function Login() {
                         />
                     </div>
 
-                    <div className='mb-4'>
-                        <label htmlFor='password' className='block text-white text-lg font-medium mb-3'>Password</label>
+                    {/* Password */}
+                    <div className='mb-2'>
+                        <label htmlFor='password' className='block text-white text-lg font-medium mb-3'>
+                            Password
+                        </label>
                         <input
                             id='password'
                             name='password'
@@ -99,12 +113,22 @@ function Login() {
                         />
                     </div>
 
-                    <button type='submit' className='w-full p-3 mt-5 bg-mainBlue text-xl text-white font-bold rounded-2xl hover:bg-hoverBlue cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300'>
+                    {/* Error message */}
+                    {errorMessage && (
+                        <p className="text-errorRed text-sm mt-2 mb-2">{errorMessage}</p>
+                    )}
+
+                    {/* Submit */}
+                    <button
+                        type='submit'
+                        className='w-full p-3 mt-4 bg-mainBlue text-xl text-white font-bold rounded-2xl hover:bg-hoverBlue cursor-pointer focus:outline-none transition-colors duration-300'
+                    >
                         Login
                     </button>
                 </form>
             </div>
 
+            {/* Success popup */}
             <AnimatePresence>
                 {showSuccess && (
                     <motion.div
@@ -131,4 +155,3 @@ function Login() {
 }
 
 export default Login;
-
