@@ -175,7 +175,7 @@ const Transactions = () => {
             </div>
 
             {/* Transactions Table */}
-            <div className="flex-1 max-h-[50vh] overflow-y-auto rounded-xl border border-darkGray mb-6">
+            <div className="flex-1 max-h-[50vh] overflow-y-auto rounded-xl border border-darkGray mb-8">
                 <table className="min-w-full text-white rounded-md">
                     <thead className="sticky top-0 z-10 bg-darkBlue">
                         <tr>
@@ -241,8 +241,10 @@ const Transactions = () => {
                 </table>
             </div>
 
+            <div className="border-b-2 border-gray-600 my-1"></div>
+
             {/* Withdrawals Table */}
-            <div className="flex items-center justify-between w-full mb-2 mt-6">
+            <div className="flex items-center justify-between w-full mb-2 mt-8">
                 <h2 className="text-2xl font-bold">Withdrawals</h2>
 
                 <div className="flex flex-wrap justify-end gap-2">
@@ -280,7 +282,7 @@ const Transactions = () => {
                 </div>
             </div>
 
-            <div className="flex-1 max-h-[50vh] overflow-y-auto rounded-xl border border-darkGray mb-6">
+            <div className="flex-1 max-h-[50vh] overflow-y-auto rounded-xl border border-darkGray">
                 <table className="min-w-full text-white rounded-md">
                     <thead className="sticky top-0 z-10 bg-darkBlue">
                         <tr>

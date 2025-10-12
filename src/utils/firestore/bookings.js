@@ -126,3 +126,27 @@ export async function getTop5PropertiesByBookings() {
         return [];
     }
 };
+
+export const getBookingStatusCounts = async () => {
+    try {
+        const bookingsRef = collection(db, "bookings");
+
+        // Query counts for each status
+        const [pendingSnap, awaitingSnap, bookedSnap] = await Promise.all([
+            getDocs(query(bookingsRef, where("status", "==", "pending"))),
+            getDocs(query(bookingsRef, where("status", "==", "awaiting_payment"))),
+            getDocs(query(bookingsRef, where("status", "==", "booked"))),
+        ]);
+
+        const counts = {
+            pendingCount: pendingSnap.size,
+            awaitingPaymentCount: awaitingSnap.size,
+            bookedCount: bookedSnap.size,
+        };
+
+        return counts;
+    } catch (error) {
+        console.error("Error fetching booking status counts:", error);
+        return { pendingCount: 0, awaitingPaymentCount: 0, bookedCount: 0 };
+    }
+};

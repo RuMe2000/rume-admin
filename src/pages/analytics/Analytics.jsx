@@ -1,5 +1,9 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, AreaChart, Area } from "recharts";
-import { getUserRoleCounts, getTopBookedAmenities, getTop5PropertiesByBookings, getBookingSuccessRatio, getAgeBracketDistribution, listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount, listenTransactionAmountsPerMonth, listenBookingsPerMonth, listenCommissionPerMonth, getPredictedTopAmenities } from "../../utils/firestoreUtils";
+import {
+    getUserRoleCounts, getTopBookedAmenities, getTop5PropertiesByBookings, getBookingSuccessRatio, getAgeBracketDistribution,
+    listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount, listenTransactionAmountsPerMonth,
+    listenBookingsPerMonth, listenCommissionPerMonth, getPredictedTopAmenities, getBookingStatusCounts
+} from "../../utils/firestoreUtils";
 import { useEffect, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 
@@ -26,6 +30,7 @@ const Analytics = () => {
     const [topAmenities, setTopAmenities] = useState([]);
     const [activeIndex, setActiveIndex] = useState(null);
     const [userRoles, setUserRoles] = useState({ seekers: 0, owners: 0 });
+    const [funnelData, setFunnelData] = useState([]);
 
     const getData = async () => {
         const bsr = await getBookingSuccessRatio();
@@ -42,6 +47,15 @@ const Analytics = () => {
 
         const amens = await getPredictedTopAmenities();
         setTopAmenities(amens);
+
+        const bookingCounts = await getBookingStatusCounts();
+
+        // Prepare data for chart
+        setFunnelData([
+            { stage: "Pending", count: bookingCounts.pendingCount },
+            { stage: "Awaiting Payment", count: bookingCounts.awaitingPaymentCount },
+            { stage: "Booked", count: bookingCounts.bookedCount },
+        ]);
 
         const ageDist = await getAgeBracketDistribution();
         // transform { "18-24": 10, "25-34": 20 } -> [{ name: "18-24", value: 10}, ...]
@@ -401,6 +415,45 @@ const Analytics = () => {
                             fillOpacity={0.7}
                         />
                     </AreaChart>
+                </ResponsiveContainer>
+            </div>
+
+            <div className="bg-blue-950 rounded-2xl p-4 shadow-lg mt-6">
+                <h2 className="text-xl font-semibold mb-4">Booking Conversion Funnel</h2>
+                <p className="text-gray-400 text-sm mb-3">
+                    {/* Visualizes how many bookings progress from Pending → Awaiting Payment → Booked. */}
+                </p>
+
+                <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                        layout="vertical"
+                        data={funnelData}
+                        margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
+                        <XAxis type="number" stroke="#cbd5e1" />
+                        <YAxis
+                            dataKey="stage"
+                            type="category"
+                            stroke="#cbd5e1"
+                            tick={{ fill: "white", fontSize: 13 }}
+                        />
+                        <Tooltip
+                            cursor={false}
+                            contentStyle={{
+                                backgroundColor: "#001740",
+                                border: "none",
+                                borderRadius: "8px",
+                                color: "#ffffff",
+                            }}
+                            formatter={(value) => [value, "Bookings"]}
+                        />
+                        <Bar dataKey="count" fill="#3b82f6" radius={[10, 10, 10, 10]} barSize={40}>
+                            {funnelData.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                        </Bar>
+                    </BarChart>
                 </ResponsiveContainer>
             </div>
 

@@ -147,7 +147,7 @@ const PlatformWalletDetails = () => {
                     {/* Wallet Overview */}
                     <div className="relative bg-blue-950 rounded-2xl p-6 shadow-lg mb-6">
                         <h2 className="text-3xl font-bold mb-2">RuMe</h2>
-                        <p className="text-gray-300 mb-1">Wallet ID: {wallet.id}</p>
+                        {/* <p className="text-gray-300 mb-1">Wallet ID: {wallet.id}</p> */}
                         <p className="text-3xl text-yellow-400 font-bold mt-4">₱{(wallet.amount / 100).toLocaleString() || "0"}</p>
                         <p className="text-gray-400 mt-2 text-sm">
                             Last Updated:{" "}
