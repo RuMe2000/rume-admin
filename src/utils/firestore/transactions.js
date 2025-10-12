@@ -174,3 +174,35 @@ export const getTransactionById = async (transactionId) => {
     return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
 };
 
+//get admin wallet and transactions inside
+export const getAdminWalletAndTransactions = async () => {
+    try {
+        // Step 1: Query the wallets collection for the admin wallet
+        const walletsRef = collection(db, "wallets");
+        const q = query(walletsRef, where("role", "==", "admin"));
+        const walletSnap = await getDocs(q);
+
+        if (walletSnap.empty) {
+            console.warn("No admin wallet found.");
+            return { wallet: null, transactions: [] };
+        }
+
+        // Assuming there’s only one admin wallet
+        const walletDoc = walletSnap.docs[0];
+        const wallet = { id: walletDoc.id, ...walletDoc.data() };
+
+        // Step 2: Get all transactions inside the wallet’s transactions subcollection
+        const transactionsRef = collection(db, "wallets", walletDoc.id, "transactions");
+        const transactionsSnap = await getDocs(transactionsRef);
+
+        const transactions = transactionsSnap.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        return { wallet, transactions };
+    } catch (error) {
+        console.error("Error fetching admin wallet and transactions:", error);
+        throw error;
+    }
+};

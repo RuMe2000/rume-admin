@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, getDoc, doc, updateDoc, onSnapshot, orderBy, serverTimestamp, increment, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 //get wallet count
@@ -62,4 +62,25 @@ export const getAllOwnerWallets = async () => {
         return [];
     }
 };
+
+// Subtract amount from wallet balance
+export const updateWalletBalance = async (walletId, amountChange) => {
+    const walletRef = doc(db, "wallets", walletId);
+    await updateDoc(walletRef, {
+        amount: increment(amountChange), // amountChange can be negative
+        updatedAt: serverTimestamp(),
+    });
+};
+
+//Create a withdrawal record
+export const createWithdrawal = async (walletId, amount) => {
+    const withdrawalsRef = collection(db, "wallets", walletId, "withdrawals");
+    await addDoc(withdrawalsRef, {
+        createdAt: serverTimestamp(),
+        paymentType: "withdrawal",
+        amount: -amount, // store as negative
+        status: "completed",
+    });
+};
+
 

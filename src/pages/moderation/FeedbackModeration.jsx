@@ -6,11 +6,15 @@ import {
     rejectFeedback,
     updateFeedback,
 } from "../../utils/firestoreUtils";
+import useAlerts from "../../hooks/useAlerts";
+import AlertContainer from "../../components/AlertContainer";
 
 const FeedbackModeration = () => {
     const [feedbacks, setFeedbacks] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [editedContent, setEditedContent] = useState("");
+
+    const { alerts, showAlert, removeAlert } = useAlerts();
 
     const fetchData = async () => {
         try {
@@ -18,7 +22,7 @@ const FeedbackModeration = () => {
             setFeedbacks(data);
         } catch (error) {
             console.error("Error fetching feedbacks:", error);
-            toast.error("Failed to load feedbacks.");
+            showAlert("error", "Failed to load feedbacks.");
         }
     };
 
@@ -29,31 +33,31 @@ const FeedbackModeration = () => {
     const handleApprove = async (id) => {
         try {
             await approveFeedback(id);
-            toast.success("Feedback approved.");
+            showAlert("success", "Feedback approved.");
             fetchData();
         } catch (error) {
-            toast.error("Failed to approve feedback.");
+            showAlert("error", "Failed to approve feedback.");
         }
     };
 
     const handleReject = async (id) => {
         try {
             await rejectFeedback(id);
-            toast.success("Feedback rejected.");
+            showAlert("info", "Feedback rejected.");
             fetchData();
         } catch (error) {
-            toast.error("Failed to reject feedback.");
+            showAlert("error", "Failed to reject feedback.");
         }
     };
 
     const handleSaveEdit = async (id) => {
         try {
             await updateFeedback(id, editedContent);
-            toast.success("Feedback updated!");
+            showAlert("success", "Feedback updated!");
             setEditingId(null);
             fetchData();
         } catch (error) {
-            toast.error("Failed to update feedback.");
+            showAlert("error", "Failed to update feedback.");
         }
     };
 
@@ -108,7 +112,7 @@ const FeedbackModeration = () => {
                                     <p className="text-sm font-semibold text-gray-300">Rating:</p>
                                     <div>{renderStars(fb.rating)}</div>
                                 </div>
-                                
+
 
                                 <div className="mt-1">
                                     <p className="text-sm font-semibold text-gray-300 mb-1">Feedback:</p>
@@ -169,6 +173,9 @@ const FeedbackModeration = () => {
                     ))}
                 </div>
             )}
+
+            <AlertContainer alerts={alerts} removeAlert={removeAlert} />
+
         </div>
     );
 };

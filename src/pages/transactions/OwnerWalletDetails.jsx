@@ -9,6 +9,7 @@ const OwnerWalletDetails = () => {
 
     const [wallet, setWallet] = useState(null);
     const [transactions, setTransactions] = useState([]);
+    const [withdrawals, setWithdrawals] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Fetch wallet details
@@ -58,23 +59,58 @@ const OwnerWalletDetails = () => {
         }
     };
 
+    // Fetch all withdrawals for this wallet
+    const fetchWalletWithdrawals = async () => {
+        try {
+            const withdrawRef = collection(db, "wallets", walletId, "withdrawals");
+            const snapshot = await getDocs(withdrawRef);
+
+            const withdrawalData = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            // Sort by most recent first
+            const sorted = withdrawalData.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
+            setWithdrawals(sorted);
+        } catch (error) {
+            console.error("Error fetching withdrawals:", error);
+        }
+    };
+
     useEffect(() => {
         fetchWalletDetails();
         fetchWalletTransactions();
+        fetchWalletWithdrawals();
     }, [walletId]);
 
+
     if (loading) {
-        return <div className="flex justify-center items-center mt-20 text-white">Loading wallet details...</div>;
+        return (
+            <div className="flex justify-center items-center mt-20 text-white">
+                Loading wallet details...
+            </div>
+        );
     }
 
     return (
         <div className="p-6 text-white">
-            <div className='flex flex-row gap-3 mb-4'>
-                <button onClick={() => navigate(-1)}
-                    className='cursor-pointer hover:scale-115 p-1 rounded-2xl duration-200 transition'>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#FFFFFF"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" /></svg>
+            <div className="flex flex-row gap-3 mb-4">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="cursor-pointer hover:scale-115 p-1 rounded-2xl duration-200 transition"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="30px"
+                        viewBox="0 -960 960 960"
+                        width="30px"
+                        fill="#FFFFFF"
+                    >
+                        <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+                    </svg>
                 </button>
-                <h1 className='text-3xl font-bold'>Wallet Details</h1>
+                <h1 className="text-3xl font-bold">Wallet Details</h1>
             </div>
 
             {wallet ? (
@@ -93,11 +129,11 @@ const OwnerWalletDetails = () => {
                     </div>
 
                     {/* Transactions List */}
-                    <div className="bg-blue-950 rounded-2xl p-5 shadow-lg">
+                    <div className="bg-blue-950 rounded-2xl p-5 shadow-lg mb-6">
                         <h3 className="text-xl font-semibold mb-4">Transactions</h3>
 
                         {transactions.length > 0 ? (
-                            <div className="max-h-[60vh] overflow-y-auto rounded-lg border border-darkGray">
+                            <div className="max-h-[30vh] overflow-y-auto rounded-lg border border-darkGray">
                                 <table className="min-w-full text-sm text-left">
                                     <thead className="sticky top-0 bg-darkBlue">
                                         <tr>
@@ -105,38 +141,95 @@ const OwnerWalletDetails = () => {
                                             <th className="px-4 py-2 text-center">Payer</th>
                                             <th className="px-4 py-2 text-center">Amount</th>
                                             <th className="px-4 py-2 text-center">Commission</th>
-                                            <th className="px-4 py-2 text-center">Status</th>
                                             <th className="px-4 py-2 text-center">Payment Type</th>
+                                            <th className="px-4 py-2 text-center">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {transactions.map((tx) => (
-                                            <tr
-                                                key={tx.id}
-                                                className="border-b border-gray-700"
-                                            >
+                                            <tr key={tx.id} className="border-b border-gray-700">
                                                 <td className="text-center px-4 py-2">
                                                     {tx.createdAt
                                                         ? new Date(tx.createdAt.seconds * 1000).toLocaleString()
                                                         : "No date"}
                                                 </td>
                                                 <td className="text-center px-4 py-2">{tx.payerName}</td>
-                                                <td className="text-center px-4 py-2">₱{(tx.amount / 100).toLocaleString()}</td>
-                                                <td className="text-center px-4 py-2">₱{(tx.commission / 100).toLocaleString()}</td>
+                                                <td className="text-center px-4 py-2">
+                                                    {tx.amount < 0
+                                                        ? `-₱${(Math.abs(tx.amount) / 100).toLocaleString()}`
+                                                        : `₱${(tx.amount / 100).toLocaleString()}`}
+                                                </td>
+                                                <td className="text-center px-4 py-2">
+                                                    ₱{((tx.commission ?? tx.serviceFee) / 100).toLocaleString()}
+                                                </td>
+                                                <td className="text-center px-4 py-2 capitalize">{tx.paymentType}</td>
                                                 <td className="text-center px-4 py-2">
                                                     <span
-                                                        className={`px-3 py-1 rounded-full font-semibold capitalize ${
-                                                            tx.status === "succeeded"
-                                                                ? "bg-successGreen text-white"
-                                                                : tx.status === "pending"
+                                                        className={`px-3 py-1 rounded-full font-semibold capitalize ${tx.status === "succeeded" || tx.status === "completed"
+                                                            ? "bg-successGreen text-white"
+                                                            : tx.status === "pending"
                                                                 ? "bg-yellow-500 text-white"
                                                                 : "bg-errorRed text-white"
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {tx.status}
                                                     </span>
                                                 </td>
-                                                <td className="text-center px-4 py-2 capitalize">{tx.paymentType}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p className="text-white text-center">No transactions found.</p>
+                        )}
+                    </div>
+
+                    {/* Withdrawals List */}
+                    <div className="bg-blue-950 rounded-2xl p-5 shadow-lg">
+                        <h3 className="text-xl font-semibold mb-4">Withdrawals</h3>
+
+                        {withdrawals.length > 0 ? (
+                            <div className="max-h-[30vh] overflow-y-auto rounded-lg border border-darkGray">
+                                <table className="min-w-full text-sm text-left">
+                                    <thead className="sticky top-0 bg-darkBlue">
+                                        <tr>
+                                            <th className="px-4 py-2 text-center">Date</th>
+                                            <th className="px-4 py-2 text-center">Withdrawal Amount</th>
+                                            <th className="px-4 py-2 text-center">Commission</th>
+                                            <th className="px-4 py-2 text-center">Payment Type</th>
+                                            <th className="px-4 py-2 text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {withdrawals.map((wd) => (
+                                            <tr key={wd.id} className="border-b border-gray-700">
+                                                <td className="text-center px-4 py-2">
+                                                    {wd.createdAt
+                                                        ? new Date(wd.createdAt.seconds * 1000).toLocaleString()
+                                                        : "No date"}
+                                                </td>
+                                                <td className="text-center px-4 py-2">
+                                                    {wd.amount < 0
+                                                        ? `-₱${(Math.abs(wd.amount) / 100).toLocaleString()}`
+                                                        : `₱${(wd.amount / 100).toLocaleString()}`}
+                                                </td>
+                                                <td className="text-center px-4 py-2">
+                                                    ₱{((wd.commission ?? wd.serviceFee) / 100).toLocaleString()}
+                                                </td>
+                                                <td className="text-center px-4 py-2 capitalize">{wd.paymentType}</td>
+                                                <td className="text-center px-4 py-2">
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full font-semibold capitalize ${wd.status === "succeeded" || wd.status === "completed"
+                                                            ? "bg-successGreen text-white"
+                                                            : wd.status === "pending"
+                                                                ? "bg-yellow-500 text-white"
+                                                                : "bg-errorRed text-white"
+                                                            }`}
+                                                    >
+                                                        {wd.status}
+                                                    </span>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

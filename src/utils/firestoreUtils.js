@@ -7,3 +7,4 @@ export * from './firestore/wallets';
 export * from './firestore/systemLogs';
 export * from './firestore/roomReverify';
 export * from './firestore/feedbacks';
+export * from './firestore/withdrawals';

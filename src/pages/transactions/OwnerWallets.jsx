@@ -52,7 +52,7 @@ const OwnerWallets = () => {
                                 <h2 className="text-xl font-semibold truncate capitalize">
                                     {wallet.ownerName || "Unnamed Owner"}
                                 </h2>
-                                <Wallet size={28} className="opacity-80 text-cyan-400" />
+                                <Wallet size={28} className="opacity-60 text-white" />
                             </div>
 
                             <p className="text-2xl font-bold mb-1 text-yellow-400">

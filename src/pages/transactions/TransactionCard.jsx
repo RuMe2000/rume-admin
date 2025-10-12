@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { getTransactionById } from '../../utils/firestoreUtils'; // Make sure this exists
-import { format } from 'date-fns'; // You can install this with `npm install date-fns`
+import { getTransactionById } from '../../utils/firestoreUtils';
+import { format } from 'date-fns';
 
 const TransactionCard = ({ transactionId, onClose }) => {
     const [transaction, setTransaction] = useState(null);

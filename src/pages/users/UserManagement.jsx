@@ -73,14 +73,17 @@ const UserManagement = () => {
         <div className='p-6'>
             <h1 className="text-start text-3xl font-bold mb-4">User Management</h1>
 
-            <div className='flex flex-row'>
-                <UserButton roleName="Owners" count={ownersCount} onManage={() => handleNavigate('Owners')} />
-                <UserButton roleName="Seekers" count={seekersCount} onManage={() => handleNavigate('Seekers')} />
+            <div className="flex flex-row items-start mb-6 flex-shrink-0">
+                <div className='flex flex-row gap-5'>
+                    <UserButton roleName="Owners" count={ownersCount} onManage={() => handleNavigate('Owners')} />
+                    <UserButton roleName="Seekers" count={seekersCount} onManage={() => handleNavigate('Seekers')} />
+                </div>
+                <div className="h-53 border-l border-gray-600 mx-4"></div>
                 <UserButton roleName="Admins" count={adminsCount} onManage={() => handleNavigate('Admins')} />
             </div>
 
             <div className="overflow-x-auto mt-8">
-                <div className="max-h-[55vh] overflow-y-auto rounded-xl border border-darkGray">
+                <div className="max-h-[54vh] overflow-y-auto rounded-xl border border-darkGray">
                     <table className="min-w-full text-white rounded-xl">
                         <thead className='sticky top-0 z-10 bg-darkBlue'>
                             <tr>

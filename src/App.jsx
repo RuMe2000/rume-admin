@@ -24,6 +24,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PendingRooms from "./pages/properties/PendingRooms";
 import OwnerWallets from "./pages/transactions/OwnerWallets";
 import OwnerWalletDetails from "./pages/transactions/OwnerWalletDetails";
+import PlatformWalletDetails from "./pages/transactions/PlatformWalletDetails.jsx";
 
 function App() {
     const { user, loading, loginInProgress } = useAuth();
@@ -102,6 +103,7 @@ function App() {
                                             path="/transactions/ownerWallets/:walletId"
                                             element={<OwnerWalletDetails />}
                                         />
+                                        <Route path="/transactions/platformWalletDetails" element={<PlatformWalletDetails />} />
 
                                         {/* Feedback & Analytics */}
                                         <Route path="/feedback" element={<FeedbackModeration />} />
