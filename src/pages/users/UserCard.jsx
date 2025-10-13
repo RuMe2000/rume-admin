@@ -90,7 +90,7 @@ const UserCard = ({ userId, onClose }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 backdrop-blur-sm">
-            <div className="bg-bgBlue text-white rounded-2xl shadow-2xl w-[550px] h-[550px] relative p-8 flex flex-col border border-darkGray">
+            <div className="bg-bgBlue text-white rounded-2xl shadow-2xl w-[550px] h-[640px] relative p-8 flex flex-col border border-darkGray">
                 {/* Close Button */}
                 <button
                     onClick={onClose}
@@ -156,10 +156,29 @@ const UserCard = ({ userId, onClose }) => {
                                 <p className="font-semibold text-gray-300">User ID</p>
                                 <p className="break-all">{user.id}</p>
                             </div>
+
                             <div>
                                 <p className="font-semibold text-gray-300">Role</p>
                                 <p>{user.role?.charAt(0).toUpperCase() + user.role?.slice(1)}</p>
                             </div>
+
+                            {user.role === 'owner' && (
+                                <>
+                                    <div>
+                                        <p className="font-semibold text-gray-300">Phone Number</p>
+                                        <p className="text-blue-300 font-medium">
+                                            {user.phoneNumber || <span className="italic text-gray-400">No phone number</span>}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p className="font-semibold text-gray-300">Address</p>
+                                        <p className="text-gray-200">
+                                            {user.address || <span className="italic text-gray-400">No address provided</span>}
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         {/* Role-specific Details */}
