@@ -33,7 +33,7 @@ const FeedbackModeration = () => {
     const handleApprove = async (id) => {
         try {
             await approveFeedback(id);
-            showAlert("success", "Feedback approved.");
+            showAlert("success", "Feedback approved!");
             fetchData();
         } catch (error) {
             showAlert("error", "Failed to approve feedback.");

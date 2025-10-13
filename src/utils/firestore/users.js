@@ -317,3 +317,57 @@ export const getGenderCount = async () => {
         return { male: 0, female: 0, total: 0 };
     }
 };
+
+
+export async function getUserCountPerMonth() {
+    const snap = await getDocs(collection(db, "users"));
+    const monthlyCounts = {};
+
+    snap.forEach((doc) => {
+        const data = doc.data();
+        if (!data.createdAt) return;
+
+        // Handle Firestore Timestamp or JS Date
+        const createdAt = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+        const month = createdAt.toLocaleString("default", { month: "short" }); // e.g. Jan, Feb
+        const year = createdAt.getFullYear();
+        const key = `${month} ${year}`;
+
+        monthlyCounts[key] = (monthlyCounts[key] || 0) + 1;
+    });
+
+    // Convert to sorted array
+    const result = Object.entries(monthlyCounts)
+        .map(([month, users]) => ({ month, users }))
+        .sort((a, b) => {
+            const [monthA, yearA] = a.month.split(" ");
+            const [monthB, yearB] = b.month.split(" ");
+            const dateA = new Date(`${monthA} 1, ${yearA}`);
+            const dateB = new Date(`${monthB} 1, ${yearB}`);
+            return dateA - dateB;
+        });
+
+    return result;
+};
+
+//get new user count
+export async function getNewUsersCount() {
+    const snap = await getDocs(collection(db, "users"));
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    let count = 0;
+    snap.forEach((doc) => {
+        const data = doc.data();
+        if (!data.createdAt) return;
+
+        const createdAt = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+        if (createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear) {
+            count++;
+        }
+    });
+
+    return count;
+}

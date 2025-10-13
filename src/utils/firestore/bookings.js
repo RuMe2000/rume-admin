@@ -3,13 +3,18 @@ import { db } from '../../firebase';
 import { getAllSeekers } from './users';
 
 export async function getSuccessfulSeekers() {
-    const q = query(collection(db, "bookings"));
+    // Query only bookings where status === 'booked'
+    const q = query(
+        collection(db, "bookings"),
+        where("status", "==", "booked")
+    );
+
     const snap = await getDocs(q);
 
     // Extract unique seeker IDs
     const seekerIds = new Set(snap.docs.map(doc => doc.data().seekerId));
     return Array.from(seekerIds);
-}
+};
 
 //booking success ratio
 export async function getBookingSuccessRatio() {

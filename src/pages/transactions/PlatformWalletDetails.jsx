@@ -230,7 +230,7 @@ const PlatformWalletDetails = () => {
                                             <th className="w-50 px-4 py-2 text-center">Date</th>
                                             <th className="px-4 py-2 text-center">From</th>
                                             <th className="px-4 py-2 text-center">Amount</th>
-                                            <th className="px-4 py-2 text-center">Payment Type</th>
+                                            <th className="px-4 py-2 text-center">Type</th>
                                             <th className="px-4 py-2 text-center">Status</th>
                                         </tr>
                                     </thead>

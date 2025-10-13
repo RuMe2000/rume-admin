@@ -136,7 +136,7 @@ const Transactions = () => {
 
             <div className="flex items-center justify-between w-full mb-2 mt-6">
                 {/* Header on the left */}
-                <h2 className="text-2xl font-bold">Transactions</h2>
+                <h2 className="text-2xl font-bold">Seeker Transactions</h2>
 
                 {/* Filters on the right */}
                 <div className="flex flex-wrap justify-end gap-2">
@@ -189,8 +189,8 @@ const Transactions = () => {
                             <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Paid By</th>
                             <th className="w-50 px-4 py-2 border-b-3 border-darkGray text-center">Paid To</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Amount</th>
+                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Type</th>
                             <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Status</th>
-                            <th className="w-30 px-4 py-2 border-b-3 border-darkGray text-center">Payment Type</th>
                             <th className="w-15 px-4 py-2 border-b-3 border-darkGray text-center"></th>
                         </tr>
                     </thead>
@@ -206,6 +206,7 @@ const Transactions = () => {
                                     <td className="px-4 py-2">{transaction.payerName}</td>
                                     <td className="px-4 py-2">{transaction.ownerName ?? "Loading..."}</td>
                                     <td className="px-4 py-2">₱{(transaction.amount / 100).toLocaleString()}</td>
+                                    <td className="px-4 py-2 capitalize">{transaction.paymentType}</td>
                                     <td className="px-4 py-2">
                                         <span
                                             className={`inline-flex capitalize items-center justify-center w-23 h-7 rounded-full text-sm font-semibold
@@ -221,7 +222,6 @@ const Transactions = () => {
                                             {transaction.status || 'Unknown'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-2 capitalize">{transaction.paymentType}</td>
                                     <td className='px-4 py-2 flex items-center justify-center gap-2'>
                                         <button
                                             onClick={() => setSelectedTransactionId(transaction.id)}
@@ -241,17 +241,17 @@ const Transactions = () => {
                 </table>
             </div>
 
-            <div className="border-b-2 border-gray-600 my-1"></div>
+            {/* <div className="border-b-2 border-gray-600 my-1"></div> */}
 
             {/* Withdrawals Table */}
-            <div className="flex items-center justify-between w-full mb-2 mt-8">
-                <h2 className="text-2xl font-bold">Withdrawals</h2>
+            <div className="flex items-center justify-between w-full mb-2 mt-10">
+                <h2 className="text-2xl font-bold">Owner Withdrawals</h2>
 
                 <div className="flex flex-wrap justify-end gap-2">
                     <input
                         type="text"
                         placeholder="Search by User or Method"
-                        title="Search by User or Method"
+                        title="Search by Owner or Method"
                         value={withdrawalSearchTerm}
                         onChange={(e) => setWithdrawalSearchTerm(e.target.value)}
                         className="bg-darkBlue text-white w-55 px-2 py-1 rounded-xl border border-gray-600 focus:outline-none"

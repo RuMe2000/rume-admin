@@ -165,8 +165,8 @@ const Sidebar = () => {
             <div className='flex justify-end mb-1 mx-3'>
                 <button
                     onClick={handleSignOut}
-                    className='w-full px-4 py-1 bg-mainBlue/70 rounded-lg text-sm font-semibold hover:bg-hoverBlue focus:outline-none hover:cursor-pointer transition duration-300'>
-                    <span>SIGN OUT</span>
+                    className='w-full px-4 py-1 bg-mainBlue rounded-lg text-sm font-semibold hover:bg-hoverBlue focus:outline-none hover:cursor-pointer transition duration-300'>
+                    <span>Sign Out</span>
                 </button>
             </div>
         </nav>

@@ -1,8 +1,8 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, AreaChart, Area } from "recharts";
 import {
     getUserRoleCounts, getTopBookedAmenities, getTop5PropertiesByBookings, getBookingSuccessRatio, getAgeBracketDistribution,
-    listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount, listenTransactionAmountsPerMonth,
-    listenBookingsPerMonth, listenCommissionPerMonth, getPredictedTopAmenities, getBookingStatusCounts
+    listenSystemLogs, getTransactionTotalAmount, getCommission, getGenderCount, listenTransactionAmountsPerMonth, getNewUsersCount,
+    listenBookingsPerMonth, listenCommissionPerMonth, getPredictedTopAmenities, getBookingStatusCounts, getUserCountPerMonth
 } from "../../utils/firestoreUtils";
 import { useEffect, useState } from "react";
 import { Timestamp } from "firebase/firestore";
@@ -24,6 +24,7 @@ const Analytics = () => {
     const [genderData, setGenderData] = useState([]);
     const [revenueData, setRevenueData] = useState([]);
     const [bookingsData, setBookingsData] = useState([]);
+    const [usersData, setUsersData] = useState([]);
     const [commissionData, setCommissionData] = useState([]);
     const [stackedData, setStackedData] = useState([]);
     const [topProperties, setTopProperties] = useState([]);
@@ -31,6 +32,7 @@ const Analytics = () => {
     const [activeIndex, setActiveIndex] = useState(null);
     const [userRoles, setUserRoles] = useState({ seekers: 0, owners: 0 });
     const [funnelData, setFunnelData] = useState([]);
+    const [newUsers, setNewUsers] = useState(null);
 
     const getData = async () => {
         const bsr = await getBookingSuccessRatio();
@@ -41,6 +43,12 @@ const Analytics = () => {
 
         const roleCount = await getUserRoleCounts();
         setUserRoles(roleCount);
+
+        const user = await getUserCountPerMonth();
+        setUsersData(user);
+
+        const count = await getNewUsersCount();
+        setNewUsers(count);
 
         const comm = await getCommission();
         setCommission(comm);
@@ -151,10 +159,22 @@ const Analytics = () => {
             <h1 className="text-3xl font-bold mb-6">Analytics & Performance</h1>
 
             {/* quick stats cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
+                    <h2 className="text-lg font-semibold mb-2">New Users This Month</h2>
+                    <p className="text-3xl font-bold text-white">
+                        {newUsers !== null ? newUsers : "..."} users
+                    </p>
+                    <p className="text-sm text-gray-300">
+                        {newUsers !== null
+                            ? "joined this month"
+                            : "Fetching data..."}
+                    </p>
+                </div>
+
                 <div className="bg-blue-950 rounded-2xl p-5 shadow-md">
                     <h2 className="text-lg font-semibold mb-2">Booking Success Ratio</h2>
-                    <p className="text-3xl font-bold">
+                    <p className="text-3xl font-bold text-white">
                         {bookingSuccess ? `${bookingSuccess.ratio}%` : "..."}
                     </p>
                     <p className="text-sm text-gray-300">
@@ -165,12 +185,12 @@ const Analytics = () => {
 
                 </div>
                 <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
-                    <h2 className="text-lg font-semibold mb-2">Total Net Revenue</h2>
-                    <p className="text-3xl font-bold">₱{commission.toLocaleString()}</p>
+                    <h2 className="text-lg font-semibold mb-2">Total Platform Revenue</h2>
+                    <p className="text-3xl font-bold text-yellow-400">₱{commission.toLocaleString()}</p>
                 </div>
                 <div className="flex flex-col bg-blue-950 rounded-2xl p-5 shadow-md justify-between">
                     <h2 className="text-lg font-semibold mb-2">Total Transactions Amount</h2>
-                    <p className="text-3xl font-bold">₱{gross.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-yellow-400">₱{gross.toLocaleString()}</p>
                 </div>
             </div>
 
@@ -252,6 +272,45 @@ const Analytics = () => {
                                     key={`cell-${index}`}
                                     fill={index === activeIndex ? "#383cc44d" : "#3539cb"}
                                 />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+
+            <div className="bg-blue-950 rounded-2xl p-4 shadow-lg my-6">
+                <h2 className="text-xl font-semibold mb-4">Booking Conversion Funnel</h2>
+                <p className="text-gray-400 text-sm mb-3">
+                    {/* Visualizes how many bookings progress from Pending → Awaiting Payment → Booked. */}
+                </p>
+
+                <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                        layout="vertical"
+                        data={funnelData}
+                        margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
+                        <XAxis type="number" stroke="#cbd5e1" />
+                        <YAxis
+                            dataKey="stage"
+                            type="category"
+                            stroke="#cbd5e1"
+                            tick={{ fill: "white", fontSize: 13 }}
+                        />
+                        <Tooltip
+                            cursor={false}
+                            contentStyle={{
+                                backgroundColor: "#001740",
+                                border: "none",
+                                borderRadius: "8px",
+                                color: "#ffffff",
+                            }}
+                            formatter={(value) => [value, "Bookings"]}
+                        />
+                        <Bar dataKey="count" fill="#3b82f6" radius={[10, 10, 10, 10]} barSize={40}>
+                            {funnelData.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Bar>
                     </BarChart>
@@ -350,7 +409,7 @@ const Analytics = () => {
                 </div>
 
                 <div className="bg-blue-950 p-4 rounded-2xl shadow-md">
-                    <h2 className="text-xl font-semibold mb-3 text-white">Commission Amount per Month</h2>
+                    <h2 className="text-xl font-semibold mb-3 text-white">Platform Revenue per Month</h2>
                     <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={commissionData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
@@ -382,10 +441,29 @@ const Analytics = () => {
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
+
+                {/* Users chart */}
+                <div className="bg-blue-950 rounded-2xl p-4 shadow-lg">
+                    <h2 className="text-xl font-semibold mb-4">User Count per Month</h2>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={usersData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
+                            <XAxis dataKey="month" stroke="#cbd5e1" />
+                            <YAxis stroke="#cbd5e1" />
+                            <Tooltip />
+                            <Line
+                                type="monotone"
+                                dataKey="users"
+                                stroke="#10b981" // teal/green color for contrast
+                                strokeWidth={3}
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
 
             <div className="bg-blue-950 rounded-2xl p-4 shadow-lg mt-6">
-                <h2 className="text-xl font-semibold mb-4">Gross Revenue vs Commission</h2>
+                <h2 className="text-xl font-semibold mb-4">Gross vs Platform Revenue</h2>
                 <ResponsiveContainer width="100%" height={300}>
                     <AreaChart
                         data={stackedData}
@@ -415,45 +493,6 @@ const Analytics = () => {
                             fillOpacity={0.7}
                         />
                     </AreaChart>
-                </ResponsiveContainer>
-            </div>
-
-            <div className="bg-blue-950 rounded-2xl p-4 shadow-lg mt-6">
-                <h2 className="text-xl font-semibold mb-4">Booking Conversion Funnel</h2>
-                <p className="text-gray-400 text-sm mb-3">
-                    {/* Visualizes how many bookings progress from Pending → Awaiting Payment → Booked. */}
-                </p>
-
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart
-                        layout="vertical"
-                        data={funnelData}
-                        margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
-                    >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#696868" />
-                        <XAxis type="number" stroke="#cbd5e1" />
-                        <YAxis
-                            dataKey="stage"
-                            type="category"
-                            stroke="#cbd5e1"
-                            tick={{ fill: "white", fontSize: 13 }}
-                        />
-                        <Tooltip
-                            cursor={false}
-                            contentStyle={{
-                                backgroundColor: "#001740",
-                                border: "none",
-                                borderRadius: "8px",
-                                color: "#ffffff",
-                            }}
-                            formatter={(value) => [value, "Bookings"]}
-                        />
-                        <Bar dataKey="count" fill="#3b82f6" radius={[10, 10, 10, 10]} barSize={40}>
-                            {funnelData.map((_, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Bar>
-                    </BarChart>
                 </ResponsiveContainer>
             </div>
 

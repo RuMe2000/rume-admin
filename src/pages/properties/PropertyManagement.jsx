@@ -53,10 +53,7 @@ const PropertyManagement = () => {
                 <RoomVerificationCard onManage={() => navigate('/properties/pendingRooms')} />
             </div>
 
-            {/* Scrollable section */}
-            <div className="flex-1 overflow-y-auto max-h-[55vh] px-2 py-4 border-y border-blue-950">
-                <PropertyCard />
-            </div>
+            <PropertyCard />
         </div>
     );
 };
