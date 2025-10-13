@@ -25,6 +25,7 @@ import PendingRooms from "./pages/properties/PendingRooms";
 import OwnerWallets from "./pages/transactions/OwnerWallets";
 import OwnerWalletDetails from "./pages/transactions/OwnerWalletDetails";
 import PlatformWalletDetails from "./pages/transactions/PlatformWalletDetails.jsx";
+import ConfirmDialog from "./components/ConfirmDialog.jsx";
 
 function App() {
     const { user, loading, loginInProgress } = useAuth();
@@ -115,6 +116,7 @@ function App() {
                     }
                 />
             </Routes>
+
         </BrowserRouter>
     );
 }

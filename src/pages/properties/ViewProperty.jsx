@@ -729,7 +729,7 @@ export default function ViewProperty() {
                             <div className="flex flex-row justify-end gap-3">
                                 <button
                                     onClick={() => setShowDatePicker(false)}
-                                    className="bg-errorRed px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
+                                    className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition duration-200"
                                 >
                                     Cancel
                                 </button>
@@ -771,7 +771,7 @@ export default function ViewProperty() {
                             <div className="flex flex-row justify-end gap-3">
                                 <button
                                     onClick={() => setShowRoomDatePicker(false)}
-                                    className="bg-errorRed px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
+                                    className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition duration-200"
                                 >
                                     Cancel
                                 </button>

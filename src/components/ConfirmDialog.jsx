@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function ConfirmDialog({
@@ -9,11 +10,13 @@ export default function ConfirmDialog({
     onConfirm,
     onCancel,
 }) {
-    return (
+    if (typeof document === "undefined") return null;
+
+    return createPortal(
         <AnimatePresence>
             {visible && (
                 <motion.div
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -44,6 +47,7 @@ export default function ConfirmDialog({
                     </motion.div>
                 </motion.div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
-}
+};

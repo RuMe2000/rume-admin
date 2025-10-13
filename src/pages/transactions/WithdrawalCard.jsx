@@ -113,11 +113,11 @@ const WithdrawalCard = ({ walletId, withdrawalId, onClose }) => {
                                             <img
                                                 src={
                                                     withdrawal.method === "GrabPay"
-                                                        ? "/src/assets/grabpay_logo.png"
+                                                        ? "/grabpay_logo.png"
                                                         : withdrawal.method === "PayMaya"
-                                                            ? "/src/assets/paymaya_logo.png"
+                                                            ? "/paymaya_logo.png"
                                                             : withdrawal.method === "GCash"
-                                                                ? "/src/assets/gcash_logo.png"
+                                                                ? "/gcash_logo.png"
                                                                 : null
                                                 }
                                                 alt={withdrawal.method}

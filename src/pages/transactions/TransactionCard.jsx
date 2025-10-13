@@ -55,7 +55,7 @@ const TransactionCard = ({ transactionId, onClose }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
-            <div className="bg-bgBlue text-white rounded-2xl shadow-lg w-[450px] h-[680px] relative p-6 flex flex-col border border-darkGray">
+            <div className="bg-bgBlue text-white rounded-2xl shadow-lg w-[480px] h-[730px] relative p-6 flex flex-col border border-darkGray">
                 {/* X Button */}
                 <button
                     onClick={onClose}
@@ -89,10 +89,10 @@ const TransactionCard = ({ transactionId, onClose }) => {
                             <div className="flex justify-center">
                                 <span
                                     className={`px-4 py-1 rounded-full text-sm font-semibold ${transaction.status === 'succeeded'
-                                            ? 'bg-successGreen text-white'
-                                            : transaction.status === 'pending'
-                                                ? 'bg-yellow-500 text-white'
-                                                : 'bg-errorRed text-white'
+                                        ? 'bg-successGreen text-white'
+                                        : transaction.status === 'pending'
+                                            ? 'bg-yellow-500 text-white'
+                                            : 'bg-errorRed text-white'
                                         }`}
                                 >
                                     {transaction.status
@@ -104,10 +104,42 @@ const TransactionCard = ({ transactionId, onClose }) => {
                             {/* General Info */}
                             <div>
                                 <h3 className="text-lg font-bold mb-2 text-white">General Info</h3>
-                                <div className="space-y-1 text-gray-300">
-                                    <p><span className="font-semibold text-white">Transaction ID:</span> {transaction.id || transactionId}</p>
-                                    <p className='capitalize'><span className="font-semibold text-white">Payment Type:</span> {transaction.paymentType}</p>
-                                    <p><span className="font-semibold text-white">Description:</span> {transaction.description || 'N/A'}</p>
+                                <div className="space-y-2 text-gray-300">
+                                    <p>
+                                        <span className="font-semibold text-white">Transaction ID:</span>{' '}
+                                        {transaction.id || transactionId}
+                                    </p>
+
+                                    <p className="capitalize">
+                                        <span className="font-semibold text-white">Payment Type:</span>{' '}
+                                        {transaction.paymentType}
+                                    </p>
+
+                                    <p>
+                                        <span className="font-semibold text-white">Description:</span>{' '}
+                                        {transaction.description || 'N/A'}
+                                    </p>
+
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold text-white">Payment Method:</span>
+                                        {transaction.method ? (
+                                            <img
+                                                src={
+                                                    transaction.method === 'grabpay'
+                                                        ? '/grabpay_logo.png'
+                                                        : transaction.method === 'paymaya'
+                                                            ? '/paymaya_logo.png'
+                                                            : transaction.method === 'gcash'
+                                                                ? '/gcash_logo.png'
+                                                                : null
+                                                }
+                                                alt={transaction.method}
+                                                className="h-6 object-contain"
+                                            />
+                                        ) : (
+                                            <span className="text-gray-400">N/A</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
