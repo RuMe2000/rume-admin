@@ -326,11 +326,11 @@ const Transactions = () => {
                                                 <img
                                                     src={
                                                         wd.method === "GrabPay"
-                                                            ? "/src/assets/grabpay_logo.png"
+                                                            ? "/grabpay_logo.png"
                                                             : wd.method === "PayMaya"
-                                                                ? "/src/assets/paymaya_logo.png"
+                                                                ? "/paymaya_logo.png"
                                                                 : wd.method === "GCash"
-                                                                    ? "/src/assets/gcash_logo.png"
+                                                                    ? "/gcash_logo.png"
                                                                     : null
                                                     }
                                                     alt={wd.method}
