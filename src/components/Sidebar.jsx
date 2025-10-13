@@ -4,10 +4,12 @@ import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import logo from '../assets/rume_logo.png';
+import ConfirmDialog from './ConfirmDialog';
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const [adminName, setAdminName] = useState('');
+    const [showConfirmSignOut, setShowConfirmSignOut] = useState(false);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -143,12 +145,26 @@ const Sidebar = () => {
             {/* Sign Out */}
             <div className="border-t border-darkGray mt-3 pt-3 px-3">
                 <button
-                    onClick={handleSignOut}
+                    onClick={() => setShowConfirmSignOut(true)}
                     className="w-full py-2 bg-mainBlue rounded-xl text-sm font-semibold hover:bg-hoverBlue transition duration-300"
                 >
                     Sign Out
                 </button>
             </div>
+
+            {/* Confirm Sign Out Dialog */}
+            <ConfirmDialog
+                visible={showConfirmSignOut}
+                title="Sign Out"
+                message="Are you sure you want to sign out?"
+                confirmText="Sign Out"
+                cancelText="Cancel"
+                onConfirm={async () => {
+                    setShowConfirmSignOut(false);
+                    await handleSignOut();
+                }}
+                onCancel={() => setShowConfirmSignOut(false)}
+            />
         </nav>
     );
 };
