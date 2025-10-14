@@ -5,7 +5,7 @@ import { db } from '../../firebase';
 export const getFeedbacks = async () => {
     try {
         const feedbacksRef = collection(db, "feedbacks");
-        const q = query(feedbacksRef, where("status", "==", "pending"), orderBy("createdAt", "desc"));
+        const q = query(feedbacksRef, orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
         return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
@@ -31,4 +31,14 @@ export const rejectFeedback = async (id) => {
 export const updateFeedback = async (id, newContent) => {
     const feedbackRef = doc(db, "feedbacks", id);
     await updateDoc(feedbackRef, { description: newContent });
+};
+
+export const getFeedbacksByProperty = async (propertyId) => {
+    const q = query(collection(db, "feedbacks"), where("propertyId", "==", propertyId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const toggleFeedbackVisibility = async (id, hidden) => {
+    await updateDoc(doc(db, "feedbacks", id), { hidden });
 };

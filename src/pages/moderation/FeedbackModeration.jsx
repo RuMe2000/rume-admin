@@ -1,181 +1,85 @@
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import {
-    getFeedbacks,
-    approveFeedback,
-    rejectFeedback,
-    updateFeedback,
-} from "../../utils/firestoreUtils";
-import useAlerts from "../../hooks/useAlerts";
-import AlertContainer from "../../components/AlertContainer";
+import { useNavigate } from "react-router-dom";
+import { getAllProperties } from "../../utils/firestoreUtils";
+import { useEffect, useState, useMemo } from "react";
 
 const FeedbackModeration = () => {
-    const [feedbacks, setFeedbacks] = useState([]);
-    const [editingId, setEditingId] = useState(null);
-    const [editedContent, setEditedContent] = useState("");
+    const [properties, setProperties] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
 
-    const { alerts, showAlert, removeAlert } = useAlerts();
+    const navigate = useNavigate();
 
-    const fetchData = async () => {
+    const fetchProperties = async () => {
+        setLoading(true);
         try {
-            const data = await getFeedbacks();
-            setFeedbacks(data);
+            const props = await getAllProperties();
+            setProperties(props);
         } catch (error) {
-            console.error("Error fetching feedbacks:", error);
-            showAlert("error", "Failed to load feedbacks.");
+            console.error("Error fetching properties:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchData();
+        fetchProperties();
     }, []);
 
-    const handleApprove = async (id) => {
-        try {
-            await approveFeedback(id);
-            showAlert("success", "Feedback approved!");
-            fetchData();
-        } catch (error) {
-            showAlert("error", "Failed to approve feedback.");
-        }
-    };
+    // ✅ Filter by property name or owner name
+    const filteredProperties = useMemo(() => {
+        if (!searchTerm.trim()) return properties;
 
-    const handleReject = async (id) => {
-        try {
-            await rejectFeedback(id);
-            showAlert("info", "Feedback rejected.");
-            fetchData();
-        } catch (error) {
-            showAlert("error", "Failed to reject feedback.");
-        }
-    };
-
-    const handleSaveEdit = async (id) => {
-        try {
-            await updateFeedback(id, editedContent);
-            showAlert("success", "Feedback updated!");
-            setEditingId(null);
-            fetchData();
-        } catch (error) {
-            showAlert("error", "Failed to update feedback.");
-        }
-    };
-
-    //convert rating to star
-    const renderStars = (rating) => {
-        const filledStars = Math.round(rating || 0);
-        return (
-            <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                    <span
-                        key={i}
-                        className={`text-3xl ${i < filledStars ? "text-yellow-400" : "text-gray-600"
-                            }`}
-                    >
-                        ★
-                    </span>
-                ))}
-            </div>
+        const lower = searchTerm.toLowerCase();
+        return properties.filter(
+            (p) =>
+                p.name?.toLowerCase().includes(lower) ||
+                p.ownerName?.toLowerCase().includes(lower)
         );
-    };
+    }, [properties, searchTerm]);
 
     return (
         <div className="p-6 text-white">
-            <h1 className="text-start text-3xl font-bold mb-6">Feedback Moderation</h1>
+            
+            <div className="flex flex-row items-center justify-between text-white gap-3 mb-6">
+                <h1 className="text-3xl font-bold">Feedback Moderation</h1>
 
-            {!feedbacks || feedbacks.length === 0 ? (
-                <p className="text-center text-white">No pending feedbacks.</p>
+                <div className="flex justify-end">
+                    <input
+                        type="text"
+                        placeholder="Search by property or owner name"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="bg-darkBlue text-white px-4 py-2 rounded-xl border border-gray-600 w-72 focus:outline-none"
+                    />
+                </div>
+            </div>
+
+            
+            {loading ? (
+                <p className="text-center text-gray-300 mt-10">Loading properties...</p>
+            ) : filteredProperties.length === 0 ? (
+                <p className="text-center text-gray-300 mt-10">No properties found.</p>
             ) : (
-                <div className="flex flex-col gap-4">
-                    {feedbacks.map((fb) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                    {filteredProperties.map((property) => (
                         <div
-                            key={fb.id}
-                            className="bg-blue-950/30 border border-darkGray rounded-2xl p-5 shadow-md flex flex-col justify-between transition-all hover:scale-101 duration-300"
+                            key={property.id}
+                            onClick={() => navigate(`/feedback/${property.id}`)}
+                            className="relative bg-blue-950/40 rounded-2xl p-4 shadow-lg border border-darkGray hover:scale-105 transition duration-300 cursor-pointer"
                         >
-                            <div className="flex flex-col gap-2 mb-4">
-                                <div className="flex justify-between items-center">
-                                    <p className="font-semibold text-lg text-white">
-                                        {fb.propertyId ? `Property: ${fb.propertyName}` : "Unknown Property"}
-                                    </p>
-                                    <p className="text-sm text-gray-400">
-                                        {fb.createdAt
-                                            ? new Date(fb.createdAt?.toDate?.() || fb.createdAt).toLocaleString()
-                                            : "Unknown date"}
-                                    </p>
-                                </div>
-
-                                <p className="text-gray-300">Room: {fb.roomName || "N/A"}</p>
-                                <p className="text-gray-300">By: {fb.seekerId || "Anonymous User"}</p>
-
-                                {/* ⭐ Rating display */}
-                                <div className="flex flex-row items-center aling-center gap-2 mt-2">
-                                    <p className="text-sm font-semibold text-gray-300">Rating:</p>
-                                    <div>{renderStars(fb.rating)}</div>
-                                </div>
-
-
-                                <div className="mt-1">
-                                    <p className="text-sm font-semibold text-gray-300 mb-1">Feedback:</p>
-                                    {editingId === fb.id ? (
-                                        <textarea
-                                            value={editedContent}
-                                            onChange={(e) => setEditedContent(e.target.value)}
-                                            className="w-full p-2 rounded-lg bg-bgBlue border border-hoverBlue text-white focus:outline-none resize-none"
-                                        />
-                                    ) : (
-                                        <p className="text-md text-gray-200">{fb.description}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Buttons section */}
-                            <div className="flex flex-row justify-between items-center mt-3">
-                                {/* Left side: Edit / Save */}
-                                <div>
-                                    {editingId === fb.id ? (
-                                        <button
-                                            onClick={() => handleSaveEdit(fb.id)}
-                                            className="px-4 py-2 rounded-xl bg-successGreen hover:bg-successGreen/80 font-semibold"
-                                        >
-                                            SAVE
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => {
-                                                setEditingId(fb.id);
-                                                setEditedContent(fb.description);
-                                            }}
-                                            className="px-4 py-2 rounded-xl bg-yellow-500 hover:bg-yellow-600 font-semibold"
-                                        >
-                                            EDIT
-                                        </button>
-                                    )}
-                                </div>
-
-                                {/* Right side: Approve / Reject */}
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleApprove(fb.id)}
-                                        className="px-4 py-2 rounded-xl bg-mainBlue hover:bg-hoverBlue font-semibold transition duration-300"
-                                    >
-                                        APPROVE
-                                    </button>
-
-                                    <button
-                                        onClick={() => handleReject(fb.id)}
-                                        className="px-4 py-2 rounded-xl bg-errorRed hover:bg-errorRed/80 font-semibold transition duration-300"
-                                    >
-                                        REJECT
-                                    </button>
-                                </div>
-                            </div>
+                            <img
+                                src={property.verificationData?.propertyFrontUrl}
+                                alt={property.name}
+                                className="h-40 w-full object-cover rounded-xl mb-3"
+                            />
+                            <h2 className="text-xl font-semibold">{property.name}</h2>
+                            <p className="text-gray-400 text-sm mt-1">
+                                {property.ownerName || "No owner info"}
+                            </p>
                         </div>
                     ))}
                 </div>
             )}
-
-            <AlertContainer alerts={alerts} removeAlert={removeAlert} />
-
         </div>
     );
 };

@@ -135,7 +135,7 @@ const OwnerWalletDetails = () => {
                         {transactions.length > 0 ? (
                             <div className="max-h-[30vh] overflow-y-auto rounded-lg border border-darkGray">
                                 <table className="min-w-full text-sm text-left">
-                                    <thead className="sticky top-0 bg-darkBlue">
+                                    <thead className="sticky top-0 bg-darkBlue border-b-2 border-darkGray">
                                         <tr>
                                             <th className="px-4 py-2 text-center">Date</th>
                                             <th className="px-4 py-2 text-center">Payer</th>

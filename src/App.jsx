@@ -26,6 +26,7 @@ import OwnerWallets from "./pages/transactions/OwnerWallets";
 import OwnerWalletDetails from "./pages/transactions/OwnerWalletDetails";
 import PlatformWalletDetails from "./pages/transactions/PlatformWalletDetails.jsx";
 import ConfirmDialog from "./components/ConfirmDialog.jsx";
+import PropertyFeedbacks from "./pages/moderation/PropertyFeedbacks.jsx";
 
 function App() {
     const { user, loading, loginInProgress } = useAuth();
@@ -106,8 +107,10 @@ function App() {
                                         />
                                         <Route path="/transactions/platformWalletDetails" element={<PlatformWalletDetails />} />
 
-                                        {/* Feedback & Analytics */}
+                                        {/* Feedback */}
                                         <Route path="/feedback" element={<FeedbackModeration />} />
+                                        <Route path="/feedback/:propertyId" element={<PropertyFeedbacks />} />
+
                                         <Route path="/analytics" element={<Analytics />} />
                                     </Routes>
                                 </div>
