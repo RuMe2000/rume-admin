@@ -177,20 +177,20 @@ export const logTransactionPayments = functions.firestore
     });
 
 
-export const setDefaultSeekerStatus = functions.firestore.onDocumentCreated(
-    "users/{userId}",
-    async (event) => {
-        const newUser = event.data?.data();
+// export const setDefaultSeekerStatus = functions.firestore.onDocumentCreated(
+//     "users/{userId}",
+//     async (event) => {
+//         const newUser = event.data?.data();
 
-        if (!newUser) return;
-        if (newUser.role === "seeker") {
-            await db.collection("users").doc(event.params.userId).update({
-                status: "searching",
-            });
-            console.log(`✅ Set seeker ${event.params.userId} to "searching"`);
-        }
-    }
-);
+//         if (!newUser) return;
+//         if (newUser.role === "seeker") {
+//             await db.collection("users").doc(event.params.userId).update({
+//                 status: "searching",
+//             });
+//             console.log(`✅ Set seeker ${event.params.userId} to "searching"`);
+//         }
+//     }
+// );
 
 
 export const updateSeekerStatusOnBookingChange = functions.firestore.onDocumentWritten(

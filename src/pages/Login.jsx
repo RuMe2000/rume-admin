@@ -58,7 +58,7 @@ function Login() {
             setLoginInProgress(false); // ✅ Reset on error
 
             let message = "An error occurred. Please try again.";
-            if (error.code === "auth/invalid-credential") message = "Invalid admin credentials.";
+            if (error.code === "auth/invalid-credential") message = "Invalid admin credential.";
             else if (error.code === "auth/user-not-found") message = "No account found with this email.";
             else if (error.code === "auth/too-many-requests") message = "Too many failed attempts. Try again later.";
             else if (error.message === "Access denied!") message = "Access denied! Admins only.";
@@ -78,7 +78,7 @@ function Login() {
                     className="absolute top-1/2 left-1/3 transform -translate-x-1/2 -translate-y-1/2 scale-[1.4] z-0 opacity-60 pointer-events-none"
                 />
 
-                <div className="relative w-full h-screen overflow-hidden flex items-center justify-center">
+                <div className="relative w-full h-screen overflow-hidden flex justify-center items-center">
                     <h1 className="text-[13rem] pt-15 font-bold text-mainBlue z-10">RuMe.</h1>
                 </div>
 
@@ -112,7 +112,7 @@ function Login() {
         );
     }
 
-    // ✅ Normal login form
+    // Normal login form
     return (
         <div className='flex min-h-screen min-w-screen bg-bgBlue overflow-hidden fixed top-0 left-0'>
             <img
