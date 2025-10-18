@@ -222,7 +222,7 @@ const UserCard = ({ userId, onClose }) => {
 
                         {/* Buttons */}
                         <div className="absolute bottom-6 right-6 flex gap-3 mt-6">
-                            {user.role === 'owner' && (
+                            {/* {user.role === 'owner' && (
                                 user.status === 'verified' ? (
                                     <button
                                         onClick={() => handleUnverifyOwner(user)}
@@ -238,7 +238,7 @@ const UserCard = ({ userId, onClose }) => {
                                         VERIFY
                                     </button>
                                 )
-                            )}
+                            )} */}
                             <button
                                 onClick={() => setShowConfirmDelete(true)}
                                 className="bg-errorRed font-semibold text-white text-sm px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
